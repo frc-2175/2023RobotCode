@@ -1,0 +1,99 @@
+{
+	"tasks": [
+		{
+			"label": "Run Lua Tests",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"type": "process",
+			"windows": {
+				"command": "${workspaceFolder}\\lib\\bin\\lua51_win64\\lua5.1.exe",
+				"args": [
+					"${workspaceFolder}\\scripts\\test.lua"
+				]
+			},
+			"osx": {
+				"command": "lua",
+				"args": [
+					"${workspaceFolder}/scripts/test.lua"
+				]
+			},
+			"linux": {
+				"command": "lua",
+				"args": [
+					"${workspaceFolder}/scripts/test.lua"
+				]
+			}
+		},
+		{
+			"label": "Build Bindings",
+			"group": "build",
+			"type": "shell",
+			"windows": {
+				"command": "${workspaceFolder}\\scripts\\build_bindings.bat"
+			},
+			"osx": {
+				"command": "${workspaceFolder}/scripts/build_bindings_macos.sh"
+			},
+			"linux": {
+				"command": "${workspaceFolder}/scripts/build_bindings_linux.sh"
+			}
+		},
+		{
+			"label": "Build LuaJIT",
+			"group": "build",
+			"type": "shell",
+			"windows": {
+				"command": "${workspaceFolder}\\scripts\\build_luajit.bat"
+			},
+			"osx": {
+				"command": "${workspaceFolder}/scripts/build_luajit_mac.sh"
+			}
+		},
+		{
+			"label": "Download Godot",
+			"group": "build",
+			"type": "shell",
+			"windows": {
+				"command": "${workspaceFolder}\\scripts\\download_godot.bat",
+			},
+			"osx": {
+				"command": "${workspaceFolder}/scripts/download_godot.sh"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Edit Godot Simulator",
+			"group": "build",
+			"type": "process",
+			"windows": {
+				"command": "${workspaceFolder}\\lib\\bin\\godot\\Godot_v3.4.2-stable_win64.exe",
+				"args": [
+					"${workspaceFolder}\\simulator\\project.godot"
+				],
+			},
+			"osx": {
+				"command": "open",
+				"args": [
+					"-n",
+					"${workspaceFolder}/lib/bin/godot/Godot.app",
+					"--args",
+					"${workspaceFolder}/simulator/project.godot"
+				],
+			},
+			"dependsOn": [
+				"Download Godot"
+			]
+		},
+		{
+			"label": "Run Godot Simulator",
+			"group": "build",
+			"type": "process",
+			"windows": {
+				"command": "${workspaceFolder}\\simulator\\bin\\win64\\simulator.exe"
+			}
+		}
+	],
+	"version": "2.0.0"
+}
