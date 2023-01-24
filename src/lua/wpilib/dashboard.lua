@@ -36,14 +36,6 @@ function putString(keyName, value)
 end
 
 ---@param keyName any
----@param value any
----@param size any
----@return any
-function putStringArray(keyName, value, size)
-    ffi.C.PutStringArray(keyName, value, size)
-end
-
----@param keyName any
 ---@param value boolean
 ---@return any
 function putBoolean(keyName, value)

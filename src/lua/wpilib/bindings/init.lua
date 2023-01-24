@@ -460,7 +460,6 @@ bool IsSimulation();
 void PutNumber(const char * keyName, double value);
 void PutNumberArray(const char * keyName, double * value, size_t size);
 void PutString(const char * keyName, const char* value);
-void PutStringArray(const char * keyName, const char ** value, size_t size);
 void PutBoolean(const char * keyName, bool value);
 void PutBooleanArray(const char * keyName, int * value, size_t size);
 void PutIntChooser(void * data);

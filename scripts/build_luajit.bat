@@ -33,7 +33,7 @@ setlocal
 @REM at the start of every new season.
 
 set LUAJIT_PATH=lib\LuaJIT-2.1
-set YEAR=2022
+set YEAR=2023
 set PATH=%PATH%;%USERPROFILE%\.gradle\toolchains\frc\%YEAR%\roborio\bin
 
 set ATHENA_MAKE=frc%YEAR%-make

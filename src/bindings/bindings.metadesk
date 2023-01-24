@@ -533,7 +533,7 @@ dashboard: {
 		@static PutNumber(@cast("std::string_view") const char* keyName, double value);
 		@static PutNumberArray(const char* keyName, double* value, size_t size) """	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));""";
 		@static PutString(@cast("std::string_view") const char* keyName, @cast("std::string_view")"const char*" value);
-		@static PutStringArray(@cast("std::string_view") const char* keyName, @cast("std::string")const char** value, size_t size) """	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span((std::vector<std::string>)value, value + size));""";
+		// @static PutStringArray(@cast("std::string_view") const char* keyName, @cast("std::string")const char** value, size_t size) """	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span((std::vector<std::string>)value, value + size));""";
 		@static PutBoolean(@cast("std::string_view") const char* keyName, bool value);
 		@static PutBooleanArray(const char* keyName, int* value, size_t size) """	frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));""";
 		@static @nolua @alias(PutIntChooser) PutData(@cast("frc::SendableChooser<int>*") void* data);
