@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>*Untitled.path</title>
+	<script src="./p5.min.js"></script>
+	<script language="javascript" type="text/javascript" src="script.js"></script>
+	<style>
+		body {
+			margin: 0;
+		}
+
+		#text {
+			font-size: 20px;
+			display: flex;
+			justify-content: space-around;
+			position: fixed;
+			width: 100%;
+			background-color: white;
+		}
+	</style>
+</head>
+<h2 id="triggerPointTitle" style="display: none;">Trigger Points:</h2>
+<div id="triggerPointDiv">
+</div>
+
+<body style="z-index: -1;">
+	<div id="text">
+		<div>Screen Cordinates: <span id="screenCords"></span></div>
+		<div>Field Cordinates: <span id="fieldCords"></span></div>
+		<div>Current Segment Length: <span id="segmentLength"></span></div>
+		<div>FPS: <span id="frameRate"></span></div>
+	</div>
+</body>
+
+</html>
