@@ -85,6 +85,7 @@ typedef struct {
 	MD_String8 ArgCasts[MAX_ARGS];
 	MD_String8 ArgEnums[MAX_ARGS];
 	MD_String8 ArgDefaults[MAX_ARGS];
+	MD_String8 ArgConstructs[MAX_ARGS];
 
 	MD_Node* After;
 
@@ -176,6 +177,11 @@ ParseFuncResult ParseFunc(MD_Node* n) {
 				res.ArgDefaults[res.NumArgs] = defaultTag->first_child->string;
 			}
 
+			MD_Node* constructTag = MD_TagFromString(argStart, MD_S8Lit("construct"), 0);
+			if (!MD_NodeIsNil(constructTag)) {
+				res.ArgConstructs[res.NumArgs] = constructTag->first_child->string;
+			}
+
 			res.NumArgs++;
 			argStart = NULL;
 		}
@@ -217,6 +223,41 @@ ParseEnumResult ParseEnum(MD_Node* n) {
 	}
 
 	return res;
+}
+
+typedef struct {
+	MD_String8 Name;
+	int NumMembers;
+	MD_String8List MemberNames[MAX_ARGS];
+	MD_String8 MemberTypes[MAX_ARGS];
+} ParseStructResult;
+
+ParseStructResult ParseStruct(MD_Node* n) {
+	ParseStructResult res = {0};
+	res.Name = n->string;
+
+	for (MD_EachNode(it, n->first_child)) {
+		res.MemberTypes[res.NumMembers] = ParseType(it, it->next);
+		while (!(it->flags & MD_NodeFlag_IsBeforeSemicolon) && !MD_NodeIsNil(it->next)) {
+			it = it->next;
+			MD_S8ListPush(a, &res.MemberNames[res.NumMembers], it->string);
+		}
+		
+		res.NumMembers++;
+	}
+	return res;
+}
+
+MD_String8 GenStruct(ParseStructResult parsedStruct) {
+	MD_String8List members;
+
+	for (int i = 0; i < parsedStruct.NumMembers; i++) {
+		MD_S8ListPushFmt(a, &members, "%S %S", parsedStruct.MemberTypes[i], MD_S8ListJoin(a, parsedStruct.MemberNames[i], &commaJoin));
+	}
+
+	MD_StringJoin join = {MD_S8Lit(""), MD_S8Lit("; "), MD_S8Lit(";")};
+
+	return MD_S8Fmt(a, "typedef struct { %S } %S;", MD_S8ListJoin(a, members, &join), parsedStruct.Name);
 }
 
 MD_String8 CTypeToLuaType(MD_String8 cType) {
@@ -266,11 +307,17 @@ MD_String8List GenCppCallArgs(ParseFuncResult parsedFunc) {
 		if (parsedFunc.ArgCasts[i].size > 0) {
 			cast = MD_S8Fmt(a, "(%S)", parsedFunc.ArgCasts[i]);
 		}
-
-		MD_S8ListPushFmt(a, &cppCallArgs,
-			"%S%S%S",
-			deref, cast, parsedFunc.ArgNames[i]
-		);
+		if (parsedFunc.ArgConstructs[i].size > 0) {
+			MD_S8ListPushFmt(a, &cppCallArgs,
+				"%S(%S%S%S)",
+				parsedFunc.ArgConstructs[i], deref, cast, parsedFunc.ArgNames[i]
+			);
+		} else {
+			MD_S8ListPushFmt(a, &cppCallArgs,
+				"%S%S%S",
+				deref, cast, parsedFunc.ArgNames[i]
+			);
+		}
 	}
 	return cppCallArgs;
 }
@@ -855,6 +902,15 @@ int main(int argc, char** argv) {
 					PrintMessage(stderr, error);
 					return 1;
 				}
+
+				fentry = fentry->next;
+			} else if (MD_NodeHasTag(fentry, MD_S8Lit("struct"), 0)) {
+				ParseStructResult res = ParseStruct(fentry);
+
+				MD_String8 genRes = GenStruct(res);
+
+				MD_S8ListPush(a, &cppDefs, genRes);
+				MD_S8ListPush(a, &luaSignatures, genRes);
 
 				fentry = fentry->next;
 			} else {
