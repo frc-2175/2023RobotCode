@@ -34,7 +34,7 @@ XboxButton = BindingEnum:new('XboxButton', {
 
 -- Construct an instance of a joystick.
 ---@param port integer
----@return any
+---@return Joystick
 function Joystick:new(port)
     port = AssertInt(port)
     local instance = {

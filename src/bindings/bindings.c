@@ -87,6 +87,9 @@ typedef struct {
 	MD_String8 ArgDefaults[MAX_ARGS];
 	MD_String8 ArgConstructs[MAX_ARGS];
 
+	int isConstructor;
+	MD_String8 ClassName;
+
 	MD_Node* After;
 
 	MD_Message* Error;
@@ -98,6 +101,9 @@ ParseFuncResult ParseFunc(MD_Node* n) {
 	if (MD_NodeHasTag(n, MD_S8Lit("doc"), 0)) {
 		res.Doc = MD_TagFromString(n, MD_S8Lit("doc"), 0)->first_child->string;
 	}
+
+	res.isConstructor = MD_NodeHasTag(n, MD_S8Lit("constructor"), 0);
+	res.ClassName = n->parent->string;
 
 	MD_Node* argsNode = NULL;
 	MD_Node* terminator = NULL;
@@ -273,6 +279,16 @@ MD_String8 CTypeToLuaType(MD_String8 cType) {
 	) {
 		return MD_S8Lit("number");
 	}
+	if (MD_S8Match(cType, MD_S8Lit("void"), 0)) {
+		return MD_S8Lit("nil");
+	}
+	if (
+		MD_S8Match(cType, MD_S8Lit("const char*"), 0)
+		|| MD_S8Match(cType, MD_S8Lit("const char *"), 0)
+		|| MD_S8Match(cType, MD_S8Lit("char const*"), 0)
+		|| MD_S8Match(cType, MD_S8Lit("char const *"), 0)) {
+		return MD_S8Lit("string");
+	}
 
 	return MD_S8Lit("any");
 }
@@ -336,10 +352,20 @@ MD_String8 GenLuaDocComment(ParseFuncResult parsedFunc) {
 		);
 	}
 	if (parsedFunc.ReturnType.size > 0) {
-		MD_S8ListPushFmt(a, &typeLines,
-			"---@return %S",
-			CTypeToLuaType(parsedFunc.ReturnType)
-		);
+		if (parsedFunc.isConstructor) {
+			MD_S8ListPushFmt(a, &typeLines,
+				"---@return %S",
+				parsedFunc.ClassName
+			);
+		} else {
+			MD_String8 luaType = CTypeToLuaType(parsedFunc.ReturnType);
+			if (!MD_S8Match(luaType, MD_S8Lit("nil"), 0)) {
+				MD_S8ListPushFmt(a, &typeLines,
+					"---@return %S",
+					CTypeToLuaType(parsedFunc.ReturnType)
+				);
+			}
+		}
 	}
 
 	MD_String8 doc = {0};

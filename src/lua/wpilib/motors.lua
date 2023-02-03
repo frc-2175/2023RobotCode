@@ -78,20 +78,17 @@ SparkMaxEncoderType = BindingEnum:new('SparkMaxEncoderType', {
     kQuadrature = 2,
 })
 
----@return any
 function VictorSPX:toSpeedController()
     return ffi.C.VictorSPX_ToSpeedController(self._this)
 end
 
 ---@param value number
----@return any
 function VictorSPX:set(value)
     value = AssertNumber(value)
     ffi.C.VictorSPX_Set(self._this, value)
 end
 
 ---@param output number
----@return any
 function VictorSPX:setVoltage(output)
     output = AssertNumber(output)
     ffi.C.VictorSPX_SetVoltage(self._this, output)
@@ -103,7 +100,6 @@ function VictorSPX:get()
 end
 
 ---@param isInverted boolean
----@return any
 function VictorSPX:setInvertedBool(isInverted)
     ffi.C.VictorSPX_SetInvertedBool(self._this, isInverted)
 end
@@ -113,24 +109,20 @@ function VictorSPX:getInvertedBool()
     return ffi.C.VictorSPX_GetInvertedBool(self._this)
 end
 
----@return any
 function VictorSPX:disable()
     ffi.C.VictorSPX_Disable(self._this)
 end
 
----@return any
 function VictorSPX:stopMotor()
     ffi.C.VictorSPX_StopMotor(self._this)
 end
 
----@return any
 function VictorSPX:toIMotorController()
     return ffi.C.VictorSPX_ToIMotorController(self._this)
 end
 
 ---@param mode integer
 ---@param value number
----@return any
 function VictorSPX:setWithControlMode(mode, value)
     mode = AssertInt(mode)
     value = AssertNumber(value)
@@ -141,7 +133,6 @@ end
 ---@param demand0 number
 ---@param demand1Type integer
 ---@param demand1 number
----@return any
 function VictorSPX:setWithControlModeAndDemands(mode, demand0, demand1Type, demand1)
     mode = AssertInt(mode)
     demand0 = AssertNumber(demand0)
@@ -150,26 +141,22 @@ function VictorSPX:setWithControlModeAndDemands(mode, demand0, demand1Type, dema
     ffi.C.VictorSPX_SetWithControlModeAndDemands(self._this, mode, demand0, demand1Type, demand1)
 end
 
----@return any
 function VictorSPX:neutralOutput()
     ffi.C.VictorSPX_NeutralOutput(self._this)
 end
 
 ---@param neutralMode integer
----@return any
 function VictorSPX:setNeutralMode(neutralMode)
     neutralMode = AssertInt(neutralMode)
     ffi.C.VictorSPX_SetNeutralMode(self._this, neutralMode)
 end
 
 ---@param PhaseSensor boolean
----@return any
 function VictorSPX:setSensorPhase(PhaseSensor)
     ffi.C.VictorSPX_SetSensorPhase(self._this, PhaseSensor)
 end
 
 ---@param invertType integer
----@return any
 function VictorSPX:setInverted(invertType)
     invertType = AssertEnumValue(CTREInvertType, invertType)
     invertType = AssertInt(invertType)
@@ -280,7 +267,6 @@ function VictorSPX:configVoltageMeasurementFilter(filterWindowSamples, timeoutMs
 end
 
 ---@param enable boolean
----@return any
 function VictorSPX:enableVoltageCompensation(enable)
     ffi.C.VictorSPX_EnableVoltageCompensation(self._this, enable)
 end
@@ -371,7 +357,6 @@ function VictorSPX:setControlFramePeriod(frame, periodMs)
 end
 
 ---@param enable boolean
----@return any
 function VictorSPX:overrideLimitSwitchesEnable(enable)
     ffi.C.VictorSPX_OverrideLimitSwitchesEnable(self._this, enable)
 end
@@ -415,7 +400,6 @@ function VictorSPX:configReverseSoftLimitEnable(enable, timeoutMs)
 end
 
 ---@param enable boolean
----@return any
 function VictorSPX:overrideSoftLimitsEnable(enable)
     ffi.C.VictorSPX_OverrideSoftLimitsEnable(self._this, enable)
 end
@@ -657,7 +641,6 @@ function VictorSPX:isMotionProfileTopLevelBufferFull()
     return ffi.C.VictorSPX_IsMotionProfileTopLevelBufferFull(self._this)
 end
 
----@return any
 function VictorSPX:processMotionProfileBuffer()
     ffi.C.VictorSPX_ProcessMotionProfileBuffer(self._this)
 end
@@ -796,18 +779,15 @@ function VictorSPX:getControlMode()
 end
 
 
----@return any
 function VictorSPX:valueUpdated()
     ffi.C.VictorSPX_ValueUpdated(self._this)
 end
 
----@return any
 function VictorSPX:feed()
     ffi.C.VictorSPX_Feed(self._this)
 end
 
 ---@param expirationTime number
----@return any
 function VictorSPX:setExpiration(expirationTime)
     expirationTime = AssertNumber(expirationTime)
     ffi.C.VictorSPX_SetExpiration(self._this, expirationTime)
@@ -819,7 +799,6 @@ function VictorSPX:isAlive()
 end
 
 ---@param enabled boolean
----@return any
 function VictorSPX:setSafetyEnabled(enabled)
     ffi.C.VictorSPX_SetSafetyEnabled(self._this, enabled)
 end
@@ -830,7 +809,7 @@ function VictorSPX:isSafetyEnabled()
 end
 
 ---@param deviceNumber integer
----@return any
+---@return VictorSPX
 function VictorSPX:new(deviceNumber)
     deviceNumber = AssertInt(deviceNumber)
     local instance = {
@@ -843,7 +822,6 @@ end
 
 ---@param mode integer
 ---@param value number
----@return any
 function VictorSPX:setWithVictorSPXControlMode(mode, value)
     mode = AssertInt(mode)
     value = AssertNumber(value)
@@ -854,7 +832,6 @@ end
 ---@param demand0 number
 ---@param demand1Type integer
 ---@param demand1 number
----@return any
 function VictorSPX:setWithVictorSPXControlModeAndDemands(mode, demand0, demand1Type, demand1)
     mode = AssertInt(mode)
     demand0 = AssertNumber(demand0)
@@ -868,20 +845,17 @@ function VictorSPX:getExpiration()
     return ffi.C.VictorSPX_GetExpiration(self._this)
 end
 
----@return any
 function TalonSRX:toSpeedController()
     return ffi.C.TalonSRX_ToSpeedController(self._this)
 end
 
 ---@param value number
----@return any
 function TalonSRX:set(value)
     value = AssertNumber(value)
     ffi.C.TalonSRX_Set(self._this, value)
 end
 
 ---@param output number
----@return any
 function TalonSRX:setVoltage(output)
     output = AssertNumber(output)
     ffi.C.TalonSRX_SetVoltage(self._this, output)
@@ -893,7 +867,6 @@ function TalonSRX:get()
 end
 
 ---@param isInverted boolean
----@return any
 function TalonSRX:setInvertedBool(isInverted)
     ffi.C.TalonSRX_SetInvertedBool(self._this, isInverted)
 end
@@ -903,24 +876,20 @@ function TalonSRX:getInvertedBool()
     return ffi.C.TalonSRX_GetInvertedBool(self._this)
 end
 
----@return any
 function TalonSRX:disable()
     ffi.C.TalonSRX_Disable(self._this)
 end
 
----@return any
 function TalonSRX:stopMotor()
     ffi.C.TalonSRX_StopMotor(self._this)
 end
 
----@return any
 function TalonSRX:toIMotorController()
     return ffi.C.TalonSRX_ToIMotorController(self._this)
 end
 
 ---@param mode integer
 ---@param value number
----@return any
 function TalonSRX:setWithControlMode(mode, value)
     mode = AssertInt(mode)
     value = AssertNumber(value)
@@ -931,7 +900,6 @@ end
 ---@param demand0 number
 ---@param demand1Type integer
 ---@param demand1 number
----@return any
 function TalonSRX:setWithControlModeAndDemands(mode, demand0, demand1Type, demand1)
     mode = AssertInt(mode)
     demand0 = AssertNumber(demand0)
@@ -940,26 +908,22 @@ function TalonSRX:setWithControlModeAndDemands(mode, demand0, demand1Type, deman
     ffi.C.TalonSRX_SetWithControlModeAndDemands(self._this, mode, demand0, demand1Type, demand1)
 end
 
----@return any
 function TalonSRX:neutralOutput()
     ffi.C.TalonSRX_NeutralOutput(self._this)
 end
 
 ---@param neutralMode integer
----@return any
 function TalonSRX:setNeutralMode(neutralMode)
     neutralMode = AssertInt(neutralMode)
     ffi.C.TalonSRX_SetNeutralMode(self._this, neutralMode)
 end
 
 ---@param PhaseSensor boolean
----@return any
 function TalonSRX:setSensorPhase(PhaseSensor)
     ffi.C.TalonSRX_SetSensorPhase(self._this, PhaseSensor)
 end
 
 ---@param invertType integer
----@return any
 function TalonSRX:setInverted(invertType)
     invertType = AssertEnumValue(CTREInvertType, invertType)
     invertType = AssertInt(invertType)
@@ -1070,7 +1034,6 @@ function TalonSRX:configVoltageMeasurementFilter(filterWindowSamples, timeoutMs)
 end
 
 ---@param enable boolean
----@return any
 function TalonSRX:enableVoltageCompensation(enable)
     ffi.C.TalonSRX_EnableVoltageCompensation(self._this, enable)
 end
@@ -1161,7 +1124,6 @@ function TalonSRX:setControlFramePeriod(frame, periodMs)
 end
 
 ---@param enable boolean
----@return any
 function TalonSRX:overrideLimitSwitchesEnable(enable)
     ffi.C.TalonSRX_OverrideLimitSwitchesEnable(self._this, enable)
 end
@@ -1205,7 +1167,6 @@ function TalonSRX:configReverseSoftLimitEnable(enable, timeoutMs)
 end
 
 ---@param enable boolean
----@return any
 function TalonSRX:overrideSoftLimitsEnable(enable)
     ffi.C.TalonSRX_OverrideSoftLimitsEnable(self._this, enable)
 end
@@ -1447,7 +1408,6 @@ function TalonSRX:isMotionProfileTopLevelBufferFull()
     return ffi.C.TalonSRX_IsMotionProfileTopLevelBufferFull(self._this)
 end
 
----@return any
 function TalonSRX:processMotionProfileBuffer()
     ffi.C.TalonSRX_ProcessMotionProfileBuffer(self._this)
 end
@@ -1586,18 +1546,15 @@ function TalonSRX:getControlMode()
 end
 
 
----@return any
 function TalonSRX:valueUpdated()
     ffi.C.TalonSRX_ValueUpdated(self._this)
 end
 
----@return any
 function TalonSRX:feed()
     ffi.C.TalonSRX_Feed(self._this)
 end
 
 ---@param expirationTime number
----@return any
 function TalonSRX:setExpiration(expirationTime)
     expirationTime = AssertNumber(expirationTime)
     ffi.C.TalonSRX_SetExpiration(self._this, expirationTime)
@@ -1609,7 +1566,6 @@ function TalonSRX:isAlive()
 end
 
 ---@param enabled boolean
----@return any
 function TalonSRX:setSafetyEnabled(enabled)
     ffi.C.TalonSRX_SetSafetyEnabled(self._this, enabled)
 end
@@ -1689,7 +1645,7 @@ function TalonSRX:isRevLimitSwitchClosed()
 end
 
 ---@param deviceNumber integer
----@return any
+---@return TalonSRX
 function TalonSRX:new(deviceNumber)
     deviceNumber = AssertInt(deviceNumber)
     local instance = {
@@ -1702,7 +1658,6 @@ end
 
 ---@param mode integer
 ---@param value number
----@return any
 function TalonSRX:setWithTalonSRXControlMode(mode, value)
     mode = AssertInt(mode)
     value = AssertNumber(value)
@@ -1713,7 +1668,6 @@ end
 ---@param demand0 number
 ---@param demand1Type integer
 ---@param demand1 number
----@return any
 function TalonSRX:setWithTalonSRXControlModeAndDemands(mode, demand0, demand1Type, demand1)
     mode = AssertInt(mode)
     demand0 = AssertNumber(demand0)
@@ -1766,7 +1720,6 @@ function TalonSRX:configContinuousCurrentLimit(amps, timeoutMs)
 end
 
 ---@param enable boolean
----@return any
 function TalonSRX:enableCurrentLimit(enable)
     ffi.C.TalonSRX_EnableCurrentLimit(self._this, enable)
 end
@@ -1776,20 +1729,17 @@ function TalonSRX:getExpiration()
     return ffi.C.TalonSRX_GetExpiration(self._this)
 end
 
----@return any
 function TalonFX:toSpeedController()
     return ffi.C.TalonFX_ToSpeedController(self._this)
 end
 
 ---@param value number
----@return any
 function TalonFX:set(value)
     value = AssertNumber(value)
     ffi.C.TalonFX_Set(self._this, value)
 end
 
 ---@param output number
----@return any
 function TalonFX:setVoltage(output)
     output = AssertNumber(output)
     ffi.C.TalonFX_SetVoltage(self._this, output)
@@ -1801,7 +1751,6 @@ function TalonFX:get()
 end
 
 ---@param isInverted boolean
----@return any
 function TalonFX:setInvertedBool(isInverted)
     ffi.C.TalonFX_SetInvertedBool(self._this, isInverted)
 end
@@ -1811,24 +1760,20 @@ function TalonFX:getInvertedBool()
     return ffi.C.TalonFX_GetInvertedBool(self._this)
 end
 
----@return any
 function TalonFX:disable()
     ffi.C.TalonFX_Disable(self._this)
 end
 
----@return any
 function TalonFX:stopMotor()
     ffi.C.TalonFX_StopMotor(self._this)
 end
 
----@return any
 function TalonFX:toIMotorController()
     return ffi.C.TalonFX_ToIMotorController(self._this)
 end
 
 ---@param mode integer
 ---@param value number
----@return any
 function TalonFX:setWithControlMode(mode, value)
     mode = AssertInt(mode)
     value = AssertNumber(value)
@@ -1839,7 +1784,6 @@ end
 ---@param demand0 number
 ---@param demand1Type integer
 ---@param demand1 number
----@return any
 function TalonFX:setWithControlModeAndDemands(mode, demand0, demand1Type, demand1)
     mode = AssertInt(mode)
     demand0 = AssertNumber(demand0)
@@ -1848,26 +1792,22 @@ function TalonFX:setWithControlModeAndDemands(mode, demand0, demand1Type, demand
     ffi.C.TalonFX_SetWithControlModeAndDemands(self._this, mode, demand0, demand1Type, demand1)
 end
 
----@return any
 function TalonFX:neutralOutput()
     ffi.C.TalonFX_NeutralOutput(self._this)
 end
 
 ---@param neutralMode integer
----@return any
 function TalonFX:setNeutralMode(neutralMode)
     neutralMode = AssertInt(neutralMode)
     ffi.C.TalonFX_SetNeutralMode(self._this, neutralMode)
 end
 
 ---@param PhaseSensor boolean
----@return any
 function TalonFX:setSensorPhase(PhaseSensor)
     ffi.C.TalonFX_SetSensorPhase(self._this, PhaseSensor)
 end
 
 ---@param invertType integer
----@return any
 function TalonFX:setInverted(invertType)
     invertType = AssertEnumValue(CTREInvertType, invertType)
     invertType = AssertInt(invertType)
@@ -1978,7 +1918,6 @@ function TalonFX:configVoltageMeasurementFilter(filterWindowSamples, timeoutMs)
 end
 
 ---@param enable boolean
----@return any
 function TalonFX:enableVoltageCompensation(enable)
     ffi.C.TalonFX_EnableVoltageCompensation(self._this, enable)
 end
@@ -2069,7 +2008,6 @@ function TalonFX:setControlFramePeriod(frame, periodMs)
 end
 
 ---@param enable boolean
----@return any
 function TalonFX:overrideLimitSwitchesEnable(enable)
     ffi.C.TalonFX_OverrideLimitSwitchesEnable(self._this, enable)
 end
@@ -2113,7 +2051,6 @@ function TalonFX:configReverseSoftLimitEnable(enable, timeoutMs)
 end
 
 ---@param enable boolean
----@return any
 function TalonFX:overrideSoftLimitsEnable(enable)
     ffi.C.TalonFX_OverrideSoftLimitsEnable(self._this, enable)
 end
@@ -2355,7 +2292,6 @@ function TalonFX:isMotionProfileTopLevelBufferFull()
     return ffi.C.TalonFX_IsMotionProfileTopLevelBufferFull(self._this)
 end
 
----@return any
 function TalonFX:processMotionProfileBuffer()
     ffi.C.TalonFX_ProcessMotionProfileBuffer(self._this)
 end
@@ -2494,18 +2430,15 @@ function TalonFX:getControlMode()
 end
 
 
----@return any
 function TalonFX:valueUpdated()
     ffi.C.TalonFX_ValueUpdated(self._this)
 end
 
----@return any
 function TalonFX:feed()
     ffi.C.TalonFX_Feed(self._this)
 end
 
 ---@param expirationTime number
----@return any
 function TalonFX:setExpiration(expirationTime)
     expirationTime = AssertNumber(expirationTime)
     ffi.C.TalonFX_SetExpiration(self._this, expirationTime)
@@ -2517,7 +2450,6 @@ function TalonFX:isAlive()
 end
 
 ---@param enabled boolean
----@return any
 function TalonFX:setSafetyEnabled(enabled)
     ffi.C.TalonFX_SetSafetyEnabled(self._this, enabled)
 end
@@ -2597,7 +2529,7 @@ function TalonFX:isRevLimitSwitchClosed()
 end
 
 ---@param deviceNumber integer
----@return any
+---@return TalonFX
 function TalonFX:new(deviceNumber)
     deviceNumber = AssertInt(deviceNumber)
     local instance = {
@@ -2610,7 +2542,6 @@ end
 
 ---@param mode integer
 ---@param value number
----@return any
 function TalonFX:setWithTalonFXControlMode(mode, value)
     mode = AssertInt(mode)
     value = AssertNumber(value)
@@ -2621,7 +2552,6 @@ end
 ---@param demand0 number
 ---@param demand1Type integer
 ---@param demand1 number
----@return any
 function TalonFX:setWithTalonFXControlModeAndDemands(mode, demand0, demand1Type, demand1)
     mode = AssertInt(mode)
     demand0 = AssertNumber(demand0)
@@ -2631,7 +2561,6 @@ function TalonFX:setWithTalonFXControlModeAndDemands(mode, demand0, demand1Type,
 end
 
 ---@param invertType integer
----@return any
 function TalonFX:setInvertedTalonFX(invertType)
     invertType = AssertEnumValue(CTRETalonFXInvertType, invertType)
     invertType = AssertInt(invertType)
@@ -2640,7 +2569,6 @@ end
 
 ---@param enable boolean
 ---@param currentLimit number
----@return any
 function TalonFX:configStatorCurrentLimit(enable, currentLimit)
     currentLimit = AssertNumber(currentLimit)
     ffi.C.TalonFX_ConfigStatorCurrentLimit(self._this, enable, currentLimit)
@@ -2648,7 +2576,6 @@ end
 
 ---@param offsetDegrees number
 ---@param timeoutMs? integer
----@return any
 function TalonFX:configIntegratedSensorOffset(offsetDegrees, timeoutMs)
     timeoutMs = timeoutMs or 0
     offsetDegrees = AssertNumber(offsetDegrees)
@@ -2676,7 +2603,7 @@ end
 
 ---@param deviceID integer
 ---@param type integer
----@return any
+---@return CANSparkMax
 function CANSparkMax:new(deviceID, type)
     type = AssertEnumValue(SparkMaxMotorType, type)
     deviceID = AssertInt(deviceID)
@@ -2690,27 +2617,23 @@ function CANSparkMax:new(deviceID, type)
 end
 
 ---@param type integer
----@return any
 function CANSparkMax:setIdleMode(type)
     type = AssertEnumValue(IdleMode, type)
     type = AssertInt(type)
     ffi.C.CANSparkMax_SetIdleMode(self._this, type)
 end
 
----@return any
 function CANSparkMax:restoreFactoryDefaults()
     ffi.C.CANSparkMax_RestoreFactoryDefaults(self._this)
 end
 
 ---@param speed number
----@return any
 function CANSparkMax:set(speed)
     speed = AssertNumber(speed)
     ffi.C.CANSparkMax_Set(self._this, speed)
 end
 
 ---@param output number
----@return any
 function CANSparkMax:setVoltage(output)
     output = AssertNumber(output)
     ffi.C.CANSparkMax_SetVoltage(self._this, output)
@@ -2722,7 +2645,6 @@ function CANSparkMax:get()
 end
 
 ---@param isInverted boolean
----@return any
 function CANSparkMax:setInverted(isInverted)
     ffi.C.CANSparkMax_SetInverted(self._this, isInverted)
 end
@@ -2732,12 +2654,10 @@ function CANSparkMax:getInverted()
     return ffi.C.CANSparkMax_GetInverted(self._this)
 end
 
----@return any
 function CANSparkMax:disable()
     ffi.C.CANSparkMax_Disable(self._this)
 end
 
----@return any
 function CANSparkMax:stopMotor()
     ffi.C.CANSparkMax_StopMotor(self._this)
 end
@@ -2752,7 +2672,6 @@ end
 
 ---@param position number
 ---@param countsPerRev? integer
----@return any
 function CANSparkMax:setPosition(position, countsPerRev)
     countsPerRev = countsPerRev or 42
     position = AssertNumber(position)
@@ -2774,7 +2693,6 @@ end
 ---@param xSpeed number
 ---@param zRotation number
 ---@param squareInputs boolean
----@return any
 function DifferentialDrive:arcadeDrive(xSpeed, zRotation, squareInputs)
     xSpeed = AssertNumber(xSpeed)
     zRotation = AssertNumber(zRotation)
@@ -2784,7 +2702,6 @@ end
 ---@param leftSpeed number
 ---@param rightSpeed number
 ---@param squareInputs boolean
----@return any
 function DifferentialDrive:tankDrive(leftSpeed, rightSpeed, squareInputs)
     leftSpeed = AssertNumber(leftSpeed)
     rightSpeed = AssertNumber(rightSpeed)

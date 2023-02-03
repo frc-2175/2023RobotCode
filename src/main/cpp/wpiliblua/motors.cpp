@@ -1913,14 +1913,11 @@ LUAFUNC void CANSparkMax_Follow(void* _this, void * leader, bool invert) {
 }
 
 LUAFUNC void * CANSparkMax_GetEncoder(void* _this, int countsPerRev) {
-		auto result = (rev::SparkMaxRelativeEncoder *)malloc(sizeof(rev::SparkMaxRelativeEncoder));
-		rev::SparkMaxRelativeEncoder encoder = ((rev::CANSparkMax *)_this)->GetEncoder();
-		memcpy(result, &encoder, sizeof(rev::SparkMaxRelativeEncoder));
-		return result;
+	return new rev::SparkMaxRelativeEncoder( ((rev::CANSparkMax *)_this)->GetEncoder());
 }
 
 LUAFUNC double CANSparkMax_GetPosition(void* _this, void * encoder) {
-		return ((rev::SparkMaxRelativeEncoder*)encoder)->GetPosition();
+	return ((rev::SparkMaxRelativeEncoder*)encoder)->GetPosition();
 }
 
 LUAFUNC void CANSparkMax_SetPosition(void* _this, double position, int countsPerRev) {

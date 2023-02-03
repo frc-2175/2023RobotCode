@@ -8,7 +8,7 @@ require("wpilib.bindings.enum")
 ---@field _this Timer
 Timer = {}
 
----@return any
+---@return Timer
 function Timer:new()
     local instance = {
         _this = ffi.C.Timer_new(),
@@ -23,17 +23,14 @@ function Timer:get()
     return ffi.C.Timer_Get(self._this)
 end
 
----@return any
 function Timer:reset()
     ffi.C.Timer_Reset(self._this)
 end
 
----@return any
 function Timer:start()
     ffi.C.Timer_Start(self._this)
 end
 
----@return any
 function Timer:stop()
     ffi.C.Timer_Stop(self._this)
 end

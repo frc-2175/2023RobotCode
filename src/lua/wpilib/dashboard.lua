@@ -12,46 +12,53 @@ SmartDashboard = {}
 ---@field _this SendableChooser
 SendableChooser = {}
 
----@param keyName any
+---@class Field2d
+---@field _this Field2d
+Field2d = {}
+
+---@param keyName string
 ---@param value number
----@return any
 function putNumber(keyName, value)
     value = AssertNumber(value)
     ffi.C.PutNumber(keyName, value)
 end
 
----@param keyName any
+---@param keyName string
 ---@param value any
 ---@param size any
----@return any
 function putNumberArray(keyName, value, size)
     ffi.C.PutNumberArray(keyName, value, size)
 end
 
----@param keyName any
----@param value any
----@return any
+---@param keyName string
+---@param value string
 function putString(keyName, value)
     ffi.C.PutString(keyName, value)
 end
 
----@param keyName any
+---@param keyName string
+---@param value any
+---@param size any
+function putStringArray(keyName, value, size)
+    ffi.C.PutStringArray(keyName, value, size)
+end
+
+---@param keyName string
 ---@param value boolean
----@return any
 function putBoolean(keyName, value)
     ffi.C.PutBoolean(keyName, value)
 end
 
----@param keyName any
+---@param keyName string
 ---@param value any
 ---@param size any
----@return any
 function putBooleanArray(keyName, value, size)
     ffi.C.PutBooleanArray(keyName, value, size)
 end
 
 
----@return any
+
+---@return SendableChooser
 function SendableChooser:new()
     local instance = {
         _this = ffi.C.SendableChooser_new(),
@@ -61,11 +68,30 @@ function SendableChooser:new()
     return instance
 end
 
----@param name any
+---@param name string
 ---@param object integer
----@return any
 function SendableChooser:addOption(name, object)
     object = AssertInt(object)
     ffi.C.SendableChooser_AddOption(self._this, name, object)
 end
 
+
+---@return Field2d
+function Field2d:new()
+    local instance = {
+        _this = ffi.C.Field2d_new(),
+    }
+    setmetatable(instance, self)
+    self.__index = self
+    return instance
+end
+
+---@param x number
+---@param y number
+---@param rotation number
+function Field2d:setRobotPose(x, y, rotation)
+    x = AssertNumber(x)
+    y = AssertNumber(y)
+    rotation = AssertNumber(rotation)
+    ffi.C.Field2d_SetRobotPose(self._this, x, y, rotation)
+end

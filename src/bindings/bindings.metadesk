@@ -339,15 +339,8 @@ motors: {
 		Disable();
 		StopMotor();
 		@nolua Follow(@deref @cast("rev::CANSparkMax*") void* leader, @default(false) bool invert);
-		@nolua void* GetEncoder(@default(42) int countsPerRev) """
-		auto result = (rev::SparkMaxRelativeEncoder *)malloc(sizeof(rev::SparkMaxRelativeEncoder));
-		rev::SparkMaxRelativeEncoder encoder = ((rev::CANSparkMax *)_this)->GetEncoder();
-		memcpy(result, &encoder, sizeof(rev::SparkMaxRelativeEncoder));
-		return result;
-		""";
-		double GetPosition(void* encoder) """
-		return ((rev::SparkMaxRelativeEncoder*)encoder)->GetPosition();
-		""";
+		@nolua void* GetEncoder(@default(42) int countsPerRev) """	return new rev::SparkMaxRelativeEncoder( ((rev::CANSparkMax *)_this)->GetEncoder());""";
+		double GetPosition(void* encoder) """	return ((rev::SparkMaxRelativeEncoder*)encoder)->GetPosition();""";
 		SetPosition(double position, @default(42) int countsPerRev) """
 		""";
 	}
@@ -527,16 +520,19 @@ robotbase: {
 @include("<span>")
 @include("<frc/smartdashboard/SmartDashboard.h>")
 @include("<frc/smartdashboard/SendableChooser.h>")
+@include("<frc/smartdashboard/Field2d.h>")
 dashboard: {
 	@class("frc::SmartDashboard")
 	SmartDashboard: {
 		@static PutNumber(@cast("std::string_view") const char* keyName, double value);
 		@static PutNumberArray(const char* keyName, double* value, size_t size) """	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));""";
 		@static PutString(@cast("std::string_view") const char* keyName, @cast("std::string_view")"const char*" value);
-		// @static PutStringArray(@cast("std::string_view") const char* keyName, @cast("std::string")const char** value, size_t size) """	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span((std::vector<std::string>)value, value + size));""";
+		@static PutStringArray(const char* keyName, const char** value, size_t size) """	std::vector<std::string> strVec(value, value + size);
+	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));""";
 		@static PutBoolean(@cast("std::string_view") const char* keyName, bool value);
 		@static PutBooleanArray(const char* keyName, int* value, size_t size) """	frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));""";
 		@static @nolua @alias(PutIntChooser) PutData(@cast("frc::SendableChooser<int>*") void* data);
+		@static @nolua @alias(PutField) PutData(@cast("frc::Field2d*") void* field);
 	}
 
 	@class("frc::SendableChooser<int>")
@@ -545,11 +541,93 @@ dashboard: {
 		AddOption(@cast("std::string_view") const char * name, int object);
 		@nolua int GetSelected();
 	}
+
+	@class("frc::Field2d")
+	Field2d: {
+		@constructor new();
+		SetRobotPose(@construct("units::inch_t") double x, @construct("units::inch_t") double y, @construct("units::radian_t") double rotation);
+	}
 }
 
 @include("<frc/Filesystem.h>")
 filesystem: {
 	@nolua "const char*" GetDeployDirectory() """  return stdStringForLua(frc::filesystem::GetDeployDirectory());""";
+}
+
+@include("<photonlib/PhotonCamera.h>")
+@include("<photonlib/PhotonPoseEstimator.h>")
+@include("<frc/apriltag/AprilTagFields.h>")
+photonvision: {
+	@class("photonlib::PhotonCamera")
+	PhotonCamera: {
+		@constructor new(@cast("std::string_view") const char* cameraName);
+		@nolua void* GetLatestResult() """	return new photonlib::PhotonPipelineResult(((photonlib::PhotonCamera*)_this)->GetLatestResult());""";
+		SetDriverMode(bool driverMode);
+		bool GetDriverMode();
+		TakeInputSnapshot();
+		TakeOutputSnapshot();
+		SetPipelineIndex(int index);
+		int GetPipelineIndex();
+	}
+
+	@class("photonlib::PhotonPipelineResult")
+	PhotonPipelineResult: {
+		@nolua void* GetBestTarget() """	return new photonlib::PhotonTrackedTarget(((photonlib::PhotonPipelineResult*)_this)->GetBestTarget());""";
+		bool HasTargets();
+	}
+
+	@struct Pose: {
+		double x, y, z;
+		double rotx, roty, rotz;
+	}
+
+	@class("photonlib::PhotonTrackedTarget")
+	PhotonTrackedTarget: {
+		double GetYaw();
+		double GetPitch();
+		double GetArea();
+		double GetSkew();
+		int GetFiducialId();
+		double GetPoseAmbiguity();
+		@nolua Pose* GetBestCameraToTarget() """	auto result = ((photonlib::PhotonTrackedTarget*)_this)->GetBestCameraToTarget();
+	return new Pose{
+		result.X().convert<units::inch>().value(), result.Y().convert<units::inch>().value(), result.Z().convert<units::inch>().value(),
+		result.Rotation().X().value(), result.Rotation().Y().value(), result.Rotation().Z().value(),
+	};""";
+	}
+
+	@enum PoseStrategy: {
+  		LOWEST_AMBIGUITY: 0,
+		CLOSEST_TO_CAMERA_HEIGHT: 1,
+		CLOSEST_TO_REFERENCE_POSE: 2,
+		CLOSEST_TO_LAST_POSE: 3,
+		AVERAGE_BEST_TARGETS: 4
+	}
+
+	@enum AprilTagField: {
+		k2022RapidReact: 0,
+		k2023ChargedUp: 1
+	}
+
+	@struct PoseEstimate: {
+		Pose pose;
+		double timestamp;
+	}
+
+	@class("photonlib::PhotonPoseEstimator")
+	PhotonPoseEstimator: {
+		@nolua @constructor newFromEnum(@enum(AprilTagField) int field, @enum(PoseStrategy) int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) """	return new photonlib::PhotonPoseEstimator(frc::LoadAprilTagLayoutField((frc::AprilTagField)field), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
+		@nolua @constructor newFromPath(const char* fieldPath, @enum(PoseStrategy) int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) """	return new photonlib::PhotonPoseEstimator(frc::AprilTagFieldLayout((std::string_view)fieldPath), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
+
+		int GetPoseStrategy();
+		void SetPoseStrategy(@enum(PoseStrategy) @cast("photonlib::PoseStrategy") int poseStrategy);
+
+		@nolua void SetReferencePose(double x, double y, double z, double rotx, double roty, double rotz) """	return ((photonlib::PhotonPoseEstimator*)_this)->SetReferencePose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
+		@nolua void SetLastPose(double x, double y, double z, double rotx, double roty, double rotz) """	return ((photonlib::PhotonPoseEstimator*)_this)->SetLastPose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
+		
+		@nolua PoseEstimate* Update() """	auto [pose, timestamp] = ((photonlib::PhotonPoseEstimator*)_this)->Update().value_or(photonlib::EstimatedRobotPose(frc::Pose3d(), -1_s));
+	return new PoseEstimate{{pose.X().convert<units::inch>().value(), pose.Y().convert<units::inch>().value(), pose.Z().convert<units::inch>().value(), pose.Rotation().X().value(), pose.Rotation().Y().value(), pose.Rotation().Z().value()}, timestamp.value()};""";
+	}
 }
 
 @include("<stdlib.h>")

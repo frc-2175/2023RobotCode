@@ -4,7 +4,7 @@
     to run.
 --]]
 
-package.path = package.path .. ";./?/init.lua;/home/lvuser/lua/?.lua;/home/lvuser/lua/?/init.lua;.\\src\\lua\\?.lua;.\\src\\lua\\?\\init.lua"
+package.path = package.path .. ";./?/init.lua;/home/lvuser/lua/?.lua;/home/lvuser/lua/?/init.lua;.\\src\\lua\\?.lua;.\\src\\lua\\?\\init.lua;.\\lib\\LuaJIT-2.1\\src\\?.lua"
 
 require("wpilib")
 

@@ -24,7 +24,6 @@ DoubleSolenoidValue = BindingEnum:new('DoubleSolenoidValue', {
 
 
 ---@param on boolean
----@return any
 function Solenoid:set(on)
     ffi.C.Solenoid_Set(self._this, on)
 end
@@ -34,7 +33,6 @@ function Solenoid:get()
     return ffi.C.Solenoid_Get(self._this)
 end
 
----@return any
 function Solenoid:toggle()
     ffi.C.Solenoid_Toggle(self._this)
 end
@@ -51,7 +49,6 @@ end
 
 
 ---@param value integer
----@return any
 function DoubleSolenoid:set(value)
     value = AssertEnumValue(DoubleSolenoidValue, value)
     value = AssertInt(value)
@@ -63,7 +60,6 @@ function DoubleSolenoid:get()
     return ffi.C.DoubleSolenoid_Get(self._this)
 end
 
----@return any
 function DoubleSolenoid:toggle()
     ffi.C.DoubleSolenoid_Toggle(self._this)
 end

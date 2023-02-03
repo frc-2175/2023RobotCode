@@ -9,7 +9,7 @@ require("wpilib.bindings.enum")
 AHRS = {}
 
 ---@param value integer
----@return any
+---@return AHRS
 function AHRS:new(value)
     value = AssertInt(value)
     local instance = {
@@ -40,7 +40,6 @@ function AHRS:getCompassHeading()
     return ffi.C.AHRS_GetCompassHeading(self._this)
 end
 
----@return any
 function AHRS:zeroYaw()
     ffi.C.AHRS_ZeroYaw(self._this)
 end
@@ -140,7 +139,6 @@ function AHRS:getQuaternionZ()
     return ffi.C.AHRS_GetQuaternionZ(self._this)
 end
 
----@return any
 function AHRS:resetDisplacement()
     ffi.C.AHRS_ResetDisplacement(self._this)
 end
@@ -149,7 +147,6 @@ end
 ---@param accel_y_g number
 ---@param update_rate_hz integer
 ---@param is_moving boolean
----@return any
 function AHRS:updateDisplacement(accel_x_g, accel_y_g, update_rate_hz, is_moving)
     accel_x_g = AssertNumber(accel_x_g)
     accel_y_g = AssertNumber(accel_y_g)
@@ -198,7 +195,6 @@ function AHRS:getRate()
 end
 
 ---@param angle number
----@return any
 function AHRS:setAngleAdjustment(angle)
     angle = AssertNumber(angle)
     ffi.C.AHRS_SetAngleAdjustment(self._this, angle)
@@ -209,7 +205,6 @@ function AHRS:getAngleAdjustment()
     return ffi.C.AHRS_GetAngleAdjustment(self._this)
 end
 
----@return any
 function AHRS:reset()
     ffi.C.AHRS_Reset(self._this)
 end
@@ -270,13 +265,11 @@ function AHRS:getActualUpdateRate()
 end
 
 ---@param enable boolean
----@return any
 function AHRS:enableLogging(enable)
     ffi.C.AHRS_EnableLogging(self._this, enable)
 end
 
 ---@param enable boolean
----@return any
 function AHRS:enableBoardlevelYawReset(enable)
     ffi.C.AHRS_EnableBoardlevelYawReset(self._this, enable)
 end
@@ -296,7 +289,6 @@ function AHRS:getAccelFullScaleRangeG()
     return ffi.C.AHRS_GetAccelFullScaleRangeG(self._this)
 end
 
----@return any
 function AHRS:calibrate()
     ffi.C.AHRS_Calibrate(self._this)
 end

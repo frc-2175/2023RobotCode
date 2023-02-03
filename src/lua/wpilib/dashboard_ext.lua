@@ -15,3 +15,8 @@ function SendableChooser:getSelected()
 
 	return self.options[selected].value
 end
+
+---@param field Field2d
+function putField(field)
+	ffi.C.PutField(field._this)
+end
