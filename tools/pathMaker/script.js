@@ -5,7 +5,7 @@
 //		 that will trigger a certain action at a part along the path
 
 // eslint-disable-next-line no-undef
-disableFriendlyErrors = true;
+disableFriendlyErrors = false;
 
 /** Class representing a vector. */
 class Vector {
@@ -209,21 +209,19 @@ function removeLastLineVector() {
 
 // eslint-disable-next-line no-unused-vars
 function mouseClicked() {
-	if (canvasFocused() && !isMouseOverTriggerPoint().isMouseOver) {
-		createNewLineVector((new Vector(mouseX, mouseY)).toField());
+	if (triggerPoints.length != 0) {
+		for (testPoint in triggerPoints) {
+			if (canvasFocused() && !(triggerPoints[testPoint].vector.distTo(mouseVector.toField()) <= 15)) {
+				createNewLineVector((new Vector(mouseX, mouseY)).toField());
+			}
+		}
+	}
+	else {
+		if (canvasFocused()) {
+			createNewLineVector((new Vector(mouseX, mouseY)).toField());
+		}
 	}
 }
-
-
-function checkDraggingTriggerPoint() {
-	const nearestTriggerPoint = isMouseOverTriggerPoint();
-	const closestPoint = getClosestPointOnLines(fieldMouse, lineVectors).vector;
-	if (nearestTriggerPoint.isMouseOver) {
-		nearestTriggerPoint.triggerPoint.vector = closestPoint;
-	}
-}
-
-
 
 
 // controls:
@@ -471,32 +469,11 @@ function updateHTML() {
 	previousTriggerPointCount = triggerPoints.length;
 }
 
-let draggingTriggerPoint = {"isMouseOver": false, "index": null};
-
-function isMouseOverTriggerPoint() {
-	if (draggingTriggerPoint.isMouseOver) {
-		return draggingTriggerPoint;
-	}
-	if (draggingTriggerPoint)
-		for (i = 0; i < triggerPoints.length; i++) {
-			if (triggerPoints[i].vector.distTo(mouseVector.toField()) < 15) {
-				draggingTriggerPoint = {"isMouseOver": true, "index": i};
-				return draggingTriggerPoint;
-			}
-		}
-	if (!mouseIsPressed) {
-		draggingTriggerPoint = {"isMouseOver": false, "index": null};
-		return draggingTriggerPoint;
-	}
-}
-
 // eslint-disable-next-line no-unused-vars
 function draw() {
 	updateHTML();
 	mouseVector = new Vector(mouseX, mouseY);
 	fieldMouse = mouseVector.toField();
-
-	console.log(draggingTriggerPoint);
 
 	clear();
 	image(img, 0, 0, width, height);
@@ -557,14 +534,16 @@ function draw() {
 			point(...triggerPoint.vector.toScreen());
 		}
 
-		if (isMouseOverTriggerPoint().isMouseOver) {
-			document.body.style.cursor = "move";
-		} else {
-			document.body.style.cursor = "default";
-		}
-
 		lineVectorHasChanged = false;
-		cnv.mousePressed(checkDraggingTriggerPoint);
+
+		//Code to move triggerPoints
+		for (testPoint in triggerPoints) {
+			if (triggerPoints[testPoint].vector.distTo(mouseVector.toField()) <= 15) {
+				if (mouseIsPressed) {
+					triggerPoints[testPoint].vector = getClosestPointOnLines(mouseVector.toField(), [lineVectors[0], lineVectors[1]]).vector;
+				}
+			}
+		}
 	}
 }
  
