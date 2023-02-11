@@ -1,14 +1,22 @@
 require("utils.blendeddrive")
 
 
----@type TalonFX
-leftMotor = TalonFX:new(1)
-rightMotor = TalonFX:new(6)
+leftMotor = TalonFX:new(10)
+rightMotor = TalonFX:new(12)
 
 rightMotor:setInverted(CTREInvertType.InvertMotorOutput)
+leftFollower = TalonFX:new(11)
+leftFollower:follow(leftMotor)
+leftFollower:setInverted(CTREInvertType.FollowMaster)
 
-leftMotor:setNeutralMode(0)
-rightMotor:setNeutralMode(0)
+rightFollower = TalonFX:new(13)
+rightFollower:follow(rightMotor)
+rightFollower:setInverted(CTREInvertType.FollowMaster)
+
+leftMotor:setNeutralMode(2)
+rightMotor:setNeutralMode(2)
+
+rightMotor:setInverted(CTREInvertType.InvertMotorOutput)
 
 
 Drivetrain = {}

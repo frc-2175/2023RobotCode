@@ -147,7 +147,7 @@ model {
 
             binaries.all{
                 it.lib luajit_win64
-                it.lib luajit_mac
+                // it.lib luajit_mac
             }
 
             // Enable run tasks for this component

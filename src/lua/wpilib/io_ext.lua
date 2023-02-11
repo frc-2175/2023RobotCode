@@ -10,7 +10,7 @@ end
 
 ---@return number
 function Joystick:getY()
-	return -deadband(ffi.C.Joystick_GetY(self._this), deadvalue)
+	return deadband(ffi.C.Joystick_GetY(self._this), deadvalue)
 end
 
 ---@return number
@@ -20,7 +20,7 @@ end
 
 ---@return number
 function Joystick:getThrottle()
-	local x = ffi.C.Joystick_GetThrottle(self._this)
+	local x = ffi.C.Joystick_GetZ(self._this)
 	return -0.5 * x + 0.5
 end
 

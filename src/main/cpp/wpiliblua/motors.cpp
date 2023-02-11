@@ -1936,6 +1936,11 @@ LUAFUNC double SparkMaxRelativeEncoder_GetVelocity(void* _this) {
     return (double)_result;
 }
 
+LUAFUNC void SparkMaxRelativeEncoder_SetPositionConversionFactor(void* _this, double factor) {
+    ((rev::SparkMaxRelativeEncoder*)_this)
+        ->SetPositionConversionFactor(factor);
+}
+
 LUAFUNC void* DifferentialDrive_new(void * leftMotor, void * rightMotor) {
 			assert(leftMotor);
 			assert(rightMotor);

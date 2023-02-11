@@ -2689,6 +2689,12 @@ function SparkMaxRelativeEncoder:getVelocity()
     return ffi.C.SparkMaxRelativeEncoder_GetVelocity(self._this)
 end
 
+---@param factor number
+function SparkMaxRelativeEncoder:setPositionConversionFactor(factor)
+    factor = AssertNumber(factor)
+    ffi.C.SparkMaxRelativeEncoder_SetPositionConversionFactor(self._this, factor)
+end
+
 
 ---@param xSpeed number
 ---@param zRotation number

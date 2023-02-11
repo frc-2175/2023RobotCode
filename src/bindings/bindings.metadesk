@@ -349,6 +349,7 @@ motors: {
 	SparkMaxRelativeEncoder: {
 		double GetPosition();
 		double GetVelocity();
+		SetPositionConversionFactor(double factor);
 	}
 	
 	@class("frc::DifferentialDrive")

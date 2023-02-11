@@ -1,9 +1,11 @@
 require("subsystems.drivetrain")
+require("subsystems.intake")
 require("utils.vector")
+require("wpilib.dashboard")
 
-local camera = PhotonCamera:new("2175cam")
-local poseEst = PhotonPoseEstimator:new(AprilTagField.k2023ChargedUp, PoseStrategy.LOWEST_AMBIGUITY, camera, Transform3d:new())
-local field = Field2d:new()
+-- local camera1 = PhotonCamera:new("HD_USB_Camera")
+-- local poseEst1 = PhotonPoseEstimator:new(getDeployDirectory() .. "/fakefield.json", PoseStrategy.AVERAGE_BEST_TARGETS, camera1, Transform3d:new(Translate3d:new(18, 0, 10), Rotate3d:new(0, 0, 0)))
+-- local field = Field2d:new()
 
 function Robot.robotInit()
 	leftStick = Joystick:new(0)
@@ -16,12 +18,17 @@ function Robot.robotInit()
 end
 
 function Robot.robotPeriodic()
-	local pose = poseEst:update()
 	
-	if pose ~= nil then
-		field:setRobotPose(pose.position.x, pose.position.y, pose.rotation.z);
-		putField(field)
-	end
+	putNumber("position", Lyon:getPosition())
+	putNumber("testPosition", Lyon:getTestPosition())
+
+	-- local pose1 = poseEst1:update()
+	
+	-- if pose1 ~= nil then
+	-- 	field:setRobotPose(pose1.position.x, pose1.position.y, pose1.rotation.z)
+	-- 	putField(field)
+	-- end
+	
 end
 
 function Robot.autonomousInit()
@@ -34,4 +41,15 @@ function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
 	Drivetrain:drive(squareInput(leftStick:getY()), squareInput(rightStick:getX()))
+	if gamepad:getButtonHeld(XboxButton.A) then
+		Lyon:up()
+	elseif gamepad:getButtonHeld(XboxButton.Y) then 
+		Lyon:down()	
+	elseif gamepad:getButtonHeld(XboxButton.B) then
+		Lyon:zero()
+	else
+		Lyon:stop()
+	end
+	Lyon:periodic()
 end
+
