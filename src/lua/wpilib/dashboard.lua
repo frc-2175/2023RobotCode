@@ -16,45 +16,71 @@ SendableChooser = {}
 ---@field _this Field2d
 Field2d = {}
 
+---@param key string
+---@return boolean
+function SmartDashboard:containsKey(key)
+    return ffi.C.ContainsKey(key)
+end
+
+---@param key string
+function SmartDashboard:setPersistent(key)
+    ffi.C.SetPersistent(key)
+end
+
+---@param key string
+function SmartDashboard:clearPersistent(key)
+    ffi.C.ClearPersistent(key)
+end
+
+---@param key string
+---@return boolean
+function SmartDashboard:isPersistent(key)
+    return ffi.C.IsPersistent(key)
+end
+
+---@param keyName string
+---@param value boolean
+function SmartDashboard:putBoolean(keyName, value)
+    ffi.C.PutBoolean(keyName, value)
+end
+
+---@param keyName string
+---@param defaultValue? boolean
+---@return boolean
+function SmartDashboard:getBoolean(keyName, defaultValue)
+    defaultValue = defaultValue == nil and nil or defaultValue
+    return ffi.C.GetBoolean(keyName, defaultValue)
+end
+
 ---@param keyName string
 ---@param value number
-function putNumber(keyName, value)
+function SmartDashboard:putNumber(keyName, value)
     value = AssertNumber(value)
     ffi.C.PutNumber(keyName, value)
 end
 
 ---@param keyName string
----@param value any
----@param size any
-function putNumberArray(keyName, value, size)
-    ffi.C.PutNumberArray(keyName, value, size)
+---@param defaultValue? number
+---@return number
+function SmartDashboard:getNumber(keyName, defaultValue)
+    defaultValue = defaultValue == nil and nil or defaultValue
+    defaultValue = AssertNumber(defaultValue)
+    return ffi.C.GetNumber(keyName, defaultValue)
 end
 
 ---@param keyName string
 ---@param value string
-function putString(keyName, value)
+function SmartDashboard:putString(keyName, value)
     ffi.C.PutString(keyName, value)
 end
 
----@param keyName string
----@param value any
----@param size any
-function putStringArray(keyName, value, size)
-    ffi.C.PutStringArray(keyName, value, size)
-end
 
----@param keyName string
----@param value boolean
-function putBoolean(keyName, value)
-    ffi.C.PutBoolean(keyName, value)
-end
 
----@param keyName string
----@param value any
----@param size any
-function putBooleanArray(keyName, value, size)
-    ffi.C.PutBooleanArray(keyName, value, size)
-end
+
+
+
+
+
 
 
 

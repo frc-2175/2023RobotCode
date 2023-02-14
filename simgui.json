@@ -68,17 +68,14 @@
     }
   },
   "NetworkTables": {
-    "Retained Values": {
+    "Persistent Values": {
       "open": false
     },
-    "Transitory Values": {
+    "Retained Values": {
       "open": false
     },
     "transitory": {
       "FMSInfo": {
-        "open": true
-      },
-      "LiveWindow": {
         "open": true
       },
       "SmartDashboard": {
@@ -107,5 +104,8 @@
         "open": true
       }
     }
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }

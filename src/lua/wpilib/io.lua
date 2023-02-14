@@ -127,7 +127,7 @@ end
 ---@param port? integer
 ---@return integer
 function Joystick:getPOV(port)
-    port = port or 0
+    port = port == nil and 0 or port
     port = AssertInt(port)
     return ffi.C.Joystick_GetPOV(self._this, port)
 end

@@ -101,7 +101,7 @@ Path = {}
 
 ---@param path Vector[]
 ---@param numberOfActualPoints integer
----@param triggerPoints table
+---@param triggerPoints table?
 ---@return Path path
 function Path:new(path, numberOfActualPoints, triggerPoints)
 	triggerPoints = triggerPoints or {}
@@ -175,12 +175,12 @@ end
 ---@return Path
 function readPath(fileName)
 	local rawFile, err = io.open(dir .. fileName .. ".path")
-	if err ~= nil then -- this one's for you, gophers.
+	if rawFile == nil then
+		print(err)
 		return { Vector:new(0, 0) }
 	end
-    ---@type Vector[]
+
     local fileContents = json.decode(rawFile:read("a"))
-    ---@type Vector[]
     local resultPath = {}
 
     for i, value in ipairs(fileContents.points) do

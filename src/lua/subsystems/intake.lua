@@ -41,9 +41,9 @@ function Lyon:getTestPosition()
 end
 
 function Lyon:periodic()
-	putNumber("LyonPos", Lyon:getPosition())
-	putNumber("LyonRawPos", Lyon:getMotorRawPosition())
-	putNumber("LyonOutput", arm:get())
+	SmartDashboard:putNumber("LyonPos", Lyon:getPosition())
+	SmartDashboard:putNumber("LyonRawPos", Lyon:getMotorRawPosition())
+	SmartDashboard:putNumber("LyonOutput", arm:get())
 	return armEncoder:getPosition()
 end
 

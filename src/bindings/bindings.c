@@ -85,6 +85,7 @@ typedef struct {
 	MD_String8 ArgCasts[MAX_ARGS];
 	MD_String8 ArgEnums[MAX_ARGS];
 	MD_String8 ArgDefaults[MAX_ARGS];
+	MD_String8 ArgValues[MAX_ARGS];
 	MD_String8 ArgConstructs[MAX_ARGS];
 
 	int isConstructor;
@@ -181,6 +182,11 @@ ParseFuncResult ParseFunc(MD_Node* n) {
 			MD_Node* defaultTag = MD_TagFromString(argStart, MD_S8Lit("default"), 0);
 			if (!MD_NodeIsNil(defaultTag)) {
 				res.ArgDefaults[res.NumArgs] = defaultTag->first_child->string;
+			}
+
+			MD_Node* valueTag = MD_TagFromString(argStart, MD_S8Lit("value"), 0);
+			if (!MD_NodeIsNil(valueTag)) {
+				res.ArgValues[res.NumArgs] = valueTag->first_child->string;
 			}
 
 			MD_Node* constructTag = MD_TagFromString(argStart, MD_S8Lit("construct"), 0);
@@ -341,6 +347,8 @@ MD_String8List GenCppCallArgs(ParseFuncResult parsedFunc) {
 MD_String8 GenLuaDocComment(ParseFuncResult parsedFunc) {
 	MD_String8List typeLines = {0};
 	for (int i = 0; i < parsedFunc.NumArgs; i++) {
+		if (parsedFunc.ArgValues[i].size > 0) continue;
+
 		MD_String8 maybeQuestionMark = {0};
 		if (parsedFunc.ArgDefaults[i].size > 0) {
 			maybeQuestionMark = MD_S8Lit("?");
@@ -389,6 +397,7 @@ MD_String8 GenLuaDocComment(ParseFuncResult parsedFunc) {
 MD_String8List GenLuaSignatureArgs(ParseFuncResult parsedFunc) {
 	MD_String8List args = {0};
 	for (int i = 0; i < parsedFunc.NumArgs; i++) {
+		if (parsedFunc.ArgValues[i].size > 0) continue;
 		MD_S8ListPush(a, &args, parsedFunc.ArgNames[i]);
 	}
 	return args;
@@ -401,9 +410,16 @@ MD_String8List GenLuaArgModifiers(ParseFuncResult parsedFunc) {
 	for (int i = 0; i < parsedFunc.NumArgs; i++) {
 		if (parsedFunc.ArgDefaults[i].size > 0) {
 			MD_S8ListPushFmt(a, &mods,
-				"    %S = %S or %S",
-				parsedFunc.ArgNames[i], parsedFunc.ArgNames[i], parsedFunc.ArgDefaults[i]
+				"    %S = %S == nil and %S or %S",
+				parsedFunc.ArgNames[i], parsedFunc.ArgNames[i], parsedFunc.ArgDefaults[i], parsedFunc.ArgNames[i]
 			);
+		}
+	}
+	
+
+	for (int i = 0; i < parsedFunc.NumArgs; i++) {
+		if (parsedFunc.ArgValues[i].size > 0) {
+			parsedFunc.ArgNames[i] = parsedFunc.ArgValues[i];
 		}
 	}
 
@@ -419,6 +435,8 @@ MD_String8List GenLuaArgModifiers(ParseFuncResult parsedFunc) {
 
 	// assert types and stuff now that we have values for everything
 	for (int i = 0; i < parsedFunc.NumArgs; i++) {
+		if (parsedFunc.ArgValues[i].size > 0) continue;
+
 		if (MD_S8Match(parsedFunc.ArgTypes[i], MD_S8Lit("int"), 0)) {
 			MD_S8ListPushFmt(a, &mods,
 				"    %S = AssertInt(%S)",
@@ -445,7 +463,11 @@ MD_String8List GenLuaCallArgs(ParseFuncResult parsedFunc, MD_b32 isMethod) {
 		MD_S8ListPush(a, &args, MD_S8Lit("self._this"));
 	}
 	for (int i = 0; i < parsedFunc.NumArgs; i++) {
-		MD_S8ListPush(a, &args, parsedFunc.ArgNames[i]);
+		if (parsedFunc.ArgValues[i].size > 0) {
+			MD_S8ListPush(a, &args, parsedFunc.ArgValues[i]);
+		} else {
+			MD_S8ListPush(a, &args, parsedFunc.ArgNames[i]);
+		}
 	}
 	return args;
 }
@@ -604,6 +626,10 @@ GenOutputResult GenOutput(GenOutputOptions opts) {
 	// Generate full nice Lua function
 	MD_String8 methodReceiver = {0};
 	if (isMethod) {
+		methodReceiver = MD_S8Fmt(a, "%S:", opts.LuaClassName);
+	}
+
+	if (opts.IsStatic) {
 		methodReceiver = MD_S8Fmt(a, "%S:", opts.LuaClassName);
 	}
 

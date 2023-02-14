@@ -8,29 +8,80 @@
 
 #include "luadef.h"
 
-LUAFUNC void PutNumber(const char * keyName, double value) {
-    frc::SmartDashboard::PutNumber((std::string_view)keyName, value);
+LUAFUNC bool ContainsKey(const char * key) {
+    auto _result = frc::SmartDashboard::ContainsKey((std::string_view)key);
+    return (bool)_result;
 }
 
-LUAFUNC void PutNumberArray(const char * keyName, double * value, size_t size) {
-	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));
+LUAFUNC void SetPersistent(const char * key) {
+    frc::SmartDashboard::SetPersistent((std::string_view)key);
 }
 
-LUAFUNC void PutString(const char * keyName, const char* value) {
-    frc::SmartDashboard::PutString((std::string_view)keyName, (std::string_view)value);
+LUAFUNC void ClearPersistent(const char * key) {
+    frc::SmartDashboard::ClearPersistent((std::string_view)key);
 }
 
-LUAFUNC void PutStringArray(const char * keyName, const char ** value, size_t size) {
-	std::vector<std::string> strVec(value, value + size);
-	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));
+LUAFUNC bool IsPersistent(const char * key) {
+    auto _result = frc::SmartDashboard::IsPersistent((std::string_view)key);
+    return (bool)_result;
 }
 
 LUAFUNC void PutBoolean(const char * keyName, bool value) {
     frc::SmartDashboard::PutBoolean((std::string_view)keyName, value);
 }
 
+LUAFUNC bool GetBoolean(const char * keyName, bool defaultValue) {
+    auto _result = frc::SmartDashboard::GetBoolean((std::string_view)keyName, defaultValue);
+    return (bool)_result;
+}
+
+LUAFUNC void PutNumber(const char * keyName, double value) {
+    frc::SmartDashboard::PutNumber((std::string_view)keyName, value);
+}
+
+LUAFUNC double GetNumber(const char * keyName, double defaultValue) {
+    auto _result = frc::SmartDashboard::GetNumber((std::string_view)keyName, defaultValue);
+    return (double)_result;
+}
+
+LUAFUNC void PutString(const char * keyName, const char * value) {
+    frc::SmartDashboard::PutString((std::string_view)keyName, (std::string_view)value);
+}
+
+LUAFUNC const char * GetString(const char * keyName, const char * defaultValue) {
+	return stdStringForLua(frc::SmartDashboard::GetString((std::string_view)keyName, (std::string_view)defaultValue));
+}
+
 LUAFUNC void PutBooleanArray(const char * keyName, int * value, size_t size) {
 	frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));
+}
+
+LUAFUNC size_t GetBooleanArraySize(const char * keyName) {
+	return frc::SmartDashboard::GetBooleanArray(keyName, {}).size();
+}
+
+LUAFUNC int * GetBooleanArray(const char * keyName, int * defaultValue, size_t defaultSize) {
+	auto result = frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize));
+	auto ptr = (int*)malloc(result.size());
+	memcpy(ptr, &result, result.size());
+	return ptr;
+}
+
+LUAFUNC void PutNumberArray(const char * keyName, double * value, size_t size) {
+	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));
+}
+
+LUAFUNC size_t GetNumberArraySize(const char * keyName) {
+	return frc::SmartDashboard::GetNumberArray(keyName, {}).size();
+}
+
+LUAFUNC double * GetNumberArray(const char * keyName, double * defaultValue, size_t defaultSize) {
+	return frc::SmartDashboard::GetNumberArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();
+}
+
+LUAFUNC void PutStringArray(const char * keyName, const char ** value, size_t size) {
+	std::vector<std::string> strVec(value, value + size);
+	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));
 }
 
 LUAFUNC void PutIntChooser(void * data) {

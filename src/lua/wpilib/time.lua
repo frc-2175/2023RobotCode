@@ -50,11 +50,11 @@ function Timer:advanceIfElapsed(period)
 end
 
 ---@return number
-function getFPGATimestamp()
+function Timer:getFPGATimestamp()
     return ffi.C.GetFPGATimestamp()
 end
 
 ---@return number
-function getMatchTime()
+function Timer:getMatchTime()
     return ffi.C.GetMatchTime()
 end

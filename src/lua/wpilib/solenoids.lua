@@ -22,6 +22,17 @@ DoubleSolenoidValue = BindingEnum:new('DoubleSolenoidValue', {
     Reverse = 2,
 })
 
+---@param channel integer
+---@return Solenoid
+function Solenoid:new(channel)
+    channel = AssertInt(channel)
+    local instance = {
+        _this = ffi.C.Solenoid_new(0, channel),
+    }
+    setmetatable(instance, self)
+    self.__index = self
+    return instance
+end
 
 ---@param on boolean
 function Solenoid:set(on)
@@ -47,6 +58,19 @@ function Solenoid:isDisabled()
     return ffi.C.Solenoid_IsDisabled(self._this)
 end
 
+---@param forwardChannel integer
+---@param reverseChannel integer
+---@return DoubleSolenoid
+function DoubleSolenoid:new(forwardChannel, reverseChannel)
+    forwardChannel = AssertInt(forwardChannel)
+    reverseChannel = AssertInt(reverseChannel)
+    local instance = {
+        _this = ffi.C.DoubleSolenoid_new(0, forwardChannel, reverseChannel),
+    }
+    setmetatable(instance, self)
+    self.__index = self
+    return instance
+end
 
 ---@param value integer
 function DoubleSolenoid:set(value)

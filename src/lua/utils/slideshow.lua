@@ -25,7 +25,7 @@ function Slideshow:prev()
 end
 
 function Slideshow:draw()
-	putString("Slide", self.slides[self.index])
+	SmartDashboard:putString("Slide", self.slides[self.index])
 end
 
 function Slideshow:move(slides)

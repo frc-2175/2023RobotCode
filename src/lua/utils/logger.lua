@@ -10,6 +10,12 @@ function initLogging()
 	path = "/home/lvuser/logs/" .. os.date():gsub(":", "."):gsub(" ", "-") .. ".log"
 	print(path)
 	file, errorMessage = io.open(path, "w")
+	if file == nil then
+		print("Error printing file: " .. errorMessage)
+		print("We're just gonna write logs to stdout. Have fun.")
+		return
+	end
+
 	io.output(file)
 end
 
@@ -27,7 +33,7 @@ end
 
 local logMetatable = {
 	stop = function(self)
-		self.time = getFPGATimestamp()
+		self.time = Timer:getFPGATimestamp()
 		writeLine(self)
 	end,
 }
@@ -40,7 +46,7 @@ function log(message, parent)
 		type = "event",
 		message = message,
 		id = uniqueID(),
-		time = getFPGATimestamp(),
+		time = Timer:getFPGATimestamp(),
 		parent = parent,
 	}
 	setmetatable(log, logMetatable)
@@ -52,7 +58,7 @@ end
 
 local dataMetatable = {
 	update = function(self, value)
-		self.time = getFPGATimestamp()
+		self.time = Timer:getFPGATimestamp()
 		self.value = value
 		writeLine(self)
 	end,
@@ -63,7 +69,7 @@ function logData(name, value)
 	local data = {
 		type = "data",
 		name = name,
-		time = getFPGATimestamp(),
+		time = Timer:getFPGATimestamp(),
 		value = value,
 	}
 	setmetatable(data, dataMetatable)

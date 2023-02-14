@@ -68,6 +68,16 @@ IdleMode = BindingEnum:new('IdleMode', {
     kBrake = 1,
 })
 
+---@class NeutralMode
+---@field EEPROMSetting integer
+---@field Coast integer
+---@field Brake integer
+NeutralMode = BindingEnum:new('NeutralMode', {
+    EEPROMSetting = 0,
+    Coast = 1,
+    Brake = 2,
+})
+
 ---@class SparkMaxEncoderType
 ---@field kNoSensor integer
 ---@field kHallSensor integer
@@ -147,6 +157,7 @@ end
 
 ---@param neutralMode integer
 function VictorSPX:setNeutralMode(neutralMode)
+    neutralMode = AssertEnumValue(NeutralMode, neutralMode)
     neutralMode = AssertInt(neutralMode)
     ffi.C.VictorSPX_SetNeutralMode(self._this, neutralMode)
 end
@@ -171,7 +182,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configFactoryDefault(timeoutMs)
-    timeoutMs = timeoutMs or 50
+    timeoutMs = timeoutMs == nil and 50 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigFactoryDefault(self._this, timeoutMs)
 end
@@ -180,7 +191,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configOpenloopRamp(secondsFromNeutralToFull, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     secondsFromNeutralToFull = AssertNumber(secondsFromNeutralToFull)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigOpenloopRamp(self._this, secondsFromNeutralToFull, timeoutMs)
@@ -190,7 +201,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configClosedloopRamp(secondsFromNeutralToFull, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     secondsFromNeutralToFull = AssertNumber(secondsFromNeutralToFull)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigClosedloopRamp(self._this, secondsFromNeutralToFull, timeoutMs)
@@ -200,7 +211,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configPeakOutputForward(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigPeakOutputForward(self._this, percentOut, timeoutMs)
@@ -210,7 +221,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configPeakOutputReverse(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigPeakOutputReverse(self._this, percentOut, timeoutMs)
@@ -220,7 +231,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configNominalOutputForward(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigNominalOutputForward(self._this, percentOut, timeoutMs)
@@ -230,7 +241,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configNominalOutputReverse(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigNominalOutputReverse(self._this, percentOut, timeoutMs)
@@ -240,7 +251,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configNeutralDeadband(percentDeadband, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentDeadband = AssertNumber(percentDeadband)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigNeutralDeadband(self._this, percentDeadband, timeoutMs)
@@ -250,7 +261,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configVoltageCompSaturation(voltage, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     voltage = AssertNumber(voltage)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigVoltageCompSaturation(self._this, voltage, timeoutMs)
@@ -260,7 +271,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configVoltageMeasurementFilter(filterWindowSamples, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     filterWindowSamples = AssertInt(filterWindowSamples)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigVoltageMeasurementFilter(self._this, filterWindowSamples, timeoutMs)
@@ -301,8 +312,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configSelectedFeedbackCoefficient(coefficient, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     coefficient = AssertNumber(coefficient)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -321,7 +332,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getSelectedSensorPosition(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetSelectedSensorPosition(self._this, pidIdx)
 end
@@ -329,7 +340,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getSelectedSensorVelocity(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetSelectedSensorVelocity(self._this, pidIdx)
 end
@@ -339,8 +350,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:setSelectedSensorPosition(sensorPos, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 50
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 50 or timeoutMs
     sensorPos = AssertNumber(sensorPos)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -365,7 +376,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configForwardSoftLimitThreshold(forwardSensorLimit, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     forwardSensorLimit = AssertNumber(forwardSensorLimit)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigForwardSoftLimitThreshold(self._this, forwardSensorLimit, timeoutMs)
@@ -375,7 +386,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configReverseSoftLimitThreshold(reverseSensorLimit, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     reverseSensorLimit = AssertNumber(reverseSensorLimit)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigReverseSoftLimitThreshold(self._this, reverseSensorLimit, timeoutMs)
@@ -385,7 +396,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configForwardSoftLimitEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigForwardSoftLimitEnable(self._this, enable, timeoutMs)
 end
@@ -394,7 +405,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configReverseSoftLimitEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigReverseSoftLimitEnable(self._this, enable, timeoutMs)
 end
@@ -409,7 +420,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:config_kP(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -421,7 +432,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:config_kI(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -433,7 +444,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:config_kD(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -445,7 +456,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:config_kF(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -457,7 +468,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:config_IntegralZone(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -469,7 +480,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configAllowableClosedloopError(slotIdx, allowableCloseLoopError, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     allowableCloseLoopError = AssertNumber(allowableCloseLoopError)
     timeoutMs = AssertInt(timeoutMs)
@@ -481,7 +492,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configMaxIntegralAccumulator(slotIdx, iaccum, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     iaccum = AssertNumber(iaccum)
     timeoutMs = AssertInt(timeoutMs)
@@ -493,7 +504,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configClosedLoopPeakOutput(slotIdx, percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
@@ -505,7 +516,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configClosedLoopPeriod(slotIdx, loopTimeMs, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     loopTimeMs = AssertInt(loopTimeMs)
     timeoutMs = AssertInt(timeoutMs)
@@ -516,7 +527,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configAuxPIDPolarity(invert, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigAuxPIDPolarity(self._this, invert, timeoutMs)
 end
@@ -526,8 +537,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:setIntegralAccumulator(iaccum, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     iaccum = AssertNumber(iaccum)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -537,7 +548,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getClosedLoopError(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetClosedLoopError(self._this, pidIdx)
 end
@@ -545,7 +556,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getIntegralAccumulator(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetIntegralAccumulator(self._this, pidIdx)
 end
@@ -553,7 +564,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getErrorDerivative(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetErrorDerivative(self._this, pidIdx)
 end
@@ -570,7 +581,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getClosedLoopTarget(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetClosedLoopTarget(self._this, pidIdx)
 end
@@ -578,7 +589,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getActiveTrajectoryPosition(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetActiveTrajectoryPosition(self._this, pidIdx)
 end
@@ -586,7 +597,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function VictorSPX:getActiveTrajectoryArbFeedFwd(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.VictorSPX_GetActiveTrajectoryArbFeedFwd(self._this, pidIdx)
 end
@@ -595,7 +606,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configMotionCruiseVelocity(sensorUnitsPer100ms, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     sensorUnitsPer100ms = AssertNumber(sensorUnitsPer100ms)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigMotionCruiseVelocity(self._this, sensorUnitsPer100ms, timeoutMs)
@@ -605,7 +616,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configMotionAcceleration(sensorUnitsPer100msPerSec, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     sensorUnitsPer100msPerSec = AssertNumber(sensorUnitsPer100msPerSec)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigMotionAcceleration(self._this, sensorUnitsPer100msPerSec, timeoutMs)
@@ -615,7 +626,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configMotionSCurveStrength(curveStrength, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     curveStrength = AssertInt(curveStrength)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigMotionSCurveStrength(self._this, curveStrength, timeoutMs)
@@ -648,7 +659,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:clearMotionProfileHasUnderrun(timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ClearMotionProfileHasUnderrun(self._this, timeoutMs)
 end
@@ -664,7 +675,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configMotionProfileTrajectoryPeriod(baseTrajDurationMs, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     baseTrajDurationMs = AssertInt(baseTrajDurationMs)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigMotionProfileTrajectoryPeriod(self._this, baseTrajDurationMs, timeoutMs)
@@ -674,7 +685,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configMotionProfileTrajectoryInterpolationEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigMotionProfileTrajectoryInterpolationEnable(self._this, enable, timeoutMs)
 end
@@ -683,7 +694,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configFeedbackNotContinuous(feedbackNotContinuous, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigFeedbackNotContinuous(self._this, feedbackNotContinuous, timeoutMs)
 end
@@ -692,7 +703,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configClearPositionOnLimitF(clearPositionOnLimitF, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigClearPositionOnLimitF(self._this, clearPositionOnLimitF, timeoutMs)
 end
@@ -701,7 +712,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configClearPositionOnLimitR(clearPositionOnLimitR, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigClearPositionOnLimitR(self._this, clearPositionOnLimitR, timeoutMs)
 end
@@ -710,7 +721,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configClearPositionOnQuadIdx(clearPositionOnQuadIdx, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigClearPositionOnQuadIdx(self._this, clearPositionOnQuadIdx, timeoutMs)
 end
@@ -719,7 +730,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configLimitSwitchDisableNeutralOnLOS(limitSwitchDisableNeutralOnLOS, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigLimitSwitchDisableNeutralOnLOS(self._this, limitSwitchDisableNeutralOnLOS, timeoutMs)
 end
@@ -728,7 +739,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configSoftLimitDisableNeutralOnLOS(softLimitDisableNeutralOnLOS, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigSoftLimitDisableNeutralOnLOS(self._this, softLimitDisableNeutralOnLOS, timeoutMs)
 end
@@ -737,7 +748,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configPulseWidthPeriod_EdgesPerRot(pulseWidthPeriod_EdgesPerRot, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     pulseWidthPeriod_EdgesPerRot = AssertInt(pulseWidthPeriod_EdgesPerRot)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigPulseWidthPeriod_EdgesPerRot(self._this, pulseWidthPeriod_EdgesPerRot, timeoutMs)
@@ -747,7 +758,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function VictorSPX:configPulseWidthPeriod_FilterWindowSz(pulseWidthPeriod_FilterWindowSz, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     pulseWidthPeriod_FilterWindowSz = AssertInt(pulseWidthPeriod_FilterWindowSz)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.VictorSPX_ConfigPulseWidthPeriod_FilterWindowSz(self._this, pulseWidthPeriod_FilterWindowSz, timeoutMs)
@@ -914,6 +925,7 @@ end
 
 ---@param neutralMode integer
 function TalonSRX:setNeutralMode(neutralMode)
+    neutralMode = AssertEnumValue(NeutralMode, neutralMode)
     neutralMode = AssertInt(neutralMode)
     ffi.C.TalonSRX_SetNeutralMode(self._this, neutralMode)
 end
@@ -938,7 +950,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configFactoryDefault(timeoutMs)
-    timeoutMs = timeoutMs or 50
+    timeoutMs = timeoutMs == nil and 50 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigFactoryDefault(self._this, timeoutMs)
 end
@@ -947,7 +959,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configOpenloopRamp(secondsFromNeutralToFull, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     secondsFromNeutralToFull = AssertNumber(secondsFromNeutralToFull)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigOpenloopRamp(self._this, secondsFromNeutralToFull, timeoutMs)
@@ -957,7 +969,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configClosedloopRamp(secondsFromNeutralToFull, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     secondsFromNeutralToFull = AssertNumber(secondsFromNeutralToFull)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigClosedloopRamp(self._this, secondsFromNeutralToFull, timeoutMs)
@@ -967,7 +979,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configPeakOutputForward(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigPeakOutputForward(self._this, percentOut, timeoutMs)
@@ -977,7 +989,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configPeakOutputReverse(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigPeakOutputReverse(self._this, percentOut, timeoutMs)
@@ -987,7 +999,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configNominalOutputForward(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigNominalOutputForward(self._this, percentOut, timeoutMs)
@@ -997,7 +1009,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configNominalOutputReverse(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigNominalOutputReverse(self._this, percentOut, timeoutMs)
@@ -1007,7 +1019,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configNeutralDeadband(percentDeadband, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentDeadband = AssertNumber(percentDeadband)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigNeutralDeadband(self._this, percentDeadband, timeoutMs)
@@ -1017,7 +1029,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configVoltageCompSaturation(voltage, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     voltage = AssertNumber(voltage)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigVoltageCompSaturation(self._this, voltage, timeoutMs)
@@ -1027,7 +1039,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configVoltageMeasurementFilter(filterWindowSamples, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     filterWindowSamples = AssertInt(filterWindowSamples)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigVoltageMeasurementFilter(self._this, filterWindowSamples, timeoutMs)
@@ -1068,8 +1080,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configSelectedFeedbackCoefficient(coefficient, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     coefficient = AssertNumber(coefficient)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -1088,7 +1100,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getSelectedSensorPosition(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetSelectedSensorPosition(self._this, pidIdx)
 end
@@ -1096,7 +1108,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getSelectedSensorVelocity(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetSelectedSensorVelocity(self._this, pidIdx)
 end
@@ -1106,8 +1118,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:setSelectedSensorPosition(sensorPos, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 50
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 50 or timeoutMs
     sensorPos = AssertNumber(sensorPos)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -1132,7 +1144,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configForwardSoftLimitThreshold(forwardSensorLimit, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     forwardSensorLimit = AssertNumber(forwardSensorLimit)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigForwardSoftLimitThreshold(self._this, forwardSensorLimit, timeoutMs)
@@ -1142,7 +1154,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configReverseSoftLimitThreshold(reverseSensorLimit, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     reverseSensorLimit = AssertNumber(reverseSensorLimit)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigReverseSoftLimitThreshold(self._this, reverseSensorLimit, timeoutMs)
@@ -1152,7 +1164,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configForwardSoftLimitEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigForwardSoftLimitEnable(self._this, enable, timeoutMs)
 end
@@ -1161,7 +1173,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configReverseSoftLimitEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigReverseSoftLimitEnable(self._this, enable, timeoutMs)
 end
@@ -1176,7 +1188,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:config_kP(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -1188,7 +1200,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:config_kI(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -1200,7 +1212,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:config_kD(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -1212,7 +1224,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:config_kF(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -1224,7 +1236,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:config_IntegralZone(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -1236,7 +1248,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configAllowableClosedloopError(slotIdx, allowableCloseLoopError, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     allowableCloseLoopError = AssertNumber(allowableCloseLoopError)
     timeoutMs = AssertInt(timeoutMs)
@@ -1248,7 +1260,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configMaxIntegralAccumulator(slotIdx, iaccum, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     iaccum = AssertNumber(iaccum)
     timeoutMs = AssertInt(timeoutMs)
@@ -1260,7 +1272,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configClosedLoopPeakOutput(slotIdx, percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
@@ -1272,7 +1284,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configClosedLoopPeriod(slotIdx, loopTimeMs, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     loopTimeMs = AssertInt(loopTimeMs)
     timeoutMs = AssertInt(timeoutMs)
@@ -1283,7 +1295,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configAuxPIDPolarity(invert, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigAuxPIDPolarity(self._this, invert, timeoutMs)
 end
@@ -1293,8 +1305,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:setIntegralAccumulator(iaccum, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     iaccum = AssertNumber(iaccum)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -1304,7 +1316,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getClosedLoopError(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetClosedLoopError(self._this, pidIdx)
 end
@@ -1312,7 +1324,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getIntegralAccumulator(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetIntegralAccumulator(self._this, pidIdx)
 end
@@ -1320,7 +1332,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getErrorDerivative(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetErrorDerivative(self._this, pidIdx)
 end
@@ -1337,7 +1349,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getClosedLoopTarget(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetClosedLoopTarget(self._this, pidIdx)
 end
@@ -1345,7 +1357,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getActiveTrajectoryPosition(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetActiveTrajectoryPosition(self._this, pidIdx)
 end
@@ -1353,7 +1365,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonSRX:getActiveTrajectoryArbFeedFwd(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonSRX_GetActiveTrajectoryArbFeedFwd(self._this, pidIdx)
 end
@@ -1362,7 +1374,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configMotionCruiseVelocity(sensorUnitsPer100ms, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     sensorUnitsPer100ms = AssertNumber(sensorUnitsPer100ms)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigMotionCruiseVelocity(self._this, sensorUnitsPer100ms, timeoutMs)
@@ -1372,7 +1384,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configMotionAcceleration(sensorUnitsPer100msPerSec, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     sensorUnitsPer100msPerSec = AssertNumber(sensorUnitsPer100msPerSec)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigMotionAcceleration(self._this, sensorUnitsPer100msPerSec, timeoutMs)
@@ -1382,7 +1394,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configMotionSCurveStrength(curveStrength, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     curveStrength = AssertInt(curveStrength)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigMotionSCurveStrength(self._this, curveStrength, timeoutMs)
@@ -1415,7 +1427,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:clearMotionProfileHasUnderrun(timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ClearMotionProfileHasUnderrun(self._this, timeoutMs)
 end
@@ -1431,7 +1443,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configMotionProfileTrajectoryPeriod(baseTrajDurationMs, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     baseTrajDurationMs = AssertInt(baseTrajDurationMs)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigMotionProfileTrajectoryPeriod(self._this, baseTrajDurationMs, timeoutMs)
@@ -1441,7 +1453,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configMotionProfileTrajectoryInterpolationEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigMotionProfileTrajectoryInterpolationEnable(self._this, enable, timeoutMs)
 end
@@ -1450,7 +1462,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configFeedbackNotContinuous(feedbackNotContinuous, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigFeedbackNotContinuous(self._this, feedbackNotContinuous, timeoutMs)
 end
@@ -1459,7 +1471,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configClearPositionOnLimitF(clearPositionOnLimitF, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigClearPositionOnLimitF(self._this, clearPositionOnLimitF, timeoutMs)
 end
@@ -1468,7 +1480,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configClearPositionOnLimitR(clearPositionOnLimitR, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigClearPositionOnLimitR(self._this, clearPositionOnLimitR, timeoutMs)
 end
@@ -1477,7 +1489,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configClearPositionOnQuadIdx(clearPositionOnQuadIdx, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigClearPositionOnQuadIdx(self._this, clearPositionOnQuadIdx, timeoutMs)
 end
@@ -1486,7 +1498,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configLimitSwitchDisableNeutralOnLOS(limitSwitchDisableNeutralOnLOS, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigLimitSwitchDisableNeutralOnLOS(self._this, limitSwitchDisableNeutralOnLOS, timeoutMs)
 end
@@ -1495,7 +1507,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configSoftLimitDisableNeutralOnLOS(softLimitDisableNeutralOnLOS, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigSoftLimitDisableNeutralOnLOS(self._this, softLimitDisableNeutralOnLOS, timeoutMs)
 end
@@ -1504,7 +1516,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configPulseWidthPeriod_EdgesPerRot(pulseWidthPeriod_EdgesPerRot, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     pulseWidthPeriod_EdgesPerRot = AssertInt(pulseWidthPeriod_EdgesPerRot)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigPulseWidthPeriod_EdgesPerRot(self._this, pulseWidthPeriod_EdgesPerRot, timeoutMs)
@@ -1514,7 +1526,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configPulseWidthPeriod_FilterWindowSz(pulseWidthPeriod_FilterWindowSz, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     pulseWidthPeriod_FilterWindowSz = AssertInt(pulseWidthPeriod_FilterWindowSz)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigPulseWidthPeriod_FilterWindowSz(self._this, pulseWidthPeriod_FilterWindowSz, timeoutMs)
@@ -1594,7 +1606,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configVelocityMeasurementPeriod(period, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     period = AssertInt(period)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigVelocityMeasurementPeriod(self._this, period, timeoutMs)
@@ -1604,7 +1616,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configVelocityMeasurementWindow(windowSize, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     windowSize = AssertInt(windowSize)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigVelocityMeasurementWindow(self._this, windowSize, timeoutMs)
@@ -1615,7 +1627,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configForwardLimitSwitchSource(limitSwitchSource, normalOpenOrClose, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     limitSwitchSource = AssertInt(limitSwitchSource)
     normalOpenOrClose = AssertInt(normalOpenOrClose)
     timeoutMs = AssertInt(timeoutMs)
@@ -1627,7 +1639,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configReverseLimitSwitchSource(limitSwitchSource, normalOpenOrClose, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     limitSwitchSource = AssertInt(limitSwitchSource)
     normalOpenOrClose = AssertInt(normalOpenOrClose)
     timeoutMs = AssertInt(timeoutMs)
@@ -1681,8 +1693,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configSelectedFeedbackSensor(feedbackDevice, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     feedbackDevice = AssertInt(feedbackDevice)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -1693,7 +1705,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configPeakCurrentLimit(amps, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     amps = AssertInt(amps)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigPeakCurrentLimit(self._this, amps, timeoutMs)
@@ -1703,7 +1715,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configPeakCurrentDuration(milliseconds, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     milliseconds = AssertInt(milliseconds)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigPeakCurrentDuration(self._this, milliseconds, timeoutMs)
@@ -1713,7 +1725,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonSRX:configContinuousCurrentLimit(amps, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     amps = AssertInt(amps)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonSRX_ConfigContinuousCurrentLimit(self._this, amps, timeoutMs)
@@ -1798,6 +1810,7 @@ end
 
 ---@param neutralMode integer
 function TalonFX:setNeutralMode(neutralMode)
+    neutralMode = AssertEnumValue(NeutralMode, neutralMode)
     neutralMode = AssertInt(neutralMode)
     ffi.C.TalonFX_SetNeutralMode(self._this, neutralMode)
 end
@@ -1822,7 +1835,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configFactoryDefault(timeoutMs)
-    timeoutMs = timeoutMs or 50
+    timeoutMs = timeoutMs == nil and 50 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigFactoryDefault(self._this, timeoutMs)
 end
@@ -1831,7 +1844,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configOpenloopRamp(secondsFromNeutralToFull, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     secondsFromNeutralToFull = AssertNumber(secondsFromNeutralToFull)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigOpenloopRamp(self._this, secondsFromNeutralToFull, timeoutMs)
@@ -1841,7 +1854,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configClosedloopRamp(secondsFromNeutralToFull, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     secondsFromNeutralToFull = AssertNumber(secondsFromNeutralToFull)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigClosedloopRamp(self._this, secondsFromNeutralToFull, timeoutMs)
@@ -1851,7 +1864,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configPeakOutputForward(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigPeakOutputForward(self._this, percentOut, timeoutMs)
@@ -1861,7 +1874,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configPeakOutputReverse(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigPeakOutputReverse(self._this, percentOut, timeoutMs)
@@ -1871,7 +1884,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configNominalOutputForward(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigNominalOutputForward(self._this, percentOut, timeoutMs)
@@ -1881,7 +1894,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configNominalOutputReverse(percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigNominalOutputReverse(self._this, percentOut, timeoutMs)
@@ -1891,7 +1904,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configNeutralDeadband(percentDeadband, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     percentDeadband = AssertNumber(percentDeadband)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigNeutralDeadband(self._this, percentDeadband, timeoutMs)
@@ -1901,7 +1914,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configVoltageCompSaturation(voltage, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     voltage = AssertNumber(voltage)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigVoltageCompSaturation(self._this, voltage, timeoutMs)
@@ -1911,7 +1924,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configVoltageMeasurementFilter(filterWindowSamples, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     filterWindowSamples = AssertInt(filterWindowSamples)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigVoltageMeasurementFilter(self._this, filterWindowSamples, timeoutMs)
@@ -1952,8 +1965,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configSelectedFeedbackCoefficient(coefficient, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     coefficient = AssertNumber(coefficient)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -1972,7 +1985,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getSelectedSensorPosition(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetSelectedSensorPosition(self._this, pidIdx)
 end
@@ -1980,7 +1993,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getSelectedSensorVelocity(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetSelectedSensorVelocity(self._this, pidIdx)
 end
@@ -1990,8 +2003,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:setSelectedSensorPosition(sensorPos, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 50
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 50 or timeoutMs
     sensorPos = AssertNumber(sensorPos)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -2016,7 +2029,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configForwardSoftLimitThreshold(forwardSensorLimit, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     forwardSensorLimit = AssertNumber(forwardSensorLimit)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigForwardSoftLimitThreshold(self._this, forwardSensorLimit, timeoutMs)
@@ -2026,7 +2039,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configReverseSoftLimitThreshold(reverseSensorLimit, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     reverseSensorLimit = AssertNumber(reverseSensorLimit)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigReverseSoftLimitThreshold(self._this, reverseSensorLimit, timeoutMs)
@@ -2036,7 +2049,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configForwardSoftLimitEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigForwardSoftLimitEnable(self._this, enable, timeoutMs)
 end
@@ -2045,7 +2058,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configReverseSoftLimitEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigReverseSoftLimitEnable(self._this, enable, timeoutMs)
 end
@@ -2060,7 +2073,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:config_kP(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -2072,7 +2085,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:config_kI(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -2084,7 +2097,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:config_kD(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -2096,7 +2109,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:config_kF(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -2108,7 +2121,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:config_IntegralZone(slotIdx, value, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     value = AssertNumber(value)
     timeoutMs = AssertInt(timeoutMs)
@@ -2120,7 +2133,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configAllowableClosedloopError(slotIdx, allowableCloseLoopError, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     allowableCloseLoopError = AssertNumber(allowableCloseLoopError)
     timeoutMs = AssertInt(timeoutMs)
@@ -2132,7 +2145,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configMaxIntegralAccumulator(slotIdx, iaccum, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     iaccum = AssertNumber(iaccum)
     timeoutMs = AssertInt(timeoutMs)
@@ -2144,7 +2157,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configClosedLoopPeakOutput(slotIdx, percentOut, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     percentOut = AssertNumber(percentOut)
     timeoutMs = AssertInt(timeoutMs)
@@ -2156,7 +2169,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configClosedLoopPeriod(slotIdx, loopTimeMs, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     slotIdx = AssertInt(slotIdx)
     loopTimeMs = AssertInt(loopTimeMs)
     timeoutMs = AssertInt(timeoutMs)
@@ -2167,7 +2180,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configAuxPIDPolarity(invert, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigAuxPIDPolarity(self._this, invert, timeoutMs)
 end
@@ -2177,8 +2190,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:setIntegralAccumulator(iaccum, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     iaccum = AssertNumber(iaccum)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -2188,7 +2201,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getClosedLoopError(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetClosedLoopError(self._this, pidIdx)
 end
@@ -2196,7 +2209,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getIntegralAccumulator(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetIntegralAccumulator(self._this, pidIdx)
 end
@@ -2204,7 +2217,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getErrorDerivative(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetErrorDerivative(self._this, pidIdx)
 end
@@ -2221,7 +2234,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getClosedLoopTarget(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetClosedLoopTarget(self._this, pidIdx)
 end
@@ -2229,7 +2242,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getActiveTrajectoryPosition(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetActiveTrajectoryPosition(self._this, pidIdx)
 end
@@ -2237,7 +2250,7 @@ end
 ---@param pidIdx? integer
 ---@return number
 function TalonFX:getActiveTrajectoryArbFeedFwd(pidIdx)
-    pidIdx = pidIdx or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
     pidIdx = AssertInt(pidIdx)
     return ffi.C.TalonFX_GetActiveTrajectoryArbFeedFwd(self._this, pidIdx)
 end
@@ -2246,7 +2259,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configMotionCruiseVelocity(sensorUnitsPer100ms, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     sensorUnitsPer100ms = AssertNumber(sensorUnitsPer100ms)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigMotionCruiseVelocity(self._this, sensorUnitsPer100ms, timeoutMs)
@@ -2256,7 +2269,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configMotionAcceleration(sensorUnitsPer100msPerSec, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     sensorUnitsPer100msPerSec = AssertNumber(sensorUnitsPer100msPerSec)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigMotionAcceleration(self._this, sensorUnitsPer100msPerSec, timeoutMs)
@@ -2266,7 +2279,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configMotionSCurveStrength(curveStrength, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     curveStrength = AssertInt(curveStrength)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigMotionSCurveStrength(self._this, curveStrength, timeoutMs)
@@ -2299,7 +2312,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:clearMotionProfileHasUnderrun(timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ClearMotionProfileHasUnderrun(self._this, timeoutMs)
 end
@@ -2315,7 +2328,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configMotionProfileTrajectoryPeriod(baseTrajDurationMs, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     baseTrajDurationMs = AssertInt(baseTrajDurationMs)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigMotionProfileTrajectoryPeriod(self._this, baseTrajDurationMs, timeoutMs)
@@ -2325,7 +2338,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configMotionProfileTrajectoryInterpolationEnable(enable, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigMotionProfileTrajectoryInterpolationEnable(self._this, enable, timeoutMs)
 end
@@ -2334,7 +2347,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configFeedbackNotContinuous(feedbackNotContinuous, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigFeedbackNotContinuous(self._this, feedbackNotContinuous, timeoutMs)
 end
@@ -2343,7 +2356,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configClearPositionOnLimitF(clearPositionOnLimitF, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigClearPositionOnLimitF(self._this, clearPositionOnLimitF, timeoutMs)
 end
@@ -2352,7 +2365,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configClearPositionOnLimitR(clearPositionOnLimitR, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigClearPositionOnLimitR(self._this, clearPositionOnLimitR, timeoutMs)
 end
@@ -2361,7 +2374,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configClearPositionOnQuadIdx(clearPositionOnQuadIdx, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigClearPositionOnQuadIdx(self._this, clearPositionOnQuadIdx, timeoutMs)
 end
@@ -2370,7 +2383,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configLimitSwitchDisableNeutralOnLOS(limitSwitchDisableNeutralOnLOS, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigLimitSwitchDisableNeutralOnLOS(self._this, limitSwitchDisableNeutralOnLOS, timeoutMs)
 end
@@ -2379,7 +2392,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configSoftLimitDisableNeutralOnLOS(softLimitDisableNeutralOnLOS, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigSoftLimitDisableNeutralOnLOS(self._this, softLimitDisableNeutralOnLOS, timeoutMs)
 end
@@ -2388,7 +2401,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configPulseWidthPeriod_EdgesPerRot(pulseWidthPeriod_EdgesPerRot, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     pulseWidthPeriod_EdgesPerRot = AssertInt(pulseWidthPeriod_EdgesPerRot)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigPulseWidthPeriod_EdgesPerRot(self._this, pulseWidthPeriod_EdgesPerRot, timeoutMs)
@@ -2398,7 +2411,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configPulseWidthPeriod_FilterWindowSz(pulseWidthPeriod_FilterWindowSz, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     pulseWidthPeriod_FilterWindowSz = AssertInt(pulseWidthPeriod_FilterWindowSz)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigPulseWidthPeriod_FilterWindowSz(self._this, pulseWidthPeriod_FilterWindowSz, timeoutMs)
@@ -2478,7 +2491,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configVelocityMeasurementPeriod(period, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     period = AssertInt(period)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigVelocityMeasurementPeriod(self._this, period, timeoutMs)
@@ -2488,7 +2501,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configVelocityMeasurementWindow(windowSize, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     windowSize = AssertInt(windowSize)
     timeoutMs = AssertInt(timeoutMs)
     return ffi.C.TalonFX_ConfigVelocityMeasurementWindow(self._this, windowSize, timeoutMs)
@@ -2499,7 +2512,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configForwardLimitSwitchSource(limitSwitchSource, normalOpenOrClose, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     limitSwitchSource = AssertInt(limitSwitchSource)
     normalOpenOrClose = AssertInt(normalOpenOrClose)
     timeoutMs = AssertInt(timeoutMs)
@@ -2511,7 +2524,7 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configReverseLimitSwitchSource(limitSwitchSource, normalOpenOrClose, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     limitSwitchSource = AssertInt(limitSwitchSource)
     normalOpenOrClose = AssertInt(normalOpenOrClose)
     timeoutMs = AssertInt(timeoutMs)
@@ -2577,7 +2590,7 @@ end
 ---@param offsetDegrees number
 ---@param timeoutMs? integer
 function TalonFX:configIntegratedSensorOffset(offsetDegrees, timeoutMs)
-    timeoutMs = timeoutMs or 0
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     offsetDegrees = AssertNumber(offsetDegrees)
     timeoutMs = AssertInt(timeoutMs)
     ffi.C.TalonFX_ConfigIntegratedSensorOffset(self._this, offsetDegrees, timeoutMs)
@@ -2588,8 +2601,8 @@ end
 ---@param timeoutMs? integer
 ---@return integer
 function TalonFX:configSelectedFeedbackSensor(feedbackDevice, pidIdx, timeoutMs)
-    pidIdx = pidIdx or 0
-    timeoutMs = timeoutMs or 0
+    pidIdx = pidIdx == nil and 0 or pidIdx
+    timeoutMs = timeoutMs == nil and 0 or timeoutMs
     feedbackDevice = AssertInt(feedbackDevice)
     pidIdx = AssertInt(pidIdx)
     timeoutMs = AssertInt(timeoutMs)
@@ -2673,7 +2686,7 @@ end
 ---@param position number
 ---@param countsPerRev? integer
 function CANSparkMax:setPosition(position, countsPerRev)
-    countsPerRev = countsPerRev or 42
+    countsPerRev = countsPerRev == nil and 42 or countsPerRev
     position = AssertNumber(position)
     countsPerRev = AssertInt(countsPerRev)
     ffi.C.CANSparkMax_SetPosition(self._this, position, countsPerRev)
@@ -2698,8 +2711,9 @@ end
 
 ---@param xSpeed number
 ---@param zRotation number
----@param squareInputs boolean
+---@param squareInputs? boolean
 function DifferentialDrive:arcadeDrive(xSpeed, zRotation, squareInputs)
+    squareInputs = squareInputs == nil and true or squareInputs
     xSpeed = AssertNumber(xSpeed)
     zRotation = AssertNumber(zRotation)
     ffi.C.DifferentialDrive_ArcadeDrive(self._this, xSpeed, zRotation, squareInputs)
@@ -2707,8 +2721,9 @@ end
 
 ---@param leftSpeed number
 ---@param rightSpeed number
----@param squareInputs boolean
+---@param squareInputs? boolean
 function DifferentialDrive:tankDrive(leftSpeed, rightSpeed, squareInputs)
+    squareInputs = squareInputs == nil and true or squareInputs
     leftSpeed = AssertNumber(leftSpeed)
     rightSpeed = AssertNumber(rightSpeed)
     ffi.C.DifferentialDrive_TankDrive(self._this, leftSpeed, rightSpeed, squareInputs)

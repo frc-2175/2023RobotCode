@@ -8,6 +8,6 @@ require("wpilib.bindings.enum")
 ---@field _this CameraServer
 CameraServer = {}
 
-function startAutomaticCapture()
+function CameraServer:startAutomaticCapture()
     ffi.C.StartAutomaticCapture()
 end

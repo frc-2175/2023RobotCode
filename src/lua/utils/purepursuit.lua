@@ -132,7 +132,7 @@ end
 ---@return number turnValue, number speed
 function PurePursuit:run()
 	-- pprint(self.path.triggerPoints)
-	self.purePursuitPID:updateTime(getFPGATimestamp())
+	self.purePursuitPID:updateTime(Timer:getFPGATimestamp())
 
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
 	local indexOfGoalPoint = findGoalPoint(self.path, indexOfClosestPoint)
@@ -169,11 +169,11 @@ function PurePursuit:run()
 	end
 
 	if speed ~= 0 then
-		putNumber("closest", indexOfClosestPoint)
-		putNumber("goal", indexOfGoalPoint)
-		putNumber("max", self.path.numberOfActualPoints)
-		putNumber("x", position.x)
-		putNumber("y", position.y)
+		SmartDashboard:putNumber("closest", indexOfClosestPoint)
+		SmartDashboard:putNumber("goal", indexOfGoalPoint)
+		SmartDashboard:putNumber("max", self.path.numberOfActualPoints)
+		SmartDashboard:putNumber("x", position.x)
+		SmartDashboard:putNumber("y", position.y)
 	end
 	return turnValue, speed
 end

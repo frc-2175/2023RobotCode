@@ -10,17 +10,15 @@ require("wpilib.dashboard")
 function Robot.robotInit()
 	leftStick = Joystick:new(0)
 	rightStick = Joystick:new(1)
-	---@type Joystick
 	gamepad = Joystick:new(2)
 
-	---@type AHRS
 	navx = AHRS:new(4)
 end
 
 function Robot.robotPeriodic()
 	
-	putNumber("position", Lyon:getPosition())
-	putNumber("testPosition", Lyon:getTestPosition())
+	SmartDashboard:putNumber("position", Lyon:getPosition())
+	SmartDashboard:putNumber("testPosition", Lyon:getTestPosition())
 
 	-- local pose1 = poseEst1:update()
 	
@@ -32,6 +30,7 @@ function Robot.robotPeriodic()
 end
 
 function Robot.autonomousInit()
+	print(SmartDashboard:getBooleanArray("strtest")[1])
 end
 
 function Robot.autonomousPeriodic()

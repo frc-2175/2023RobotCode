@@ -92,6 +92,12 @@ motors: {
 		kBrake: 1,
 	}
 
+	@enum NeutralMode: {
+		EEPROMSetting: 0,
+		Coast: 1,
+		Brake: 2
+	}
+
 	@enum
 	SparkMaxEncoderType: {
 		kNoSensor: 0,
@@ -160,7 +166,7 @@ motors: {
 		@alias("SetWithControlMode") Set(@cast("ctre::phoenix::motorcontrol::ControlMode") int mode, double value);
 		@alias("SetWithControlModeAndDemands") Set(@cast("ctre::phoenix::motorcontrol::ControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
 		NeutralOutput();
-		SetNeutralMode(@cast("ctre::phoenix::motorcontrol::NeutralMode") int neutralMode);
+		SetNeutralMode(@enum(NeutralMode) @cast("ctre::phoenix::motorcontrol::NeutralMode") int neutralMode);
 		SetSensorPhase(bool PhaseSensor);
 		SetInverted(@enum(CTREInvertType) @cast("ctre::phoenix::motorcontrol::InvertType") int invertType);
 		bool GetInverted();
@@ -361,8 +367,8 @@ motors: {
 			auto r = (frc::MotorController*)rightMotor;
 			return new frc::DifferentialDrive(*l, *r);
 		""";
-		ArcadeDrive(double xSpeed, double zRotation, bool squareInputs);
-		TankDrive(double leftSpeed, double rightSpeed, bool squareInputs);
+		ArcadeDrive(double xSpeed, double zRotation, @default(true) bool squareInputs);
+		TankDrive(double leftSpeed, double rightSpeed, @default(true) bool squareInputs);
 		@nolua @static CurvatureDriveIK(double xSpeed, double zRotation, bool allowTurnInPlace, double* leftSpeed, double* rightSpeed) """
 			auto speeds = frc::DifferentialDrive::CurvatureDriveIK(xSpeed, zRotation, allowTurnInPlace);
 			*leftSpeed = speeds.left;
@@ -386,7 +392,7 @@ solenoids: {
 
 	@class("frc::Solenoid")
 	Solenoid: {
-		@nolua @constructor new(@cast("frc::PneumaticsModuleType") int moduleType, int channel);
+		@constructor new(@value(0) @cast("frc::PneumaticsModuleType") int moduleType, int channel);
 		Set(bool on);
 		bool Get();
 		Toggle();
@@ -396,7 +402,7 @@ solenoids: {
 
 	@class("frc::DoubleSolenoid")
 	DoubleSolenoid: {
-		@nolua @constructor new(@cast("frc::PneumaticsModuleType") int moduleType, int forwardChannel, int reverseChannel);
+		@constructor new(@value(0) @cast("frc::PneumaticsModuleType") int moduleType, int forwardChannel, int reverseChannel);
 		Set(@enum(DoubleSolenoidValue) @cast("frc::DoubleSolenoid::Value") int value);
 		int Get();
 		Toggle();
@@ -525,13 +531,25 @@ robotbase: {
 dashboard: {
 	@class("frc::SmartDashboard")
 	SmartDashboard: {
-		@static PutNumber(@cast("std::string_view") const char* keyName, double value);
-		@static PutNumberArray(const char* keyName, double* value, size_t size) """	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));""";
-		@static PutString(@cast("std::string_view") const char* keyName, @cast("std::string_view")"const char*" value);
-		@static PutStringArray(const char* keyName, const char** value, size_t size) """	std::vector<std::string> strVec(value, value + size);
-	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));""";
+		@static bool ContainsKey(@cast("std::string_view") const char* key);
+		// @static void* GetKeys(int types);
+		@static SetPersistent(@cast("std::string_view") const char* key);
+		@static ClearPersistent(@cast("std::string_view") const char* key);
+		@static bool IsPersistent(@cast("std::string_view") const char* key);
 		@static PutBoolean(@cast("std::string_view") const char* keyName, bool value);
-		@static PutBooleanArray(const char* keyName, int* value, size_t size) """	frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));""";
+		@static bool GetBoolean(@cast("std::string_view") const char* keyName, @default(nil) bool defaultValue);
+		@static PutNumber(@cast("std::string_view") const char* keyName, double value);
+		@static double GetNumber(@cast("std::string_view") const char* keyName, @default(nil) double defaultValue);
+		@static PutString(@cast("std::string_view") const char* keyName, @cast("std::string_view") const char* value);
+		@static @nolua const char * GetString(const char* keyName, const char* defaultValue) """	return stdStringForLua(frc::SmartDashboard::GetString((std::string_view)keyName, (std::string_view)defaultValue));""";
+		@static @nolua PutBooleanArray(const char* keyName, int* value, size_t size) """	frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));""";
+		@static @nolua size_t GetBooleanArraySize(const char* keyName) """	return frc::SmartDashboard::GetBooleanArray(keyName, {}).size();""";
+		@static @nolua int* GetBooleanArray(const char* keyName, int* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize));""";
+		@static @nolua PutNumberArray(const char* keyName, double* value, size_t size) """	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));""";
+		@static @nolua size_t GetNumberArraySize(const char* keyName) """	return frc::SmartDashboard::GetNumberArray(keyName, {}).size();""";
+		@static @nolua double* GetNumberArray(const char* keyName, double* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetNumberArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();""";
+		@static @nolua PutStringArray(const char* keyName, const char** value, size_t size) """	std::vector<std::string> strVec(value, value + size);
+	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));""";
 		@static @nolua @alias(PutIntChooser) PutData(@cast("frc::SendableChooser<int>*") void* data);
 		@static @nolua @alias(PutField) PutData(@cast("frc::Field2d*") void* field);
 	}

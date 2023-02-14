@@ -44,16 +44,16 @@ function RobotBase:isTest()
 end
 
 ---@return integer
-function getRuntimeType()
+function RobotBase:getRuntimeType()
     return ffi.C.GetRuntimeType()
 end
 
 ---@return boolean
-function isReal()
+function RobotBase:isReal()
     return ffi.C.IsReal()
 end
 
 ---@return boolean
-function isSimulation()
+function RobotBase:isSimulation()
     return ffi.C.IsSimulation()
 end
