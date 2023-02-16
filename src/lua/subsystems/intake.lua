@@ -2,6 +2,7 @@ require("utils.teleopcoroutine")
 require("utils.math")
 require("wpilib.dashboard")
 
+local gripperSolonoid = Solonoid:new(0) --TODO: not a real device id
 local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
 ---@type SparkMaxRelativeEncoder
 local armEncoder = arm:getEncoder()
@@ -13,19 +14,25 @@ local testEncoder = testMotor:getEncoder()
 
 armPosition = 0
 
-
---add values
+--TODO: refine values
 local upSpeed = 0.2
 local midSpeed = 0
 local downSpeed = 0.2
 
---add values
 local upPosition = math.pi / 4
 local midPosition = 0
 local downPosition = -math.pi / 4
 -- so i wanna put smth here to just set various postions but idk the implementation so ima do it later
 
 Lyon = {}
+
+function grip:open()
+	gripperSolonoid:set(true)
+end
+
+function grip:close()
+	gripperSolonoid:set(false)
+end
 
 function Lyon:getMotorRawPosition()
 	return armEncoder:getPosition()
