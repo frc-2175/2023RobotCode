@@ -79,7 +79,7 @@ local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
 local armEncoder = arm:getEncoder()
 armEncoder:setPositionConversionFactor(1)
 local telescopingArm = CANSparkMax:new(0, SparkMaxMotorType.kBrushless) -- TODO: not a real device id
-local gripperSolonoid = Solonoid:new(0) --TODO: not a real device id
+local gripperSolenoid = Solenoid:new(0) --TODO: not a real device id
 
 --TODO: refine values
 local lyonUpSpeed = 0.2
@@ -185,12 +185,15 @@ function telescopingArm:out()
 	end
 end
 
-function gripperSolonoid:open()
-	gripperSolonoid:set(true)
+function gripperSolenoid
+:open()
+	gripperSolenoid
+:set(true)
 end
 
 function grip:close()
-	gripperSolonoid:set(false)
+	gripperSolenoid
+:set(false)
 end
 
 test("angleMotorOutputSpeed", function(t)
