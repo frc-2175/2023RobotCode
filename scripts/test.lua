@@ -125,18 +125,22 @@ end
 -------------------------------------------------------------------------------
 -- Create our actual global test module
 
+---@class T
+local T = {}
+
 -- TODO: Support sub-tests?
 local tests = {}
+
+---@param name string The name of the test.
+---@param func fun(t:T) The function to run for the test.
 function test(name, func)
     tests[name] = func
 end
 
-local t = {}
-
 --- Assert that a condition is true.
 ---@param value any The value to check - must be true for the test to pass.
----@param message string An optional message to show in case of failure.
-function t:assert(value, message)
+---@param message string? An optional message to show in case of failure.
+function T:assert(value, message)
     local errorPrefix = message and (message..": ") or ""
     assert(value, errorPrefix.."assertion failed!")
 end
@@ -144,8 +148,8 @@ end
 --- Assert that two values are equal (or in the case of numbers, very nearly equal).
 ---@param actual any The actual value produced by your code. Usually the result of a function call.
 ---@param expected any The value you expect to see.
----@param message string An optional message to show in case of failure.
-function t:assertEqual(actual, expected, message)
+---@param message string? An optional message to show in case of failure.
+function T:assertEqual(actual, expected, message)
     local errorPrefix = message and (message..": ") or ""
     local defaultMsg = errorPrefix.."values were not equal: expected "..tostring(expected)..", but got "..tostring(actual)
     
@@ -159,7 +163,9 @@ function t:assertEqual(actual, expected, message)
     end
 end
 
-function t:assertDoesError(func)
+---Asserts that the given function triggers an error when called.
+---@param func function
+function T:assertDoesError(func)
     if pcall(func) then
         error('expected function to trigger an error, but it did not', 2)
     end
@@ -193,7 +199,7 @@ function runTests()
         io.stdout = fakeStdout
         io.stderr = fakeStderr
         local ok, err = xpcall(function()
-            test.func(t)
+            test.func(T)
         end, debug.traceback)
         io.stdout = realStdout
         io.stderr = realStderr

@@ -16,17 +16,8 @@ function Robot.robotInit()
 end
 
 function Robot.robotPeriodic()
-	
-	SmartDashboard:putNumber("position", Lyon:getPosition())
+	SmartDashboard:putNumber("position", Lyon:getAngle())
 	SmartDashboard:putNumber("testPosition", Lyon:getTestPosition())
-
-	-- local pose1 = poseEst1:update()
-	
-	-- if pose1 ~= nil then
-	-- 	field:setRobotPose(pose1.position.x, pose1.position.y, pose1.rotation.z)
-	-- 	putField(field)
-	-- end
-	
 end
 
 function Robot.autonomousInit()

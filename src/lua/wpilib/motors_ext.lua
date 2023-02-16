@@ -91,7 +91,7 @@ function SparkMaxRelativeEncoder:wrap(cppEncoder)
 end
 
 ---@param countsPerRev? integer
----@return any
+---@return SparkMaxRelativeEncoder
 function CANSparkMax:getEncoder(countsPerRev)
     countsPerRev = countsPerRev or 42
     countsPerRev = AssertInt(countsPerRev)
