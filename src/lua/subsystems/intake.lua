@@ -2,6 +2,7 @@ require("utils.teleopcoroutine")
 require("utils.math")
 require("wpilib.dashboard")
 
+local telescopingArm = CANSparkMax:new(0, SparkMaxMotorType.kBrushless) -- TODO: not a real device id
 local gripperSolonoid = Solonoid:new(0) --TODO: not a real device id
 local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
 ---@type SparkMaxRelativeEncoder
@@ -12,21 +13,40 @@ local testMotor = CANSparkMax:new(20, SparkMaxMotorType.kBrushless)
 ---@type SparkMaxRelativeEncoder
 local testEncoder = testMotor:getEncoder()
 
+
+--Note Telescoping Arm has been abrieviated to ta.
+--TODO: refine values
+local taOutSpeed = 0.2
+local taMidSpeed = 0
+local taInSpeed = 0.2
+--TODO: refine values or figure out what they actually are
+local taOutPosition = 1
+local taMidPosition = 0
+local taInPosition = -1
+
 armPosition = 0
 
 --TODO: refine values
-local upSpeed = 0.2
-local midSpeed = 0
-local downSpeed = 0.2
+local lyonUpSpeed = 0.2
+local lyonMidSpeed = 0
+local lyonDownSpeed = 0.2
 
-local upPosition = math.pi / 4
-local midPosition = 0
-local downPosition = -math.pi / 4
+local lyonUpPosition = math.pi / 4
+local lyonMidPosition = 0
+local lyonDownPosition = -math.pi / 4
 -- so i wanna put smth here to just set various postions but idk the implementation so ima do it later
 
 Lyon = {}
 
-function grip:open()
+function telescopingArm:out()
+	if self:getPosition() < taOutPosition then
+		telescopingArm:set(taOutSpeed)
+	else
+		telescopingArm:set(0)
+	end
+end
+
+function gripperSolonoid:open()
 	gripperSolonoid:set(true)
 end
 
@@ -55,16 +75,16 @@ function Lyon:periodic()
 end
 
 function Lyon:up()
-	if self:getPosition() < upPosition then
-		arm:set(upSpeed)
+	if self:getPosition() < lyonUpPosition then
+		arm:set(lyonUpSpeed)
 	else
 		arm:set(0)
 	end
 end
 
 function Lyon:down()
-	if self:getPosition() > downPosition then
-		arm:set(-downSpeed)
+	if self:getPosition() > lyonDownPosition then
+		arm:set(-lyonDownSpeed)
 	else
 		arm:set(0)
 	end
