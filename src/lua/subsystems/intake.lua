@@ -95,14 +95,19 @@ local lyonDownPosition = -math.pi / 4
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
 local function extensionToGround(angle)
-	error("not implemented")
+	local TO_GROUND = 40 / cos(angle)
 end
 
 ---Computes the maximum length in inches to which the arm may extend.
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
 local function maxSafeExtension(angle)
-	error("not implemented")
+	local MAX_SAFE
+	if angle > 30 then
+		MAX_SAFE = 40 / cos(angle)
+	else
+		MAX_SAFE = 0
+	end
 end
 
 ---Computes the output speed of the angle motor, respecting safety constraints.
