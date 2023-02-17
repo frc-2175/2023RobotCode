@@ -70,7 +70,7 @@ end
 
 -- call this every loop
 ---@return number x, number y, number rotationRad
-function DDPE:Update(angleRad, leftDistance, rightDistance);
+function DDPE:Update(angleRad, leftDistance, rightDistance)
 	ffi.C.DDPE_Update(self._this, angleRad, leftDistance, rightDistance)
 
 	return self:GetEstimatedPosition()

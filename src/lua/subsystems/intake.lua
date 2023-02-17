@@ -91,7 +91,11 @@ local targetAngle
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
 local function extensionToGround(angle)
-	return 40 / math.cos(angle)
+	if math.cos(angle) == 0 then
+		return Lyon.MAX_EXTENSION
+	end
+
+	return math.min(40 / math.cos(angle), Lyon.MAX_EXTENSION)
 end
 
 ---Computes the maximum length in inches to which the arm may extend.
@@ -101,7 +105,7 @@ local function maxSafeExtension(angle)
 	local MAX_SAFE = Lyon.MIN_EXTENSION + 2
 
 	if math.abs(angle) > OUTSIDE_ANGLE then -- if outside frame
-		MAX_SAFE = 40 / math.cos(angle)
+		MAX_SAFE = extensionToGround(angle)
 	end
 
 	return MAX_SAFE
@@ -145,7 +149,7 @@ local function teleMotorOutputSpeed(target, extension, angle)
 	local outSpeed = 0
 
 	if math.abs(target - extension) > 1 then
-		outSpeed = -sign(target - extension) * TA_MOTOR_MAX_SPEED
+		outSpeed = sign(target - extension) * TA_MOTOR_MAX_SPEED
 	end
 
 	return outSpeed
