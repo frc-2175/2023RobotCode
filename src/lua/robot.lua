@@ -31,15 +31,5 @@ function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
 	Drivetrain:drive(squareInput(leftStick:getY()), squareInput(rightStick:getX()))
-	if gamepad:getButtonHeld(XboxButton.A) then
-		Lyon:up()
-	elseif gamepad:getButtonHeld(XboxButton.Y) then 
-		Lyon:down()	
-	elseif gamepad:getButtonHeld(XboxButton.B) then
-		Lyon:zero()
-	else
-		Lyon:stop()
-	end
-	Lyon:periodic()
 end
 

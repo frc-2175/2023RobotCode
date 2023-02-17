@@ -76,9 +76,12 @@ local TA_OUT_POSITION = 1
 local TA_IN_POSITION = -1
 
 local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
+---@type SparkMaxRelativeEncoder
 local armEncoder = arm:getEncoder()
 armEncoder:setPositionConversionFactor(1)
 local telescopingArm = CANSparkMax:new(0, SparkMaxMotorType.kBrushless) -- TODO: not a real device id
+---@type SparkMaxRelativeEncoder
+local telescopingEncoder = telescopingArm:getEncoder()
 local gripperSolenoid = Solenoid:new(0) --TODO: not a real device id
 
 --TODO: refine values
@@ -91,11 +94,14 @@ local lyonMidPosition = 0
 local lyonDownPosition = -math.pi / 4
 -- so i wanna put smth here to just set various postions but idk the implementation so ima do it later
 
+local targetExtension
+local targetAngle
+
 ---Computes how far the arm should extend in order to reach the ground. Formula: 40" / cos(angle).
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
 local function extensionToGround(angle)
-	local TO_GROUND = 40 / cos(angle)
+	return 40 / math.cos(angle)
 end
 
 ---Computes the maximum length in inches to which the arm may extend.
@@ -104,19 +110,37 @@ end
 local function maxSafeExtension(angle)
 	local MAX_SAFE
 	if angle > 30 then
-		MAX_SAFE = 40 / cos(angle)
+		MAX_SAFE = 40 / math.cos(angle)
 	else
 		MAX_SAFE = 0
 	end
+	return MAX_SAFE
 end
 
 ---Computes the output speed of the angle motor, respecting safety constraints.
----@param targetAngle number
+---@param target number
 ---@param angle number
 ---@param extension number
 ---@return number
-local function angleMotorOutputSpeed(targetAngle, angle, extension)
-	error("not implemented")
+local function angleMotorOutputSpeed(target, angle, extension)
+	local armSpeed = 0
+	if math.abs(target - angle) > 0.05 then -- 0.05 radians is roughly 3 degrees
+		armSpeed = -sign(target - angle) * ANGLE_MOTOR_MAX_SPEED
+	end
+
+	if Lyon:getAngle() >= 1.8 then
+		armSpeed = math.min(armSpeed, 0)
+	elseif Lyon:getAngle() <= -1.8 then
+		armSpeed = math.max(armSpeed, 0)
+	end
+
+	if Lyon:getAngle() <= OUTSIDE_ANGLE and Lyon:getAngle() > 0 then
+		armSpeed = math.max(armSpeed, 0)
+	elseif Lyon:getAngle() >= -OUTSIDE_ANGLE and Lyon:getAngle() < 0 then
+		armSpeed = math.min(armSpeed, 0)
+	end
+
+	return armSpeed
 end
 
 ---Gets the raw encoder position from the arm angle motor. Unit: revolutions.
@@ -128,7 +152,7 @@ end
 ---Gets the raw encoder position from the telescoping arm motor. Unit: revolutions.
 ---@return number
 local function getExtensionMotorRawPosition()
-	error("not implemented")
+	return telescopingEncoder:getPosition()
 end
 
 -- Everything below this point is public and must be safe to call at all times.
@@ -142,58 +166,57 @@ function Lyon:periodic()
 	SmartDashboard:putNumber("LyonPos", Lyon:getAngle())
 	SmartDashboard:putNumber("LyonRawPos", getAngleMotorRawPosition())
 	SmartDashboard:putNumber("LyonOutput", arm:get())
-
+	local armSpeed
 	-- TODO: Drive all the motors
+
+	armSpeed = angleMotorOutputSpeed(targetAngle, Lyon:getAngle(), targetExtension)
+
+
+	arm:set(armSpeed)
+
+	
+	local extension = targetExtension
+
+	if Lyon:getExtension() >= 35 and (0 <= Lyon:getAngle() <= OUTSIDE_ANGLE) then
+		armSpeed = math.max(armSpeed, 0)
+		telescopingArm = math.max(TA_MOTOR_MAX_SPEED, 0)
+	end
+
+	if Lyon:getExtension() >= 35 and (-OUTSIDE_ANGLE <= Lyon:getAngle() <= 0) then
+		armSpeed = math.min(armSpeed, 0)
+		telescopingArm = math.min(TA_MOTOR_MAX_SPEED, 0)
+	end
+
 end
 
 ---Gets the angle of the arm, in radians. Positive angle is toward the front of the robot; negative angle is toward the back.
 ---@return number
 function Lyon:getAngle()
-	-- return armEncoder:getPosition() * (2.5 * 2 * math.pi) / (50 * 13)
 	return armEncoder:getPosition() * (math.pi / 155.4955)
 end
 
 ---Gets the length of the arm in inches, from the center axle to the tip of the gripper.
 ---@return number
 function Lyon:getExtension()
-	error("not implemented")
+	return (telescopingEncoder:getPosition() / 18) * math.pi + 35
 end
 
 ---Sets the desired arm angle, in radians.
----@param angle number
-function Lyon:setTargetAngle(angle)
-	error("not implemented")
+---@param target number
+function Lyon:setTargetAngle(target)
+	targetAngle = target
 end
 
 ---Sets the desired arm extension, in inches. This is the distance from the axle to the tip of the gripper.
----@param extension number
-function Lyon:setTargetExtension(extension)
-	error("not implemented")
+---@param target number
+function Lyon:setTargetExtension(target)
+	targetExtension = target
 end
 
 ---Opens or closes the gripper.
 ---@param doGrip boolean
-function Lyon:grip(doGrip)
-	error("not implemented")
-end
-
-function telescopingArm:out()
-	if self:getPosition() < TA_OUT_POSITION then
-		telescopingArm:set(TA_MOTOR_MAX_SPEED)
-	else
-		telescopingArm:set(0)
-	end
-end
-
-function gripperSolenoid
-:open()
-	gripperSolenoid
-:set(true)
-end
-
-function grip:close()
-	gripperSolenoid
-:set(false)
+function Lyon:gripperSolenoid(doGrip)
+	gripperSolenoid:set(doGrip)
 end
 
 test("angleMotorOutputSpeed", function(t)
