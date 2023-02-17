@@ -97,10 +97,11 @@ function getTrapezoidSpeed(
     rampDownDistance,
     currentDistance
 )
+	-- if the ramp up/down distances are too great, simply lerp from start to finish instead of ramping
 	if rampDownDistance + rampUpDistance > totalDistance then
 		if currentDistance < 0 then
 			return startSpeed
-		elseif currentDistance < totalDistance then
+		elseif totalDistance < currentDistance then
 			return endSpeed
 		end
 

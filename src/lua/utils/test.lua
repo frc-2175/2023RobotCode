@@ -43,6 +43,7 @@ test(
 		t:assertEqual(getTrapezoidSpeed(0.2, 0.8, 0.4, 3, 1, 2, 3), 0.4)
 		t:assertEqual(getTrapezoidSpeed(0.2, 0.8, 0.4, 3, 1, 2, 4), 0.4)
 
+		-- ramp up/down distances are greater than the total distance
 		t:assertEqual(getTrapezoidSpeed(0.2, 0.8, 0.4, 3, 2, 2, -1), 0.2)
 		t:assertEqual(getTrapezoidSpeed(0.2, 0.8, 0.4, 3, 2, 2, 0), 0.2)
 		t:assertEqual(getTrapezoidSpeed(0.2, 0.8, 0.4, 3, 2, 2, 1.5), 0.3)

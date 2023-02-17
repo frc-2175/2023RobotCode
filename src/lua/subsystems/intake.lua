@@ -32,8 +32,8 @@ The zero angle on Lyon is hanging straight down. Positive angle raises the arm
 toward the front of the bot. Negative angle raises the arm toward the back of
 the bot.
 
-Any angle whose magnitude (absolute value) is less than THRESH is considered
-inside the robot. Angles with magnitude greater than that threshold
+Any angle whose magnitude (absolute value) is less than OUTSIDE_ANGLE is
+considered inside the robot. Angles with magnitude greater than that threshold
 are outside.
 
 -------------------------------------------------------------------------------
@@ -55,6 +55,7 @@ CONSTRAINTS
 Lyon must always respect the following constraints:
 
 - The arm must never extend beyond ground level. (See extensionToGround.)
+- The arm must never extend beyond 57.875in.
 - When the arm angle is between -OUTSIDE_ANGLE and OUTSIDE_ANGLE, the arm must
   be fully retracted.
 	- (There will be a small exception to this rule that we will handle later.)
@@ -67,7 +68,6 @@ Lyon must always respect the following constraints:
 --]]
 
 local OUTSIDE_ANGLE = 0.6
-local AXLE_HEIGHT = 40
 local ANGLE_MOTOR_MAX_SPEED = 0.2
 local TA_MOTOR_MAX_SPEED = 0.2
 
@@ -98,7 +98,7 @@ end
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
 local function maxSafeExtension(angle)
-	local MAX_SAFE = 35
+	local MAX_SAFE = Lyon.MIN_EXTENSION + 2
 
 	if math.abs(angle) > OUTSIDE_ANGLE then -- if outside frame
 		MAX_SAFE = 40 / math.cos(angle)
@@ -167,8 +167,11 @@ end
 
 Lyon = {}
 
+Lyon.AXLE_HEIGHT = 40
 Lyon.NODE_ANGLE_MID = 1.57
 Lyon.NODE_ANGLE_HIGH = 1.78
+Lyon.MIN_EXTENSION = 33
+Lyon.MAX_EXTENSION = 57.875
 
 function Lyon:periodic()
 	SmartDashboard:putNumber("LyonPos", Lyon:getAngle())
@@ -214,6 +217,9 @@ function Lyon:gripperSolenoid(doGrip)
 end
 
 test("angleMotorOutputSpeed", function(t)
-	t:assert(angleMotorOutputSpeed(math.pi/2, 0, 0) > 0)
-	t:assert(angleMotorOutputSpeed(-math.pi/2, 0, 0) < 0)
+	-- hanging straight down
+	t:assert(angleMotorOutputSpeed(math.pi/2, 0, 0) > 0, "straight down, not extended, swing forward")
+	t:assert(angleMotorOutputSpeed(-math.pi/2, 0, 0) < 0, "straight down, not extended, swing backward")
+	t:assertEqual(extensionToGround(0), Lyon.AXLE_HEIGHT)
+	t:assert(maxSafeExtension(0) < Lyon.MIN_EXTENSION + 3)
 end)
