@@ -115,7 +115,7 @@ end
 local function angleMotorOutputSpeed(target, angle, extension)
 	local armSpeed = 0
 	if math.abs(target - angle) > 0.05 then -- 0.05 radians is roughly 3 degrees
-		armSpeed = -sign(target - angle) * ANGLE_MOTOR_MAX_SPEED
+		armSpeed = sign(target - angle) * ANGLE_MOTOR_MAX_SPEED
 	end
 
 	if angle >= 1.8 then

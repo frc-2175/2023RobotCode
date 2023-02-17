@@ -4,7 +4,7 @@ local ffi = require("ffi")
 ffi.cdef[[
 void *DDPE_new(double angleRad, double leftDistance, double rightDistance, double x, double y, double rotationRad);
 void DDPE_SetVisionMeasurementStdDevs(void *_this, double x, double y, double headingRad);
-void DDPE_ResetPosition(void *_this, double angleRad, double leftDistance, double rightDistance, double double x, double y, double rotationRad);
+void DDPE_ResetPosition(void *_this, double angleRad, double leftDistance, double rightDistance, double x, double y, double rotationRad);
 double DDPE_GetEstimatedX(void *_this);
 double DDPE_GetEstimatedY(void *_this);
 double DDPE_GetEstimatedRotationRad(void *_this);

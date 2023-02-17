@@ -68,7 +68,7 @@ function AssertEnumValue(type, value)
 		for _, name in ipairs(type._names) do
 			io.stderr:write("      " .. tostring(type) .. "." .. name .. "\n")
 		end
-		error(msg, 2)
+		error(msg, 3)
 	end
 	return value._value
 end
