@@ -216,10 +216,27 @@ function Lyon:gripperSolenoid(doGrip)
 	gripperSolenoid:set(doGrip)
 end
 
-test("angleMotorOutputSpeed", function(t)
+test("Lyon safety constraints", function(t)
 	-- hanging straight down
 	t:assert(angleMotorOutputSpeed(math.pi/2, 0, 0) > 0, "straight down, not extended, swing forward")
 	t:assert(angleMotorOutputSpeed(-math.pi/2, 0, 0) < 0, "straight down, not extended, swing backward")
 	t:assertEqual(extensionToGround(0), Lyon.AXLE_HEIGHT)
-	t:assert(maxSafeExtension(0) < Lyon.MIN_EXTENSION + 3)
+	t:assert(maxSafeExtension(0) < Lyon.MIN_EXTENSION + 3, "safe extension when inside the robot")
+	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MIN_EXTENSION + 2, 0) <= 0, "retract when inside the robot")
+
+	-- straight forward
+	t:assert(angleMotorOutputSpeed(math.pi, math.pi/2, 0) > 0, "straight forward, not extended, swing forward")
+	t:assert(angleMotorOutputSpeed(-math.pi/2, math.pi/2, 0) < 0, "straight forward, not extended, swing backward")
+	t:assert(extensionToGround(math.pi/2) < 100, "no crazy extensionToGround (forward)")
+	t:assertEqual(maxSafeExtension(math.pi/2), Lyon.MAX_EXTENSION, "safe extension when outside the robot, forward")
+	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MAX_EXTENSION, math.pi/2) <= 0, "retract when outside the robot, forward")
+	t:assert(teleMotorOutputSpeed(Lyon.MAX_EXTENSION, Lyon.MIN_EXTENSION, math.pi/2) >= 0, "extend when outside the robot, forward")
+
+	-- straight backward
+	t:assert(angleMotorOutputSpeed(math.pi/2, -math.pi/2, 0) > 0, "straight backward, not extended, swing forward")
+	t:assert(angleMotorOutputSpeed(-math.pi, -math.pi/2, 0) < 0, "straight backward, not extended, swing backward")
+	t:assert(extensionToGround(-math.pi/2) < 100, "no crazy extensionToGround (backward)")
+	t:assertEqual(maxSafeExtension(-math.pi/2), Lyon.MAX_EXTENSION, "safe extension when outside the robot, backward")
+	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MAX_EXTENSION, -math.pi/2) <= 0, "retract when outside the robot, backward")
+	t:assert(teleMotorOutputSpeed(Lyon.MAX_EXTENSION, Lyon.MIN_EXTENSION, -math.pi/2) >= 0, "extend when outside the robot, backward")
 end)
