@@ -146,4 +146,5 @@
 		"lowercase-global"
 	],
 	"C_Cpp.errorSquiggles": "disabled",
+	"Lua.runtime.version": "LuaJIT",
 }

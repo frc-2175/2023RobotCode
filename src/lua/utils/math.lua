@@ -121,3 +121,14 @@ function getTrapezoidSpeed(
 		return endSpeed
 	end
 end
+
+---Computes a point along a cubic Bezier curve.
+---@param t number A value from 0 to 1 indicating how far along the path to calculate
+---@param p1 Vector
+---@param p2 Vector
+---@param p3 Vector
+---@param p4 Vector
+---@return Vector
+function bezier(t, p1, p2, p3, p4)
+	error("not yet implemented")
+end

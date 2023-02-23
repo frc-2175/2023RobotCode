@@ -31,9 +31,9 @@ function findClosestPoint(path, fieldPosition, previousClosestPoint)
 	startIndex = math.max(startIndex, 1)
 	endIndex = math.min(endIndex, path.numberOfActualPoints) -- closest point cannot be in the extra points
 
-	local minDistance = (path.path[1] - fieldPosition):length() -- distance to closest point so far
+	local minDistance = (path.points[1] - fieldPosition):length() -- distance to closest point so far
 	for i = startIndex, endIndex do -- check through each point in list, and ...
-		local distanceToPoint = (path.path[i] - fieldPosition):length()
+		local distanceToPoint = (path.points[i] - fieldPosition):length()
 		if distanceToPoint <= minDistance then
 			indexOfClosestPoint = i
 			minDistance = distanceToPoint -- if we find a closer one, that becomes the new minDist
@@ -47,7 +47,7 @@ end
 ---@return integer goalPoint
 function findGoalPoint(path, closestPoint)
 	closestPoint = closestPoint or 1 -- default 1
-	return math.min(closestPoint + LOOKAHEAD_DISTANCE, #path.path) -- # is length operator
+	return math.min(closestPoint + LOOKAHEAD_DISTANCE, #path.points) -- # is length operator
 	-- in case we are aiming PAST the end of the path, just aim at the end instead
 end
 
@@ -136,7 +136,7 @@ function PurePursuit:run()
 
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
 	local indexOfGoalPoint = findGoalPoint(self.path, indexOfClosestPoint)
-	local goalPoint = (self.path.path[indexOfGoalPoint] - position):rotate(math.rad(navx:getAngle()))
+	local goalPoint = (self.path.points[indexOfGoalPoint] - position):rotate(math.rad(navx:getAngle()))
 	local angle = getAngleToPoint(goalPoint)
 	
 	if self.isBackwards then
@@ -155,8 +155,8 @@ function PurePursuit:run()
 
 	for i = self.previousClosestPoint - 1, indexOfClosestPoint do
 		print(i)
-		if self.path.triggerPoints[i] ~= nil then
-			self.triggerFuncs[self.path.triggerPoints[i]]()
+		if self.path.eventFuncs[i] ~= nil then
+			self.triggerFuncs[self.path.eventFuncs[i]]()
 		end
 	end
 
