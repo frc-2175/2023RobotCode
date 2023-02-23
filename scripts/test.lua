@@ -153,7 +153,17 @@ function T:assertEqual(actual, expected, message)
     local errorPrefix = message and (message..": ") or ""
     local defaultMsg = errorPrefix.."values were not equal: expected "..tostring(expected)..", but got "..tostring(actual)
     
-    if type(actual) == "table" and type(expected) == "table" then
+	local function hasMetaEq(thing)
+		local meta = getmetatable(thing)
+		if not meta then
+			return false
+		end
+		return meta.__eq ~= nil
+	end
+
+	if hasMetaEq(actual) and hasMetaEq(expected) then
+		assert(actual == expected, defaultMsg)
+    elseif type(actual) == "table" and type(expected) == "table" then
         assert(#actual == #expected, errorPrefix.."tables were not the same size")
         assert(table.unpack(actual) == table.unpack(expected), errorPrefix.."values were not equal: expected "..tostring(expected)..", but got "..tostring(actual))
     elseif type(actual) == "number" and type(expected) == "number" then

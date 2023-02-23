@@ -1,3 +1,5 @@
+METERS2INCHES = 39.37008
+
 --- Linearly interpolate (blend) from one value to another. `a` and `b` are
 --- the two end values, and `t` is the blend factor between them. As `t` goes
 --- from 0 to 1, the result goes from `a` to `b`.
@@ -6,10 +8,11 @@
 ---  - `lerp(2, 10, 0)` is `2`.
 ---  - `lerp(2, 10, 1)` is `10`.
 ---  - `lerp(2, 10, 0.5)` is `6`, because `6` is halfway from `2` to `10`.
----@param a any
----@param b any
+---@generic T: number|Vector
+---@param a T
+---@param b T
 ---@param t number
----@return number blendedValue
+---@return T blendedValue
 function lerp(a, b, t)
 	return (1 - t) * a + t * b
 end
@@ -130,5 +133,33 @@ end
 ---@param p4 Vector
 ---@return Vector
 function bezier(t, p1, p2, p3, p4)
-	error("not yet implemented")
+	local q1 = lerp(p1, p2, t)
+	local q2 = lerp(p2, p3, t)
+	local q3 = lerp(p3, p4, t)
+
+	local r1 = lerp(q1, q2, t)
+	local r2 = lerp(q2, q3, t)
+
+	return lerp(r1, r2, t)
 end
+
+---bezier(0.1, ...whatever)
+
+test("lerp", function(t)
+	t:assert(lerp(2, 10, 0) == 2)
+	t:assert(lerp(2, 10, 0.5) == 6)
+	t:assert(lerp(2, 10, 1) == 10)
+end)
+
+test("bezier", function(t)
+	local p1 = Vector:new(1, 1)
+	local p2 = Vector:new(1, 2)
+	local p3 = Vector:new(2, 2)
+	local p4 = Vector:new(2, 1)
+
+	t:assertEqual(bezier(0, p1, p2, p3, p4), p1)
+	t:assertEqual(bezier(0.25, p1, p2, p3, p4), Vector:new(37/32, 25/16))
+	t:assertEqual(bezier(0.5, p1, p2, p3, p4), Vector:new(3/2, 7/4))
+	t:assertEqual(bezier(0.75, p1, p2, p3, p4), Vector:new(59/32, 25/16))
+	t:assertEqual(bezier(1, p1, p2, p3, p4), p4)
+end)

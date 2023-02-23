@@ -5,14 +5,6 @@ local pprint = require("utils.pprint")
 -- math.lua tests
 
 test(
-	"lerp", function(t)
-		t:assert(lerp(2, 10, 0) == 2)
-		t:assert(lerp(2, 10, 0.5) == 6)
-		t:assert(lerp(2, 10, 1) == 10)
-	end
-)
-
-test(
 	"squareInput", function(t)
 		t:assertEqual(squareInput(-1), -1)
 		t:assertEqual(squareInput(-0.5), -0.25)
@@ -138,20 +130,5 @@ test(
 		t:assertEqual(ramp:ramp(1), -0.1)
 		t:assertEqual(ramp:ramp(0), 0.0)
 		t:assertEqual(ramp:ramp(0), 0.0)
-	end
-)
-
-test(
-	"Vector Tests :D", function(t)
-		t:assertEqual(Vector:new(1, 2) + Vector:new(3, 4), Vector:new(4, 6))
-		t:assertEqual(Vector:new(1, 2) + Vector:new(3, 4), Vector:new(-2, -2))
-		t:assertEqual(Vector:new(1, 2) * 3, Vector:new(3, 6))
-		t:assertEqual(3 * Vector:new(1, 2), Vector:new(3, 6))
-		t:assertEqual(Vector:new(4, 6) / 2, Vector:new(2, 3))
-		t:assertEqual(-Vector:new(1, 2), Vector:new(-1, -2))
-		t:assertEqual(Vector:new(3, 4) == Vector:new(3, 4), true)
-		t:assertEqual(Vector:new(3, 4):length(), 5)
-		t:assertEqual(Vector:new(3, 4):normalized(), Vector:new(0.6, 0.8))
-		t:assertEqual(Vector:new(1, 2):rotate(math.pi / 2), Vector:new(-2, 1))
 	end
 )

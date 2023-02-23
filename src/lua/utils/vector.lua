@@ -105,3 +105,22 @@ end
 function Vector:dot(vec)
 	return self.x * vec.x + self.y * vec.y
 end
+
+test("Vector Tests :D", function(t)
+	t:assertEqual(Vector:new(1, 2) + Vector:new(3, 4), Vector:new(4, 6))
+	t:assertEqual(Vector:new(1, 2) - Vector:new(3, 4), Vector:new(-2, -2))
+	t:assertEqual(Vector:new(1, 2) * 3, Vector:new(3, 6))
+	t:assertEqual(3 * Vector:new(1, 2), Vector:new(3, 6))
+	t:assertEqual(Vector:new(4, 6) / 2, Vector:new(2, 3))
+	t:assertEqual(-Vector:new(1, 2), Vector:new(-1, -2))
+	t:assertEqual(Vector:new(3, 4) == Vector:new(3, 4), true)
+	t:assertEqual(Vector:new(3, 4):length(), 5)
+	t:assertEqual(Vector:new(3, 4):normalized(), Vector:new(0.6, 0.8))
+
+	-- strict equality is not what we want for this test
+	do
+		local actual = Vector:new(1, 2):rotate(math.pi / 2)
+		t:assertEqual(actual.x, -2)
+		t:assertEqual(actual.y, 1)
+	end
+end)
