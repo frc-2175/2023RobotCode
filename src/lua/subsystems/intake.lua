@@ -67,31 +67,36 @@ Lyon must always respect the following constraints:
 
 --]]
 
+Lyon = {}
+
+Lyon.AXLE_HEIGHT = 40
+Lyon.NODE_ANGLE_MID = 1.57
+Lyon.NODE_ANGLE_HIGH = 1.78
+Lyon.MIN_EXTENSION = 35
+Lyon.MAX_EXTENSION = 57.875
+
 local OUTSIDE_ANGLE = 0.6
 local ANGLE_MOTOR_MAX_SPEED = 0.2
-local TA_MOTOR_MAX_SPEED = 0.2
+local TA_MOTOR_MAX_SPEED = 0.5
 
---TODO: refine values or figure out what they actually are
-local TA_OUT_POSITION = 1
-local TA_IN_POSITION = -1
-
-local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
+local arm = CANSparkMax:new(20, SparkMaxMotorType.kBrushless)
 ---@type SparkMaxRelativeEncoder
 local armEncoder = arm:getEncoder()
 armEncoder:setPositionConversionFactor(1)
-local telescopingArm = CANSparkMax:new(0, SparkMaxMotorType.kBrushless) -- TODO: not a real device id
+local telescopingArm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless) -- TODO: not a real device id
+telescopingArm:setInverted(true)
 ---@type SparkMaxRelativeEncoder
 local telescopingEncoder = telescopingArm:getEncoder()
-local gripperSolenoid = Solenoid:new(0) --TODO: not a real device id
+gripperSolenoid = DoubleSolenoid:new(0, 1) --TODO: not a real device id
 
-local targetExtension
-local targetAngle
+local targetExtension = Lyon.MIN_EXTENSION
+local targetAngle = 0
 
 ---Computes how far the arm should extend in order to reach the ground. Formula: 40" / cos(angle).
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
 local function extensionToGround(angle)
-	if math.cos(angle) == 0 then
+	if math.cos(angle) <= 0 then
 		return Lyon.MAX_EXTENSION
 	end
 
@@ -128,12 +133,18 @@ local function angleMotorOutputSpeed(target, angle, extension)
 		armSpeed = math.max(armSpeed, 0)
 	end
 
-	if extension > 35 then
-		if angle <= OUTSIDE_ANGLE and angle > 0 then
+	if extension > Lyon.MIN_EXTENSION + 2 then
+		if 0 < angle and  angle <= OUTSIDE_ANGLE then
 			armSpeed = math.max(armSpeed, 0)
-		elseif angle >= -OUTSIDE_ANGLE and angle < 0 then
+		elseif -OUTSIDE_ANGLE <= angle and angle < 0 then
 			armSpeed = math.min(armSpeed, 0)
 		end
+	end
+
+	-- temporary
+	
+	if angle < 0.1 then
+		armSpeed = math.max(armSpeed, 0)
 	end
 
 	return armSpeed
@@ -169,25 +180,21 @@ end
 
 -- Everything below this point is public and must be safe to call at all times.
 
-Lyon = {}
-
-Lyon.AXLE_HEIGHT = 40
-Lyon.NODE_ANGLE_MID = 1.57
-Lyon.NODE_ANGLE_HIGH = 1.78
-Lyon.MIN_EXTENSION = 33
-Lyon.MAX_EXTENSION = 57.875
-
 function Lyon:periodic()
-	SmartDashboard:putNumber("LyonPos", Lyon:getAngle())
-	SmartDashboard:putNumber("LyonRawPos", getAngleMotorRawPosition())
-	SmartDashboard:putNumber("LyonOutput", arm:get())
+	SmartDashboard:putNumber("LyonAngleTarget", targetAngle)
+	SmartDashboard:putNumber("LyonTeleTarget", targetExtension)
+	SmartDashboard:putNumber("LyonAnglePos", Lyon:getAngle())
+	SmartDashboard:putNumber("LyonRawAnglePos", getAngleMotorRawPosition())
+	SmartDashboard:putNumber("LyonTelePos", Lyon:getExtension())
+	SmartDashboard:putNumber("LyonRawTelePos", getExtensionMotorRawPosition())
 
 	local armSpeed = angleMotorOutputSpeed(targetAngle, Lyon:getAngle(), Lyon:getExtension())
-
+	SmartDashboard:putNumber("LyonArmSpeed", armSpeed)
 	arm:set(armSpeed)
 	
 	local teleSpeed = teleMotorOutputSpeed(targetExtension, Lyon:getExtension(), Lyon:getAngle())
-
+	SmartDashboard:putNumber("LyonTeleSpeed", teleSpeed)
+	telescopingArm:set(teleSpeed)
 end
 
 ---Gets the angle of the arm, in radians. Positive angle is toward the front of the robot; negative angle is toward the back.
@@ -199,7 +206,7 @@ end
 ---Gets the length of the arm in inches, from the center axle to the tip of the gripper.
 ---@return number
 function Lyon:getExtension()
-	return (telescopingEncoder:getPosition() / 18) * math.pi + 33
+	return (telescopingEncoder:getPosition() / 18) * math.pi + Lyon.MIN_EXTENSION
 end
 
 ---Sets the desired arm angle, in radians.
@@ -215,7 +222,6 @@ function Lyon:setTargetExtension(target)
 end
 
 ---Opens or closes the gripper.
----@param doGrip boolean
 function Lyon:gripperSolenoid(doGrip)
 	gripperSolenoid:set(doGrip)
 end

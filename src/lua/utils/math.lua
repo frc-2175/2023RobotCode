@@ -39,6 +39,7 @@ end
 ---@param band number
 ---@return number
 function deadband(value, band)
+	band = band or 0.1
 	local result = 0
 	if (value > band) then
 		result = (value - band) / (1 - band)
