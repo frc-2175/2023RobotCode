@@ -78,6 +78,7 @@ Lyon.MAX_EXTENSION = 57.875
 
 local OUTSIDE_ANGLE_FRONT = 0.09
 local OUTSIDE_ANGLE_BACK = -0.6
+local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION + 2
 local ANGLE_MOTOR_MAX_SPEED = 0.2
 local TA_MOTOR_MAX_SPEED = 0.5
 
@@ -109,9 +110,9 @@ end
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
 local function maxSafeExtension(angle)
-	local MAX_SAFE = Lyon.MIN_EXTENSION + 2
+	local MAX_SAFE = MAX_EXTENSION_WHEN_INSIDE
 
-	if math.abs(angle) > OUTSIDE_ANGLE_FRONT then -- if outside frame
+	if angle < OUTSIDE_ANGLE_BACK or OUTSIDE_ANGLE_FRONT < angle then -- if outside frame
 		MAX_SAFE = extensionToGround(angle)
 	end
 
@@ -135,19 +136,12 @@ local function angleMotorOutputSpeed(target, angle, extension)
 		armSpeed = math.max(armSpeed, 0)
 	end
 
-
 	if extension > Lyon.MIN_EXTENSION + 2 then
 		if 0 < angle and  angle <= OUTSIDE_ANGLE_FRONT then
 			armSpeed = math.max(armSpeed, 0)
 		elseif OUTSIDE_ANGLE_BACK <= angle and angle < 0 then
 			armSpeed = math.min(armSpeed, 0)
 		end
-	end
-
-	-- temporary
-	
-	if angle < 0.1 then
-		armSpeed = math.max(armSpeed, 0)
 	end
 
 	return armSpeed
@@ -268,4 +262,64 @@ test("Lyon safety constraints", function(t)
 	t:assertEqual(angleMotorOutputSpeed(0, -Lyon.NODE_ANGLE_HIGH - 1, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "past the outer limit returning, backward")
 	t:assertEqual(angleMotorOutputSpeed(Lyon.NODE_ANGLE_HIGH + 2, Lyon.NODE_ANGLE_HIGH + 1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, forward")
 	t:assertEqual(angleMotorOutputSpeed(-Lyon.NODE_ANGLE_HIGH - 2, -Lyon.NODE_ANGLE_HIGH - 1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, backward")
+end)
+
+test("Lyon: traverse from back to inside", function(t)
+	--------------------------------------------------------
+	-- moving from out back of robot to inside frame - requiring us to go up and over the electronics
+
+	local targetExtension = extensionToGround(0) - 1
+	t:assert(targetExtension > MAX_EXTENSION_WHEN_INSIDE)
+	t:assert(targetExtension < extensionToGround(0))
+
+	-- step 1: out back of robot
+	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_BACK - 0.5, 40) > 0)
+	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_BACK - 0.5), 0)
+
+	-- step 2: at the wall, extended
+	t:assertEqual(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_BACK + 0.01, 40), 0)
+	t:assert(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_BACK + 0.01) < 0)
+
+	-- step 3: at the wall, retracted
+	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_BACK + 0.01, Lyon.MIN_EXTENSION) > 0)
+	t:assertEqual(maxSafeExtension(OUTSIDE_ANGLE_BACK + 0.01), MAX_EXTENSION_WHEN_INSIDE)
+	t:assertEqual(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_BACK + 0.01), 0)
+
+	-- step 4: at front wall, retracted
+	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_FRONT + 0.01, MAX_EXTENSION_WHEN_INSIDE) > 0)
+	t:assert(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_FRONT + 0.01) > 0)
+
+	-- step 5: at front wall, extended
+	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_FRONT + 0.01, 50) > 0)
+	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_FRONT + 0.01), 0)
+end)
+
+test("Lyon: traverse from front to back", function(t)
+	--------------------------------------------------------
+	-- moving from out back of robot to inside frame - requiring us to go up and over the electronics
+
+	local targetExtension = extensionToGround(0) - 1
+	t:assert(targetExtension > MAX_EXTENSION_WHEN_INSIDE)
+	t:assert(targetExtension < extensionToGround(0))
+
+	-- step 1: out front of robot
+	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_FRONT + 0.5, 40) < 0)
+	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_FRONT + 0.5), 0)
+
+	-- step 2: at the wall, extended
+	t:assertEqual(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_FRONT - 0.01, 40), 0)
+	t:assert(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_FRONT - 0.01) < 0)
+
+	-- step 3: at the wall, retracted
+	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_FRONT - 0.01, Lyon.MIN_EXTENSION) < 0)
+	t:assertEqual(maxSafeExtension(OUTSIDE_ANGLE_FRONT - 0.01), MAX_EXTENSION_WHEN_INSIDE)
+	t:assertEqual(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_FRONT - 0.01), 0)
+
+	-- step 4: at back wall, retracted
+	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_BACK - 0.01, MAX_EXTENSION_WHEN_INSIDE) < 0)
+	t:assert(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_BACK - 0.01) > 0)
+
+	-- step 5: at back wall, extended
+	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_BACK - 0.01, 50) < 0)
+	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_BACK - 0.01), 0)
 end)
