@@ -67,7 +67,8 @@ Lyon must always respect the following constraints:
 
 --]]
 
-local OUTSIDE_ANGLE = 0.6
+local OUTSIDE_ANGLE_FRONT = 0.09
+local OUTSIDE_ANGLE_BACK = -0.6
 local ANGLE_MOTOR_MAX_SPEED = 0.2
 local TA_MOTOR_MAX_SPEED = 0.2
 
@@ -104,7 +105,7 @@ end
 local function maxSafeExtension(angle)
 	local MAX_SAFE = Lyon.MIN_EXTENSION + 2
 
-	if math.abs(angle) > OUTSIDE_ANGLE then -- if outside frame
+	if math.abs(angle) > OUTSIDE_ANGLE_FRONT then -- if outside frame
 		MAX_SAFE = extensionToGround(angle)
 	end
 
@@ -129,9 +130,9 @@ local function angleMotorOutputSpeed(target, angle, extension)
 	end
 
 	if extension > 35 then
-		if angle <= OUTSIDE_ANGLE and angle > 0 then
+		if angle <= OUTSIDE_ANGLE_FRONT and angle > 0 then
 			armSpeed = math.max(armSpeed, 0)
-		elseif angle >= -OUTSIDE_ANGLE and angle < 0 then
+		elseif angle >= OUTSIDE_ANGLE_BACK and angle < 0 then
 			armSpeed = math.min(armSpeed, 0)
 		end
 	end
@@ -245,10 +246,10 @@ test("Lyon safety constraints", function(t)
 	t:assert(teleMotorOutputSpeed(Lyon.MAX_EXTENSION, Lyon.MIN_EXTENSION, -math.pi/2) >= 0, "extend when outside the robot, backward")
 
 	-- on the edge
-	t:assertEqual(angleMotorOutputSpeed(0, -OUTSIDE_ANGLE, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "arm entering frame retracted, forward")
-	t:assertEqual(angleMotorOutputSpeed(0, -OUTSIDE_ANGLE, Lyon.MAX_EXTENSION), 0, "arm entering frame extended, forward")
-	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "arm entering frame retracted, backward")
-	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE, Lyon.MAX_EXTENSION), 0, "arm entering frame extended, backward")
+	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_BACK, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "arm entering frame retracted, forward")
+	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_BACK, Lyon.MAX_EXTENSION), 0, "arm entering frame extended, forward")
+	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_FRONT, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "arm entering frame retracted, backward")
+	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_FRONT, Lyon.MAX_EXTENSION), 0, "arm entering frame extended, backward")
 
 	-- too far
 	t:assertEqual(angleMotorOutputSpeed(0, Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "on the outer limit returning, forward")
