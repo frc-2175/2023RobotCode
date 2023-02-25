@@ -107,7 +107,6 @@ test("Path:new", function(t)
 			print("wow, an event!")
 		end
 	})
-	pprint(p)
 	t:assertEqual(#p.distances, #p.points, "we should have one distance for each point")
 	t:assert(p.events[1].func ~= nil)
 end)
