@@ -3,7 +3,7 @@ function AssertInt(value)
 		local msg = "Expected an integer, but got " .. tostring(value) .. " instead."
 		io.stderr:write(Red .. "ERROR" .. ResetColor .. ":\n")
 		io.stderr:write("    " .. msg .. "\n")
-		error(msg, 2)
+		error(msg, 3)
 	end
 	return value
 end
@@ -13,7 +13,7 @@ function AssertNumber(value)
 		local msg = "Expected a number, but got " .. tostring(value) .. " instead."
 		io.stderr:write(Red .. "ERROR" .. ResetColor .. ":\n")
 		io.stderr:write("    " .. msg .. "\n")
-		error(msg, 2)
+		error(msg, 3)
 	end
 	return value
 end
