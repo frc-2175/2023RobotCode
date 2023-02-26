@@ -9,4 +9,4 @@ autoEngage = coroutine.create(autoEngage ()
 			coroutine.yield()
 		end
 	end
-end)
+end
