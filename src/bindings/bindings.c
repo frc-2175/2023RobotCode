@@ -90,6 +90,7 @@ typedef struct {
 
 	int isConstructor;
 	MD_String8 ClassName;
+	MD_String8 LuaType
 
 	MD_Node* After;
 
@@ -101,6 +102,10 @@ ParseFuncResult ParseFunc(MD_Node* n) {
 
 	if (MD_NodeHasTag(n, MD_S8Lit("doc"), 0)) {
 		res.Doc = MD_TagFromString(n, MD_S8Lit("doc"), 0)->first_child->string;
+	}
+
+	if (MD_NodeHasTag(n, MD_S8Lit("luatype"), 0)) {
+		res.LuaType = MD_TagFromString(n, MD_S8Lit("luatype"), 0)->first_child->string;
 	}
 
 	res.isConstructor = MD_NodeHasTag(n, MD_S8Lit("constructor"), 0);
@@ -360,7 +365,13 @@ MD_String8 GenLuaDocComment(ParseFuncResult parsedFunc) {
 		);
 	}
 	if (parsedFunc.ReturnType.size > 0) {
-		if (parsedFunc.isConstructor) {
+		if (parsedFunc.LuaType.size > 0) {
+			MD_S8ListPushFmt(a, &typeLines,
+				"---@return %S",
+				parsedFunc.LuaType
+			);
+
+		} else if (parsedFunc.isConstructor) {
 			MD_S8ListPushFmt(a, &typeLines,
 				"---@return %S",
 				parsedFunc.ClassName

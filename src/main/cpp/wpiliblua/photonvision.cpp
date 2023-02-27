@@ -130,6 +130,6 @@ LUAFUNC void PhotonPoseEstimator_SetLastPose(void* _this, double x, double y, do
 }
 
 LUAFUNC PoseEstimate * PhotonPoseEstimator_Update(void* _this) {
-	auto [pose, timestamp] = ((photonlib::PhotonPoseEstimator*)_this)->Update().value_or(photonlib::EstimatedRobotPose(frc::Pose3d(), -1_s));
+	auto [pose, timestamp, _] = ((photonlib::PhotonPoseEstimator*)_this)->Update().value_or(photonlib::EstimatedRobotPose(frc::Pose3d(), -1_s, {}));
 	return new PoseEstimate{{pose.X().convert<units::inch>().value(), pose.Y().convert<units::inch>().value(), pose.Z().convert<units::inch>().value(), pose.Rotation().X().value(), pose.Rotation().Y().value(), pose.Rotation().Z().value()}, timestamp.value()};
 }

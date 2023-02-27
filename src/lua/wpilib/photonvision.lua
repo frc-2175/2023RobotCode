@@ -104,12 +104,14 @@ end
 ---@field CLOSEST_TO_REFERENCE_POSE integer
 ---@field CLOSEST_TO_LAST_POSE integer
 ---@field AVERAGE_BEST_TARGETS integer
+---@field MULTI_TAG_PNP integer
 PoseStrategy = BindingEnum:new('PoseStrategy', {
     LOWEST_AMBIGUITY = 0,
     CLOSEST_TO_CAMERA_HEIGHT = 1,
     CLOSEST_TO_REFERENCE_POSE = 2,
     CLOSEST_TO_LAST_POSE = 3,
     AVERAGE_BEST_TARGETS = 4,
+    MULTI_TAG_PNP = 5,
 })
 
 ---@class AprilTagField
