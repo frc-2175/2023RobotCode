@@ -1,12 +1,15 @@
-autoEngage = coroutine.create(autoEngage ()
-	if navx:getRoll() < 0.1 then
+autoEngage = FancyCoroutine:new(function ()
+	while navx:getRoll() < 0.1 do
 		Drivetrain:drive(0.2)
 		coroutine.yield()
 	end
-	if navx:getRoll() > 0.1 then
+	
+	local encoderStart = Drivetrain:getEncoder()
+
+	while Drivetrain:getEncoder() - encoderStart < 82 do
 		Drivetrain:drive(0.2)
-		if Drivetrain:getEncoder() >= 82 then
-			coroutine.yield()
-		end
+		coroutine.yield()
 	end
-end
+
+	Drivetrain:stop()
+end)

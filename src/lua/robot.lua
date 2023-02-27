@@ -40,16 +40,8 @@ function Robot.teleopPeriodic()
 		Lyon:gripperSolenoid(DoubleSolenoidValue.Off)
 	end
 
-	if leftStick:getButtonHeld(3) then --TODO these button values are probably not correct
-		coroutine.resume(autoEngage)
-		if leftStick:getButtonReleased(3)then
-			coroutine.yield(autoEngage)
-		end
-	elseif rightStick:getButtonHeld(3) then
-		coroutine.resume(autoEngage)
-		if rightStick:getButtonReleased(3) then
-			coroutine.yield(autoEngage)
-		end
+	if leftStick:getButtonHeld(3) or rightStick:getButtonHeld(3) then --TODO these button values are probably not correct
+		autoEngage:run(
 	end
 
 	if gamepad:getRightStickY() > 0 then
