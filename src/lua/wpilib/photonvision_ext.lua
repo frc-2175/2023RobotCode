@@ -69,7 +69,7 @@ function PhotonPoseEstimator:setLastPose(pose)
 	ffi.C.PhotonPoseEstimator_SetLastPose(pose.position.x, pose.position.y, pose.position.z, pose.rotation.x, pose.rotation.y, pose.rotation.z)
 end
 
----@return Transform3d? pose
+---@return Transform3d? pose, number timestamp
 function PhotonPoseEstimator:update()
 	local result = ffi.new("PoseEstimate*", ffi.C.PhotonPoseEstimator_Update(self._this))
 
@@ -80,5 +80,5 @@ function PhotonPoseEstimator:update()
 		return nil
 	end
 
-	return Transform3d:new(pos, rot)
+	return Transform3d:new(pos, rot), result.timestamp
 end

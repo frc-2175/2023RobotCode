@@ -61,10 +61,7 @@ LUAFUNC size_t GetBooleanArraySize(const char * keyName) {
 }
 
 LUAFUNC int * GetBooleanArray(const char * keyName, int * defaultValue, size_t defaultSize) {
-	auto result = frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize));
-	auto ptr = (int*)malloc(result.size());
-	memcpy(ptr, &result, result.size());
-	return ptr;
+	return frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();
 }
 
 LUAFUNC void PutNumberArray(const char * keyName, double * value, size_t size) {

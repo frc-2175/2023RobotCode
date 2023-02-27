@@ -544,7 +544,7 @@ dashboard: {
 		@static @nolua const char * GetString(const char* keyName, const char* defaultValue) """	return stdStringForLua(frc::SmartDashboard::GetString((std::string_view)keyName, (std::string_view)defaultValue));""";
 		@static @nolua PutBooleanArray(const char* keyName, int* value, size_t size) """	frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));""";
 		@static @nolua size_t GetBooleanArraySize(const char* keyName) """	return frc::SmartDashboard::GetBooleanArray(keyName, {}).size();""";
-		@static @nolua int* GetBooleanArray(const char* keyName, int* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize));""";
+		@static @nolua int* GetBooleanArray(const char* keyName, int* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();""";
 		@static @nolua PutNumberArray(const char* keyName, double* value, size_t size) """	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));""";
 		@static @nolua size_t GetNumberArraySize(const char* keyName) """	return frc::SmartDashboard::GetNumberArray(keyName, {}).size();""";
 		@static @nolua double* GetNumberArray(const char* keyName, double* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetNumberArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();""";
@@ -620,7 +620,8 @@ photonvision: {
 		CLOSEST_TO_CAMERA_HEIGHT: 1,
 		CLOSEST_TO_REFERENCE_POSE: 2,
 		CLOSEST_TO_LAST_POSE: 3,
-		AVERAGE_BEST_TARGETS: 4
+		AVERAGE_BEST_TARGETS: 4,
+		MULTI_TAG_PNP: 5
 	}
 
 	@enum AprilTagField: {

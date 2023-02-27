@@ -31,7 +31,7 @@ function DDPE:new(angleRad, leftDistance, rightDistance, x, y, rotationRad)
 	rotationRad = rotationRad or 0
 
     local instance = {
-        _this = ffi.C.DDPE_new(angleRad, leftDistance, rightDistance, x, y, rotationRad),
+        _this = ffi.gc(ffi.C.DDPE_new(angleRad, leftDistance, rightDistance, x, y, rotationRad), ffi.C.liberate),
     }
     setmetatable(instance, self)
     self.__index = self
