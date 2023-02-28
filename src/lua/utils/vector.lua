@@ -1,6 +1,11 @@
 ---@class Vector
 ---@field x number
 ---@field y number
+---@operator add(Vector|number): Vector
+---@operator sub(Vector|number): Vector
+---@operator mul(Vector|number): Vector
+---@operator div(number): Vector
+---@operator unm: Vector
 Vector = {
 	__add = function(a, b)
 		if type(b) == "number" then

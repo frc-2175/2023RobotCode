@@ -2677,21 +2677,6 @@ end
 
 
 
----@param encoder any
----@return number
-function CANSparkMax:getPosition(encoder)
-    return ffi.C.CANSparkMax_GetPosition(self._this, encoder)
-end
-
----@param position number
----@param countsPerRev? integer
-function CANSparkMax:setPosition(position, countsPerRev)
-    countsPerRev = countsPerRev == nil and 42 or countsPerRev
-    position = AssertNumber(position)
-    countsPerRev = AssertInt(countsPerRev)
-    ffi.C.CANSparkMax_SetPosition(self._this, position, countsPerRev)
-end
-
 ---@return number
 function SparkMaxRelativeEncoder:getPosition()
     return ffi.C.SparkMaxRelativeEncoder_GetPosition(self._this)

@@ -90,7 +90,7 @@ typedef struct {
 
 	int isConstructor;
 	MD_String8 ClassName;
-	MD_String8 LuaType
+	MD_String8 LuaType;
 
 	MD_Node* After;
 

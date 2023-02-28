@@ -24,21 +24,24 @@ local angleOffset = navx:getAngle()
 --]]
 function findClosestPoint(path, fieldPosition, previousClosestPoint)
 	local indexOfClosestPoint = 1
-	local startIndex = previousClosestPoint - SEARCH_DISTANCE
-	local endIndex = previousClosestPoint + SEARCH_DISTANCE
-	
-	-- making sure indexes make sense
-	startIndex = math.max(startIndex, 1)
-	endIndex = math.min(endIndex, path.numberOfActualPoints) -- closest point cannot be in the extra points
+	local startDistance = path.distances[previousClosestPoint] - SEARCH_DISTANCE
+	local endDistance = path.distances[previousClosestPoint] + SEARCH_DISTANCE
 
-	local minDistance = (path.points[1] - fieldPosition):length() -- distance to closest point so far
-	for i = startIndex, endIndex do -- check through each point in list, and ...
-		local distanceToPoint = (path.points[i] - fieldPosition):length()
-		if distanceToPoint <= minDistance then
-			indexOfClosestPoint = i
-			minDistance = distanceToPoint -- if we find a closer one, that becomes the new minDist
+	startDistance = math.max(startDistance, 0)
+	endDistance = math.min(endDistance, path.distances[#path.points])
+
+	local minDistance = (path.points[1] - fieldPosition):length()
+	for i = 1, #path.points do
+		if startDistance < path.distances[i] and path.distances[i] < endDistance then
+			local distance = (path.points[i] - fieldPosition):length()
+
+			if distance <= minDistance then
+				indexOfClosestPoint = i
+				minDistance = distance
+			end
 		end
 	end
+
 	return indexOfClosestPoint
 end
 
@@ -46,9 +49,17 @@ end
 ---@param closestPoint integer
 ---@return integer goalPoint
 function findGoalPoint(path, closestPoint)
-	closestPoint = closestPoint or 1 -- default 1
-	return math.min(closestPoint + LOOKAHEAD_DISTANCE, #path.points) -- # is length operator
-	-- in case we are aiming PAST the end of the path, just aim at the end instead
+	closestPoint = closestPoint or 1
+
+	local goalPoint = closestPoint
+
+	while goalPoint <= #path.points do
+		if path.distances[goalPoint] - path.distances[closestPoint] >= LOOKAHEAD_DISTANCE then
+			return goalPoint
+		end
+	end
+
+	return goalPoint
 end
 
 ---@param point Vector
@@ -100,26 +111,21 @@ end
 ---@class PurePursuit
 ---@field path Path
 ---@field triggerFuncs table<string, function>
----@field isBackwards boolean
 ---@field previousClosestPoint number
 ---@field purePursuitPID number
 PurePursuit = {}
 
 ---@param path Path
----@param isBackwards boolean
 ---@param p number
 ---@param i number
 ---@param d number
 ---@return PurePursuit
-function PurePursuit:new(path, isBackwards, p, i, d, triggerFuncs)
+function PurePursuit:new(path, p, i, d, triggerFuncs)
 	triggerFuncs = triggerFuncs or {}
-	if isBackwards then
-		path = path:negated()
-	end
+
 	local x = {
 		path = path,
 		triggerFuncs = triggerFuncs,
-		isBackwards = isBackwards,
 		purePursuitPID = PIDController:new(p, i, d),
 		previousClosestPoint = 0,
 	}
@@ -139,31 +145,22 @@ function PurePursuit:run()
 	local goalPoint = (self.path.points[indexOfGoalPoint] - position):rotate(math.rad(navx:getAngle()))
 	local angle = getAngleToPoint(goalPoint)
 	
-	if self.isBackwards then
-		angle = -getAngleToPoint(-goalPoint)
-	end
-	
 	local turnValue = self.purePursuitPID:pid(-angle, 0)
 	local speed = getTrapezoidSpeed(
-		0.25, 0.75, 0.5, self.path.numberOfActualPoints, 20, 20, indexOfClosestPoint
+		0.25, 0.75, 0.5, #self.path, 20, 20, indexOfClosestPoint
 	)
-
-	if self.isBackwards then -- dont join these two
-		turnValue = -turnValue
-		speed = -speed
-	end
 
 	for i = self.previousClosestPoint - 1, indexOfClosestPoint do
 		print(i)
-		if self.path.eventFuncs[i] ~= nil then
-			self.triggerFuncs[self.path.eventFuncs[i]]()
+		if self.path.events[i] ~= nil then
+			self.triggerFuncs[self.path.events[i]]()
 		end
 	end
 
 	self.previousClosestPoint = indexOfClosestPoint
 
 	-- without this the bot will relentlessly target the last point and that's no good
-	if indexOfClosestPoint >= self.path.numberOfActualPoints then
+	if indexOfClosestPoint >= #self.path then
 		speed = 0
 		turnValue = 0
 	end
@@ -171,7 +168,7 @@ function PurePursuit:run()
 	if speed ~= 0 then
 		SmartDashboard:putNumber("closest", indexOfClosestPoint)
 		SmartDashboard:putNumber("goal", indexOfGoalPoint)
-		SmartDashboard:putNumber("max", self.path.numberOfActualPoints)
+		SmartDashboard:putNumber("max", #self.path)
 		SmartDashboard:putNumber("x", position.x)
 		SmartDashboard:putNumber("y", position.y)
 	end

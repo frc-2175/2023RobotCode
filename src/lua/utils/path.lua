@@ -2,11 +2,10 @@ require("utils.vector")
 require("utils.math")
 local json = require("utils.json")
 local dir = getDeployDirectory() .. "/pathplanner/"
-local pprint = require("src.lua.utils.pprint")
 
 ---@class Path
 ---@field points Vector[] The path points in field coordinates. (Origin bottom left, inches.)
----@field distances number[] A table with the distance for each path point.
+---@field distances number[] A table with the distance for each path point. (Cumulative)
 ---@field events table[] The events to run along the path. Each table is {distance from start, function to run}.
 Path = {}
 
@@ -28,6 +27,8 @@ local myPath = Path:new("MyPath", {
 	end,
 })
 --]]
+
+
 
 ---@param pathName string The name of the path in PathPlanner, e.g. "MyPath" for a file named MyPath.path
 ---@param eventFuncs table<string, function>? A table of functions for path events.
@@ -55,11 +56,11 @@ function Path:new(pathName, eventFuncs)
 		local p3 = Vector:new(waypoints[i + 1].prevControl.x, waypoints[i + 1].prevControl.y)
 		local p4 = Vector:new(waypoints[i + 1].anchorPoint.x, waypoints[i + 1].anchorPoint.y)
 
-		local incr = 0.01
-		for t = 0, 1, incr do
+		local increment = 0.01
+		for t = 0, 1, increment do
 			for _, marker in ipairs(markers) do
 				if math.floor(marker.position) == i - 1 then -- the marker is on the current segment
-					if t - incr < marker.position and marker.position <= t then -- we just crossed the marker
+					if t - increment < marker.position and marker.position <= t then -- we just crossed the marker
 						for _, name in ipairs(marker.names) do
 							if eventFuncs[name] == nil then
 								error('Function "'.. name ..'" not defined')

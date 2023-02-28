@@ -360,8 +360,6 @@ void CANSparkMax_Disable(void* _this);
 void CANSparkMax_StopMotor(void* _this);
 void CANSparkMax_Follow(void* _this, void * leader, bool invert);
 void * CANSparkMax_GetEncoder(void* _this, int countsPerRev);
-double CANSparkMax_GetPosition(void* _this, void * encoder);
-void CANSparkMax_SetPosition(void* _this, double position, int countsPerRev);
 double SparkMaxRelativeEncoder_GetPosition(void* _this);
 double SparkMaxRelativeEncoder_GetVelocity(void* _this);
 void SparkMaxRelativeEncoder_SetPositionConversionFactor(void* _this, double factor);

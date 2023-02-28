@@ -346,9 +346,6 @@ motors: {
 		StopMotor();
 		@nolua Follow(@deref @cast("rev::CANSparkMax*") void* leader, @default(false) bool invert);
 		@nolua void* GetEncoder(@default(42) int countsPerRev) """	return new rev::SparkMaxRelativeEncoder( ((rev::CANSparkMax *)_this)->GetEncoder());""";
-		double GetPosition(void* encoder) """	return ((rev::SparkMaxRelativeEncoder*)encoder)->GetPosition();""";
-		SetPosition(double position, @default(42) int countsPerRev) """
-		""";
 	}
 
 	@class("rev::SparkMaxRelativeEncoder")
@@ -645,7 +642,7 @@ photonvision: {
 		@nolua void SetReferencePose(double x, double y, double z, double rotx, double roty, double rotz) """	return ((photonlib::PhotonPoseEstimator*)_this)->SetReferencePose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
 		@nolua void SetLastPose(double x, double y, double z, double rotx, double roty, double rotz) """	return ((photonlib::PhotonPoseEstimator*)_this)->SetLastPose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
 		
-		@nolua PoseEstimate* Update() """	auto [pose, timestamp] = ((photonlib::PhotonPoseEstimator*)_this)->Update().value_or(photonlib::EstimatedRobotPose(frc::Pose3d(), -1_s));
+		@nolua PoseEstimate* Update() """	auto [pose, timestamp, _] = ((photonlib::PhotonPoseEstimator*)_this)->Update().value_or(photonlib::EstimatedRobotPose(frc::Pose3d(), -1_s, {}));
 	return new PoseEstimate{{pose.X().convert<units::inch>().value(), pose.Y().convert<units::inch>().value(), pose.Z().convert<units::inch>().value(), pose.Rotation().X().value(), pose.Rotation().Y().value(), pose.Rotation().Z().value()}, timestamp.value()};""";
 	}
 }
