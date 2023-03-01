@@ -82,15 +82,15 @@ local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION + 2
 local ANGLE_MOTOR_MAX_SPEED = 0.2
 local TA_MOTOR_MAX_SPEED = 0.5
 
-local arm = CANSparkMax:new(20, SparkMaxMotorType.kBrushless)
+local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
 ---@type SparkMaxRelativeEncoder
 local armEncoder = arm:getEncoder()
 armEncoder:setPositionConversionFactor(1)
-local telescopingArm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless) -- TODO: not a real device id
+local telescopingArm = CANSparkMax:new(22, SparkMaxMotorType.kBrushless)
 telescopingArm:setInverted(true)
 ---@type SparkMaxRelativeEncoder
 local telescopingEncoder = telescopingArm:getEncoder()
-gripperSolenoid = DoubleSolenoid:new(0, 1) --TODO: not a real device id
+gripperSolenoid = DoubleSolenoid:new(0, 1)
 
 local targetExtension = Lyon.MIN_EXTENSION
 local targetAngle = 0
