@@ -73,22 +73,19 @@ Lyon = {}
 Lyon.AXLE_HEIGHT = 40
 Lyon.NODE_ANGLE_MID = 1.57
 Lyon.NODE_ANGLE_HIGH = 1.78
-Lyon.MIN_EXTENSION = 35
-Lyon.MAX_EXTENSION = 57.875
+Lyon.MIN_EXTENSION = 33
+Lyon.MAX_EXTENSION = 55
 
 local OUTSIDE_ANGLE_FRONT = 0.09
 local OUTSIDE_ANGLE_BACK = -0.6
-local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION + 2
+local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION + 1
 local ANGLE_MOTOR_MAX_SPEED = 0.2
-local TA_MOTOR_MAX_SPEED = 0.5
+local TA_MOTOR_MAX_SPEED = 0.75
 
 local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
----@type SparkMaxRelativeEncoder
 local armEncoder = arm:getEncoder()
-armEncoder:setPositionConversionFactor(1)
 local telescopingArm = CANSparkMax:new(22, SparkMaxMotorType.kBrushless)
-telescopingArm:setInverted(true)
----@type SparkMaxRelativeEncoder
+telescopingArm:setInverted(false)
 local telescopingEncoder = telescopingArm:getEncoder()
 gripperSolenoid = DoubleSolenoid:new(0, 1)
 
@@ -103,7 +100,7 @@ local function extensionToGround(angle)
 		return Lyon.MAX_EXTENSION
 	end
 
-	return math.min(40 / math.cos(angle), Lyon.MAX_EXTENSION)
+	return math.min((Lyon.AXLE_HEIGHT - 2) / math.cos(angle), Lyon.MAX_EXTENSION)
 end
 
 ---Computes the maximum length in inches to which the arm may extend.
@@ -184,8 +181,10 @@ function Lyon:periodic()
 	SmartDashboard:putNumber("LyonRawAnglePos", getAngleMotorRawPosition())
 	SmartDashboard:putNumber("LyonTelePos", Lyon:getExtension())
 	SmartDashboard:putNumber("LyonRawTelePos", getExtensionMotorRawPosition())
+	SmartDashboard:putNumber("LyonExtensionToGround", extensionToGround(Lyon:getAngle()))
 
 	local armSpeed = angleMotorOutputSpeed(targetAngle, Lyon:getAngle(), Lyon:getExtension())
+
 	SmartDashboard:putNumber("LyonArmSpeed", armSpeed)
 	arm:set(armSpeed)
 	
@@ -203,7 +202,7 @@ end
 ---Gets the length of the arm in inches, from the center axle to the tip of the gripper.
 ---@return number
 function Lyon:getExtension()
-	return (telescopingEncoder:getPosition() / 18) * math.pi + Lyon.MIN_EXTENSION
+	return 1.25 * (telescopingEncoder:getPosition() / 14.2) * math.pi + Lyon.MIN_EXTENSION
 end
 
 ---Sets the desired arm angle, in radians.
@@ -227,7 +226,7 @@ test("Lyon safety constraints", function(t)
 	-- hanging straight down
 	t:assert(angleMotorOutputSpeed(math.pi/2, 0, 0) > 0, "straight down, not extended, swing forward")
 	t:assert(angleMotorOutputSpeed(-math.pi/2, 0, 0) < 0, "straight down, not extended, swing backward")
-	t:assertEqual(extensionToGround(0), Lyon.AXLE_HEIGHT)
+	t:assertEqual(extensionToGround(0), Lyon.AXLE_HEIGHT - 2)
 	t:assert(maxSafeExtension(0) < Lyon.MIN_EXTENSION + 3, "safe extension when inside the robot")
 	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MIN_EXTENSION + 2, 0) <= 0, "retract when inside the robot")
 
