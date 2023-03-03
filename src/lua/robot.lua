@@ -33,7 +33,7 @@ end
 function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
-	Drivetrain:drive(squareInput(leftStick:getY()) * 0.5, -squareInput(rightStick:getX()) * 0.5)
+	Drivetrain:drive(squareInput(leftStick:getY()) * 0.5, squareInput(rightStick:getX()) * 0.5)
 
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:gripperSolenoid(DoubleSolenoidValue.Forward)
