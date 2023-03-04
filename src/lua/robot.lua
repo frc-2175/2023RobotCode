@@ -43,12 +43,22 @@ function Robot.teleopPeriodic()
 		Lyon:gripperSolenoid(DoubleSolenoidValue.Off)
 	end
 
-	if gamepad:getRightStickY() > 0 then
+	-- if gamepad:getRightStickY() > 0 then
+	-- 	Lyon:setTargetAngle(Lyon.NODE_ANGLE_HIGH)
+	-- elseif gamepad:getRightStickY() < 0 then
+	-- 	Lyon:setTargetAngle(-Lyon.NODE_ANGLE_HIGH)
+	-- else
+	-- 	Lyon:setTargetAngle(Lyon:getAngle())
+	-- end
+
+	if gamepad:getButtonHeld(XboxButton.A) then
 		Lyon:setTargetAngle(Lyon.NODE_ANGLE_HIGH)
-	elseif gamepad:getRightStickY() < 0 then
-		Lyon:setTargetAngle(-Lyon.NODE_ANGLE_HIGH)
-	else
-		Lyon:setTargetAngle(Lyon:getAngle())
+	elseif gamepad:getButtonHeld(XboxButton.B) then
+		Lyon:setTargetAngle(0.2)
+	elseif gamepad:getButtonHeld(XboxButton.X) then
+		Lyon:setTargetAngle(Lyon.NODE_ANGLE_MID)
+	elseif gamepad:getButtonReleased(XboxButton.A) or gamepad:getButtonReleased(XboxButton.B) or gamepad:getButtonReleased(XboxButton.X) then
+		Lyon:setTargetAngle(0)
 	end
 
 	if gamepad:getPOV() == 0 then

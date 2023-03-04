@@ -17,6 +17,12 @@ function lerp(a, b, t)
 	return (1 - t) * a + t * b
 end
 
+test("lerp", function(t)
+	t:assert(lerp(2, 10, 0) == 2)
+	t:assert(lerp(2, 10, 0.5) == 6)
+	t:assert(lerp(2, 10, 1) == 10)
+end)
+
 --- Returns the sign of the input number `n`
 ---
 --- Examples:
@@ -57,6 +63,25 @@ end
 function clamp(value, min, max)
 	return math.min(math.max(value, min), max)
 end
+
+---Clamps value to a minimum and maximum magnitude, preserving sign
+---@param value number
+---@param min number
+---@param max number
+---@return number
+function clampMag(value, min, max)
+	return sign(value) * clamp(math.abs(value), math.abs(min), math.abs(max))
+end
+
+test("clampMag", function (t)
+	-- positive
+	t:assertEqual(clampMag(1.5, 1, 2), 1.5)
+	t:assertEqual(clampMag(-1.5, 1, 2), -1.5)
+	t:assertEqual(clampMag(-3, 1, 2), -2)
+	t:assertEqual(clampMag(-0.5, 1, 2), -1)
+	t:assertEqual(clampMag(3, 1, 2), 2)
+	t:assertEqual(clampMag(0.5, 1, 2), 1)
+end)
 
 function squareInput(num)
 	return num * math.abs(num)
@@ -144,14 +169,6 @@ function bezier(t, p1, p2, p3, p4)
 	return lerp(r1, r2, t)
 end
 
----bezier(0.1, ...whatever)
-
-test("lerp", function(t)
-	t:assert(lerp(2, 10, 0) == 2)
-	t:assert(lerp(2, 10, 0.5) == 6)
-	t:assert(lerp(2, 10, 1) == 10)
-end)
-
 test("bezier", function(t)
 	local p1 = Vector:new(1, 1)
 	local p2 = Vector:new(1, 2)
@@ -164,3 +181,48 @@ test("bezier", function(t)
 	t:assertEqual(bezier(0.75, p1, p2, p3, p4), Vector:new(59/32, 25/16))
 	t:assertEqual(bezier(1, p1, p2, p3, p4), p4)
 end)
+
+---Returns the argument with the minimum magnitude
+---@vararg number
+---@return number
+function minMag(...)
+	local min
+	local minAbs
+
+	for _, v in ipairs({...}) do
+		local abs = math.abs(v)
+		if minAbs == nil or abs < minAbs then
+			min = v
+			minAbs = abs
+		end
+	end
+
+	return min
+end
+
+test("minMag", function(t)
+	t:assertEqual(minMag(0, 0.1, 1, 10), 0)
+	t:assertEqual(minMag(0, -0.1, -1, -10), 0)
+	t:assertEqual(minMag(-0.1, 1, -10), -0.1)
+	t:assertEqual(minMag(0.1, -1, 10), 0.1)
+end)
+
+---Returns the argument with the maximum magnitude
+---@vararg number
+---@return number
+function maxMag(...)
+	local max
+	local maxAbs
+
+	for _, v in ipairs({...}) do
+		local abs = math.abs(v)
+		if maxAbs == nil or abs > maxAbs then
+			max = v
+			maxAbs = abs
+		end
+	end
+
+	return max
+end
+
+---bezier(0.1, ...whatever)

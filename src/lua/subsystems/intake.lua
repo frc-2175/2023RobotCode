@@ -73,9 +73,9 @@ Lyon = {}
 
 Lyon.AXLE_HEIGHT = 40
 Lyon.NODE_ANGLE_MID = 1.57
-Lyon.NODE_ANGLE_HIGH = 1.78
+Lyon.NODE_ANGLE_HIGH = 1.82
 Lyon.MIN_EXTENSION = 33
-Lyon.MAX_EXTENSION = 55
+Lyon.MAX_EXTENSION = 63
 
 local OUTSIDE_ANGLE_FRONT = 0.09
 local OUTSIDE_ANGLE_BACK = -0.6
@@ -90,6 +90,7 @@ telescopingArm:setInverted(false)
 local telescopingEncoder = telescopingArm:getEncoder()
 gripperSolenoid = DoubleSolenoid:new(0, 1)
 
+local anglePid = PIDController:new(1 / 0.25, 0, 0)
 local telePid = PIDController:new(1 / 5, 0, 0)
 
 local targetExtension = Lyon.MIN_EXTENSION
@@ -125,10 +126,7 @@ end
 ---@param extension number
 ---@return number
 local function angleMotorOutputSpeed(target, angle, extension)
-	local armSpeed = 0
-	if math.abs(target - angle) > 0.05 then -- 0.05 radians is roughly 3 degrees
-		armSpeed = sign(target - angle) * ANGLE_MOTOR_MAX_SPEED
-	end
+	local armSpeed = anglePid:pid(angle, target, 1, math.pi, ANGLE_MOTOR_MAX_SPEED)
 
 	if angle >= Lyon.NODE_ANGLE_HIGH then
 		armSpeed = math.min(armSpeed, 0)
@@ -154,7 +152,7 @@ end
 local function teleMotorOutputSpeed(target, extension, angle)
 	target = math.min(target, maxSafeExtension(angle))
 
-	return math.min(telePid:pid(extension, target, 1), TA_MOTOR_MAX_SPEED)
+	return clampMag(telePid:pid(extension, target, 1), 0, TA_MOTOR_MAX_SPEED)
 end
 
 ---Gets the raw encoder position from the arm angle motor. Unit: revolutions.
@@ -223,42 +221,65 @@ end
 
 test("Lyon safety constraints", function(t)
 	-- hanging straight down
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(math.pi/2, 0, 0) > 0, "straight down, not extended, swing forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-math.pi/2, 0, 0) < 0, "straight down, not extended, swing backward")
 	t:assertEqual(extensionToGround(0), Lyon.AXLE_HEIGHT - 2)
 	t:assert(maxSafeExtension(0) < Lyon.MIN_EXTENSION + 3, "safe extension when inside the robot")
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MIN_EXTENSION + 2, 0) <= 0, "retract when inside the robot")
 
 	-- straight forward
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(math.pi, math.pi/2, 0) > 0, "straight forward, not extended, swing forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-math.pi/2, math.pi/2, 0) < 0, "straight forward, not extended, swing backward")
 	t:assert(extensionToGround(math.pi/2) < 100, "no crazy extensionToGround (forward)")
 	t:assertEqual(maxSafeExtension(math.pi/2), Lyon.MAX_EXTENSION, "safe extension when outside the robot, forward")
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MAX_EXTENSION, math.pi/2) <= 0, "retract when outside the robot, forward")
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(Lyon.MAX_EXTENSION, Lyon.MIN_EXTENSION, math.pi/2) >= 0, "extend when outside the robot, forward")
 
 	-- straight backward
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(math.pi/2, -math.pi/2, 0) > 0, "straight backward, not extended, swing forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-math.pi, -math.pi/2, 0) < 0, "straight backward, not extended, swing backward")
 	t:assert(extensionToGround(-math.pi/2) < 100, "no crazy extensionToGround (backward)")
 	t:assertEqual(maxSafeExtension(-math.pi/2), Lyon.MAX_EXTENSION, "safe extension when outside the robot, backward")
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MAX_EXTENSION, -math.pi/2) <= 0, "retract when outside the robot, backward")
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(Lyon.MAX_EXTENSION, Lyon.MIN_EXTENSION, -math.pi/2) >= 0, "extend when outside the robot, backward")
 
 	-- on the edge
-	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_BACK, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "arm entering frame retracted, forward")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assert(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_BACK, Lyon.MIN_EXTENSION) > 0, "arm entering frame retracted, forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_BACK, Lyon.MAX_EXTENSION), 0, "arm entering frame extended, forward")
-	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_FRONT, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "arm entering frame retracted, backward")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assert(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_FRONT, Lyon.MIN_EXTENSION) < 0, "arm entering frame retracted, backward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(0, OUTSIDE_ANGLE_FRONT, Lyon.MAX_EXTENSION), 0, "arm entering frame extended, backward")
 
 	-- too far
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(0, Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "on the outer limit returning, forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(0, -Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "on the outer limit returning, backward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(Lyon.NODE_ANGLE_HIGH + 1, Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), 0, "on the outer limit continuing, forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(-Lyon.NODE_ANGLE_HIGH - 1, -Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), 0, "on the outer limit continuing, backward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(0, Lyon.NODE_ANGLE_HIGH + 1, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "past the outer limit returning, forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(0, -Lyon.NODE_ANGLE_HIGH - 1, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "past the outer limit returning, backward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(Lyon.NODE_ANGLE_HIGH + 2, Lyon.NODE_ANGLE_HIGH + 1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, forward")
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(-Lyon.NODE_ANGLE_HIGH - 2, -Lyon.NODE_ANGLE_HIGH - 1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, backward")
 end)
 
@@ -271,24 +292,34 @@ test("Lyon: traverse from back to inside", function(t)
 	t:assert(targetExtension < extensionToGround(0))
 
 	-- step 1: out back of robot
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_BACK - 0.5, 40) > 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_BACK - 0.5), 0)
 
 	-- step 2: at the wall, extended
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_BACK + 0.01, 40), 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_BACK + 0.01) < 0)
 
 	-- step 3: at the wall, retracted
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_BACK + 0.01, Lyon.MIN_EXTENSION) > 0)
 	t:assertEqual(maxSafeExtension(OUTSIDE_ANGLE_BACK + 0.01), MAX_EXTENSION_WHEN_INSIDE)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_BACK + 0.01), 0)
 
 	-- step 4: at front wall, retracted
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_FRONT + 0.01, MAX_EXTENSION_WHEN_INSIDE) > 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_FRONT + 0.01) > 0)
 
 	-- step 5: at front wall, extended
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(0.2, OUTSIDE_ANGLE_FRONT + 0.01, 50) > 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_FRONT + 0.01), 0)
 end)
 
@@ -301,23 +332,33 @@ test("Lyon: traverse from front to back", function(t)
 	t:assert(targetExtension < extensionToGround(0))
 
 	-- step 1: out front of robot
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_FRONT + 0.5, 40) < 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_FRONT + 0.5), 0)
 
 	-- step 2: at the wall, extended
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_FRONT - 0.01, 40), 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_FRONT - 0.01) < 0)
 
 	-- step 3: at the wall, retracted
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_FRONT - 0.01, Lyon.MIN_EXTENSION) < 0)
 	t:assertEqual(maxSafeExtension(OUTSIDE_ANGLE_FRONT - 0.01), MAX_EXTENSION_WHEN_INSIDE)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_FRONT - 0.01), 0)
 
 	-- step 4: at back wall, retracted
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_BACK - 0.01, MAX_EXTENSION_WHEN_INSIDE) < 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(targetExtension, MAX_EXTENSION_WHEN_INSIDE, OUTSIDE_ANGLE_BACK - 0.01) > 0)
 
 	-- step 5: at back wall, extended
+	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-0.8, OUTSIDE_ANGLE_BACK - 0.01, 50) < 0)
+	telePid:clear(Timer:getFPGATimestamp())
 	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, OUTSIDE_ANGLE_BACK - 0.01), 0)
 end)

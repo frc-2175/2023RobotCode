@@ -4,6 +4,7 @@
 ---@field kd number
 ---@field integral number
 ---@field previousError number
+---@field previousOutput number
 ---@field previousTime number
 ---@field dt number
 ---@field shouldRunIntegral boolean
@@ -15,11 +16,12 @@ PIDController = {}
 ---@return PIDController
 function PIDController:new(p, i, d)
 	local pid = {
-		kp = p,
-		ki = i,
-		kd = d,
+		kp = p or 0,
+		ki = i or 0,
+		kd = d or 0,
 		integral = 0,
 		previousError = nil,
+		previousOutput = nil,
 		previousTime = 0,
 		dt = 0,
 		shouldRunIntegral = false,
@@ -36,6 +38,7 @@ function PIDController:clear(time)
 	self.previousTime = time
 	self.integral = 0
 	self.previousError = nil
+	self.previousOutput = nil
 	self.shouldRunIntegral = false
 end
 
@@ -43,7 +46,7 @@ end
 ---@param setpoint number
 ---@param thresh number
 ---@return number
-function PIDController:pid(input, setpoint, thresh)
+function PIDController:pid(input, setpoint, thresh, maxChange, maxOutput)
 	local threshold = thresh or 0
 	local error = setpoint - input
 	local p = error * self.kp
@@ -69,7 +72,19 @@ function PIDController:pid(input, setpoint, thresh)
 
 	self.previousError = error
 
-	return p + i + d
+	local output = p + i + d
+
+	if self.previousOutput ~= nil and maxChange ~= nil then
+		output = self.previousOutput + clampMag(output - self.previousOutput, 0, maxChange / 50)
+	end
+
+	if maxOutput ~= nil then
+		output = clampMag(output, 0, maxOutput)
+	end
+
+	self.previousOutput = output
+
+	return output
 end
 
 ---@param time number
