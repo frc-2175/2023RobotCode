@@ -6,11 +6,11 @@ local pprint = require("utils.pprint")
 
 test(
 	"squareInput", function(t)
-		t:assertEqual(squareInput(-1), -1)
-		t:assertEqual(squareInput(-0.5), -0.25)
-		t:assertEqual(squareInput(0), 0)
-		t:assertEqual(squareInput(0.5), 0.25)
-		t:assertEqual(squareInput(1), 1)
+		t:assertEqual(signedPow(-1), -1)
+		t:assertEqual(signedPow(-0.5), -0.25)
+		t:assertEqual(signedPow(0), 0)
+		t:assertEqual(signedPow(0.5), 0.25)
+		t:assertEqual(signedPow(1), 1)
 	end
 )
 

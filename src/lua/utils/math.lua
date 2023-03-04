@@ -83,8 +83,13 @@ test("clampMag", function (t)
 	t:assertEqual(clampMag(0.5, 1, 2), 1)
 end)
 
-function squareInput(num)
-	return num * math.abs(num)
+---@param num number
+---@param pow integer?
+---@return number
+function signedPow(num, pow)
+	pow = pow or 2
+	AssertInt(pow)
+	return sign(num) * math.abs(num ^ pow)
 end
 
 -- Oh boyo, here we go!

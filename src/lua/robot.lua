@@ -33,7 +33,7 @@ end
 function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
-	Drivetrain:drive(squareInput(leftStick:getY()) * 0.5, squareInput(rightStick:getX()) * 0.5)
+	Drivetrain:drive(signedPow(leftStick:getY()) * 0.5, signedPow(rightStick:getX()) * 0.5)
 
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:gripperSolenoid(DoubleSolenoidValue.Forward)
@@ -43,30 +43,16 @@ function Robot.teleopPeriodic()
 		Lyon:gripperSolenoid(DoubleSolenoidValue.Off)
 	end
 
-	-- if gamepad:getRightStickY() > 0 then
-	-- 	Lyon:setTargetAngle(Lyon.NODE_ANGLE_HIGH)
-	-- elseif gamepad:getRightStickY() < 0 then
-	-- 	Lyon:setTargetAngle(-Lyon.NODE_ANGLE_HIGH)
-	-- else
-	-- 	Lyon:setTargetAngle(Lyon:getAngle())
-	-- end
-
 	if gamepad:getButtonHeld(XboxButton.A) then
-		Lyon:setTargetAngle(Lyon.NODE_ANGLE_HIGH)
-	elseif gamepad:getButtonHeld(XboxButton.B) then
-		Lyon:setTargetAngle(0.2)
+		Lyon:setTargetPosition(34, 13)
 	elseif gamepad:getButtonHeld(XboxButton.X) then
-		Lyon:setTargetAngle(Lyon.NODE_ANGLE_MID)
-	elseif gamepad:getButtonReleased(XboxButton.A) or gamepad:getButtonReleased(XboxButton.B) or gamepad:getButtonReleased(XboxButton.X) then
-		Lyon:setTargetAngle(0)
-	end
-
-	if gamepad:getPOV() == 0 then
-	 	Lyon:setTargetExtension(Lyon.MAX_EXTENSION)
-	elseif gamepad:getPOV() == 180 then
-	 	Lyon:setTargetExtension(Lyon.MIN_EXTENSION)
+		Lyon:setTargetPosition(42.75, 46)
+	elseif gamepad:getButtonHeld(XboxButton.Y) then
+		Lyon:setTargetPosition(60, 59)
+	elseif gamepad:getButtonHeld(XboxButton.B) then
+		Lyon:setTargetPosition(20, 0)
 	else
-		Lyon:setTargetExtension(Lyon:getExtension())
+		Lyon:setTargetPosition(0,20)
 	end
 
 	Lyon:periodic()

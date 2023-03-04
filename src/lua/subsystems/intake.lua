@@ -74,13 +74,14 @@ Lyon = {}
 Lyon.AXLE_HEIGHT = 40
 Lyon.NODE_ANGLE_MID = 1.57
 Lyon.NODE_ANGLE_HIGH = 1.82
-Lyon.MIN_EXTENSION = 33
+Lyon.MIN_EXTENSION = 32.5
 Lyon.MAX_EXTENSION = 63
+Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.5
 
-local OUTSIDE_ANGLE_FRONT = 0.09
+local OUTSIDE_ANGLE_FRONT = 0.1
 local OUTSIDE_ANGLE_BACK = -0.6
 local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION
-local ANGLE_MOTOR_MAX_SPEED = 0.5
+local ANGLE_MOTOR_MAX_SPEED = 1
 local TA_MOTOR_MAX_SPEED = 0.75
 
 local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
@@ -104,7 +105,7 @@ local function extensionToGround(angle)
 		return Lyon.MAX_EXTENSION
 	end
 
-	return math.min((Lyon.AXLE_HEIGHT - 2) / math.cos(angle), Lyon.MAX_EXTENSION)
+	return math.min((Lyon.AXLE_HEIGHT - 2	) / math.cos(angle), Lyon.MAX_EXTENSION)
 end
 
 ---Computes the maximum length in inches to which the arm may extend.
@@ -142,15 +143,25 @@ local function angleMotorOutputSpeed(target, angle, extension)
 		end
 	end
 
-	return armSpeed
+	local speedWhenExtended = 1 / 8
+	local curviness = 6
+
+	local relativeExtension = (extension - Lyon.MIN_EXTENSION) / Lyon.MAX_EXTENSION
+	local armMultiplier = (1 - speedWhenExtended) * signedPow(1-relativeExtension, curviness) + speedWhenExtended
+
+	return armSpeed * armMultiplier
 end
 
 ---Computes the output speed of the telescope motor, respecting safety constraints.
 ---@param target number
 ---@param extension number
 ---@param angle number
-local function teleMotorOutputSpeed(target, extension, angle)
-	target = math.min(target, maxSafeExtension(angle))
+local function teleMotorOutputSpeed(target, extension, angle, angleTarget)
+	target = clamp(target, Lyon.MIN_EXTENSION, maxSafeExtension(angle))
+
+	if math.abs(angleTarget - angle) > Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS then
+		target = Lyon.MIN_EXTENSION
+	end
 
 	return clampMag(telePid:pid(extension, target, 1), 0, TA_MOTOR_MAX_SPEED)
 end
@@ -182,8 +193,8 @@ function Lyon:periodic()
 
 	SmartDashboard:putNumber("LyonArmSpeed", armSpeed)
 	arm:set(armSpeed)
-	
-	local teleSpeed = teleMotorOutputSpeed(targetExtension, Lyon:getExtension(), Lyon:getAngle())
+
+	local teleSpeed = teleMotorOutputSpeed(targetExtension, Lyon:getExtension(), Lyon:getAngle(), targetAngle)
 	SmartDashboard:putNumber("LyonTeleSpeed", teleSpeed)
 	telescopingArm:set(teleSpeed)
 
@@ -218,6 +229,44 @@ end
 function Lyon:gripperSolenoid(doGrip)
 	gripperSolenoid:set(doGrip)
 end
+
+---@param x number
+---@param y number
+function Lyon:setTargetPosition(x, y)
+	local position = Vector:new(x, y) - Vector:new(0, Lyon.AXLE_HEIGHT)
+	position = position:rotate(math.pi / 2)
+	local angle = math.atan2(position.y, position.x)
+	local extension = position:length()
+
+	self:setTargetAngle(angle)
+	self:setTargetExtension(extension)
+
+	return angle, extension
+end
+
+test("Lyon setTarget", function (t)
+	local angle, extension
+
+	angle, extension = Lyon:setTargetPosition(0, 0)
+	t:assertEqual(angle, 0, "straigt down angle")
+	t:assertEqual(extension, 40, "straigt down extension")
+
+	angle, extension = Lyon:setTargetPosition(40, 40)
+	t:assertEqual(angle, math.pi / 2, "straigt forward angle")
+	t:assertEqual(extension, 40, "straigt forward extension")
+
+	angle, extension = Lyon:setTargetPosition(-40, 40)
+	t:assertEqual(angle, -math.pi / 2, "straigt backward angle")
+	t:assertEqual(extension, 40, "straigt backward extension")
+
+	angle, extension = Lyon:setTargetPosition(40, 0)
+	t:assertEqual(angle, math.pi / 4, "diagonal forward angle")
+	t:assertEqual(extension, math.sqrt(40 ^ 2 + 40 ^ 2), "diagonal forward extension")
+
+	angle, extension = Lyon:setTargetPosition(-40, 0)
+	t:assertEqual(angle, -math.pi / 4, "diagonal forward angle")
+	t:assertEqual(extension, math.sqrt(40 ^ 2 + 40 ^ 2), "diagonal forward extension")
+end)
 
 test("Lyon safety constraints", function(t)
 	-- hanging straight down
