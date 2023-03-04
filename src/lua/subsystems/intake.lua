@@ -1,5 +1,6 @@
 require("utils.teleopcoroutine")
 require("utils.math")
+require("utils.pid")
 require("wpilib.dashboard")
 
 --[[
@@ -78,8 +79,8 @@ Lyon.MAX_EXTENSION = 55
 
 local OUTSIDE_ANGLE_FRONT = 0.09
 local OUTSIDE_ANGLE_BACK = -0.6
-local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION + 1
-local ANGLE_MOTOR_MAX_SPEED = 0.2
+local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION
+local ANGLE_MOTOR_MAX_SPEED = 0.5
 local TA_MOTOR_MAX_SPEED = 0.75
 
 local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
@@ -88,6 +89,8 @@ local telescopingArm = CANSparkMax:new(22, SparkMaxMotorType.kBrushless)
 telescopingArm:setInverted(false)
 local telescopingEncoder = telescopingArm:getEncoder()
 gripperSolenoid = DoubleSolenoid:new(0, 1)
+
+local telePid = PIDController:new(1 / 5, 0, 0)
 
 local targetExtension = Lyon.MIN_EXTENSION
 local targetAngle = 0
@@ -151,13 +154,7 @@ end
 local function teleMotorOutputSpeed(target, extension, angle)
 	target = math.min(target, maxSafeExtension(angle))
 
-	local outSpeed = 0
-
-	if math.abs(target - extension) > 1 then
-		outSpeed = sign(target - extension) * TA_MOTOR_MAX_SPEED
-	end
-
-	return outSpeed
+	return math.min(telePid:pid(extension, target, 1), TA_MOTOR_MAX_SPEED)
 end
 
 ---Gets the raw encoder position from the arm angle motor. Unit: revolutions.
@@ -191,6 +188,8 @@ function Lyon:periodic()
 	local teleSpeed = teleMotorOutputSpeed(targetExtension, Lyon:getExtension(), Lyon:getAngle())
 	SmartDashboard:putNumber("LyonTeleSpeed", teleSpeed)
 	telescopingArm:set(teleSpeed)
+
+	telePid:updateTime(Timer:getFPGATimestamp())
 end
 
 ---Gets the angle of the arm, in radians. Positive angle is toward the front of the robot; negative angle is toward the back.
