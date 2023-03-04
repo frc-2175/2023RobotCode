@@ -76,13 +76,13 @@ Lyon.NODE_ANGLE_MID = 1.57
 Lyon.NODE_ANGLE_HIGH = 1.82
 Lyon.MIN_EXTENSION = 32.5
 Lyon.MAX_EXTENSION = 63
-Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.5
+Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
 
 local OUTSIDE_ANGLE_FRONT = 0.1
 local OUTSIDE_ANGLE_BACK = -0.6
 local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION
 local ANGLE_MOTOR_MAX_SPEED = 1
-local TA_MOTOR_MAX_SPEED = 0.75
+local TA_MOTOR_MAX_SPEED = 1
 
 local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
 local armEncoder = arm:getEncoder()
@@ -91,7 +91,7 @@ telescopingArm:setInverted(false)
 local telescopingEncoder = telescopingArm:getEncoder()
 gripperSolenoid = DoubleSolenoid:new(0, 1)
 
-local anglePid = PIDController:new(1 / 0.25, 0, 0)
+local anglePid = PIDController:new(1 / 0.25, 0, 0.3)
 local telePid = PIDController:new(1 / 5, 0, 0)
 
 local targetExtension = Lyon.MIN_EXTENSION
@@ -143,8 +143,8 @@ local function angleMotorOutputSpeed(target, angle, extension)
 		end
 	end
 
-	local speedWhenExtended = 1 / 8
-	local curviness = 6
+	local speedWhenExtended = 1 / 10
+	local curviness = 10
 
 	local relativeExtension = (extension - Lyon.MIN_EXTENSION) / Lyon.MAX_EXTENSION
 	local armMultiplier = (1 - speedWhenExtended) * signedPow(1-relativeExtension, curviness) + speedWhenExtended
@@ -198,6 +198,7 @@ function Lyon:periodic()
 	SmartDashboard:putNumber("LyonTeleSpeed", teleSpeed)
 	telescopingArm:set(teleSpeed)
 
+	anglePid:updateTime(Timer:getFPGATimestamp())
 	telePid:updateTime(Timer:getFPGATimestamp())
 end
 

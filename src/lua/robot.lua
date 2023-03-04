@@ -48,7 +48,7 @@ function Robot.teleopPeriodic()
 	elseif gamepad:getButtonHeld(XboxButton.X) then
 		Lyon:setTargetPosition(42.75, 46)
 	elseif gamepad:getButtonHeld(XboxButton.Y) then
-		Lyon:setTargetPosition(60, 59)
+		Lyon:setTargetPosition(60, 64)
 	elseif gamepad:getButtonHeld(XboxButton.B) then
 		Lyon:setTargetPosition(20, 0)
 	else
