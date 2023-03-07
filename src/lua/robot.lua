@@ -1,5 +1,5 @@
 require("subsystems.drivetrain")
-require("subsystems.intake")
+require("subsystems.lyon")
 require("utils.vector")
 require("utils.DDPE")
 require("utils.path")
@@ -9,8 +9,6 @@ require("wpilib.dashboard")
 leftStick = Joystick:new(0)
 rightStick = Joystick:new(1)
 gamepad = Joystick:new(2)
-
-navx = AHRS:new(4)
 
 -----------------------------------
 

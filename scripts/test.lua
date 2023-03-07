@@ -137,6 +137,11 @@ function test(name, func)
     tests[name] = func
 end
 
+---@return boolean
+function isTesting()
+	return true
+end
+
 --- Assert that a condition is true.
 ---@param value any The value to check - must be true for the test to pass.
 ---@param message string? An optional message to show in case of failure.
@@ -182,7 +187,7 @@ function T:assertDoesError(func)
 end
 
 function runTests()
-    local testItems = {}
+	local testItems = {}
     for name, func in pairs(tests) do
         table.insert(testItems, {
             name = name,

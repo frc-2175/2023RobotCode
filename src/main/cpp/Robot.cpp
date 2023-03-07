@@ -21,6 +21,7 @@ public:
 
 		// Disable tests in real robot code
 		RunLuaString(L, "function test() end");
+		RunLuaString(L, "function isTesting() return false end");
 
 		int initError = RunLuaFile(L, "init.lua");
 		if (initError) {

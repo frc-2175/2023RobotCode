@@ -1,5 +1,6 @@
 require("utils.blendeddrive")
-
+require("mocks.navx")
+require("mocks.motors")
 
 leftMotor = TalonFX:new(10)
 rightMotor = TalonFX:new(12)
@@ -24,7 +25,9 @@ local TICKS_TO_INCHES = (6 * math.pi) / (2048 * 11.71)
 
 Drivetrain = {}
 
-function Drivetrain:yaw() return -math.rad(navx:getYaw()) end
+function Drivetrain:yaw()
+	return -math.rad(navx:getYaw())
+end
 
 function Drivetrain:periodic()
 	SmartDashboard:putNumber("leftPosition", Drivetrain:leftPosition())
@@ -49,4 +52,10 @@ end
 
 function Drivetrain:rightPosition()
 	return -rightMotor:getSelectedSensorPosition() * TICKS_TO_INCHES
+end
+
+if isTesting() then
+	navx = MockNavX
+	leftMotor = MockTalonFX
+	rightMotor = MockTalonFX
 end
