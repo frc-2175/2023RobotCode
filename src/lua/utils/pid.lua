@@ -44,7 +44,9 @@ end
 
 ---@param input number
 ---@param setpoint number
----@param thresh number
+---@param thresh number?
+---@param maxChange number?
+---@param maxOutput number?
 ---@return number
 function PIDController:pid(input, setpoint, thresh, maxChange, maxOutput)
 	local threshold = thresh or 0
