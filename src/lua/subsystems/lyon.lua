@@ -73,8 +73,8 @@ Lyon = {}
 
 Lyon.AXLE_HEIGHT = 40
 Lyon.NODE_ANGLE_MID = 1.57
-Lyon.NODE_ANGLE_HIGH = 1.82
-Lyon.MIN_EXTENSION = 32.5
+Lyon.NODE_ANGLE_HIGH = 1.89
+Lyon.MIN_EXTENSION = 31.5
 Lyon.MAX_EXTENSION = 63
 Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
 
@@ -91,8 +91,8 @@ telescopingArm:setInverted(false)
 local telescopingEncoder = telescopingArm:getEncoder()
 gripperSolenoid = DoubleSolenoid:new(0, 1)
 
-local anglePid = PIDController:new(1 / 0.25, 0, 0.3)
-local telePid = PIDController:new(1 / 5, 0, 0)
+local anglePid = PIDController:new(1 / 0.2, 0.25, 0.35)
+local telePid = PIDController:new(1 / 2, 0, 0)
 
 local targetExtension = Lyon.MIN_EXTENSION
 local targetAngle = 0
@@ -105,7 +105,11 @@ local function extensionToGround(angle)
 		return Lyon.MAX_EXTENSION
 	end
 
-	return math.min((Lyon.AXLE_HEIGHT - 2	) / math.cos(angle), Lyon.MAX_EXTENSION)
+	-- the arm sags. this is a dumb hack to keep the claw off the ground.
+	local fudge = 16 * (-math.cos(angle) + 1) / 2
+	SmartDashboard:putNumber("LyonExtensionFudge", fudge)
+
+	return clamp((Lyon.AXLE_HEIGHT - 0.5) / math.cos(angle) - fudge, Lyon.MIN_EXTENSION, Lyon.MAX_EXTENSION)
 end
 
 ---Computes the maximum length in inches to which the arm may extend.
@@ -127,7 +131,13 @@ end
 ---@param extension number
 ---@return number
 local function angleMotorOutputSpeed(target, angle, extension)
-	local armSpeed = anglePid:pid(angle, target, 1, math.pi, ANGLE_MOTOR_MAX_SPEED)
+	local speedWhenExtended = 1 / 10
+	local curviness = 10
+
+	local relativeExtension = (extension - Lyon.MIN_EXTENSION) / Lyon.MAX_EXTENSION
+	local armMultiplier = (1 - speedWhenExtended) * signedPow(1-relativeExtension, curviness) + speedWhenExtended
+
+	local armSpeed = anglePid:pid(angle, target, 0.3, math.pi, ANGLE_MOTOR_MAX_SPEED * armMultiplier)
 
 	if angle >= Lyon.NODE_ANGLE_HIGH then
 		armSpeed = math.min(armSpeed, 0)
@@ -142,12 +152,6 @@ local function angleMotorOutputSpeed(target, angle, extension)
 			armSpeed = math.min(armSpeed, 0)
 		end
 	end
-
-	local speedWhenExtended = 1 / 10
-	local curviness = 10
-
-	local relativeExtension = (extension - Lyon.MIN_EXTENSION) / Lyon.MAX_EXTENSION
-	local armMultiplier = (1 - speedWhenExtended) * signedPow(1-relativeExtension, curviness) + speedWhenExtended
 
 	return armSpeed * armMultiplier
 end
@@ -227,9 +231,12 @@ function Lyon:setTargetExtension(target)
 	targetExtension = target
 end
 
----Opens or closes the gripper.
-function Lyon:gripperSolenoid(doGrip)
-	gripperSolenoid:set(doGrip)
+function Lyon:openGripper()
+	gripperSolenoid:set(DoubleSolenoidValue.Reverse)
+end
+
+function Lyon:closeGripper()
+	gripperSolenoid:set(DoubleSolenoidValue.Forward)
 end
 
 ---@param x number
@@ -242,6 +249,9 @@ function Lyon:setTargetPosition(x, y)
 
 	self:setTargetAngle(angle)
 	self:setTargetExtension(extension)
+
+	SmartDashboard:putNumber("LyonTargetX", x)
+	SmartDashboard:putNumber("LyonTargetY", y)
 
 	return angle, extension
 end

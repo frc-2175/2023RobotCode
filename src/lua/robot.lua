@@ -17,12 +17,20 @@ local poseEst = PhotonPoseEstimator:new(getDeployDirectory() .. "/fakefield.json
 
 local pe = DDPE:new(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition(), 0, 0, 0)
 
-local path = Path:new("Test")
+local path = Path:new("Test", {
+	testEvent = function()
+		print("TEST PATH TEST PATH TEST PATH")
+	end,
+})
 local pp = PurePursuit:new(path, 0.1, 0, 0)
 
 local field = Field2d:new()
 
 local speed, turn
+
+local nudgePosition = 10
+
+local nudgeSpeed = 16 -- inches per second
 
 -----------------------------------
 
@@ -67,24 +75,28 @@ function Robot.teleopPeriodic()
 	Drivetrain:drive(signedPow(leftStick:getY()) * 0.5, signedPow(rightStick:getX()) * 0.5)
 
 	if gamepad:getLeftTriggerAmount() > 0.5 then
-		Lyon:gripperSolenoid(DoubleSolenoidValue.Forward)
+		Lyon:openGripper()
 	elseif gamepad:getRightTriggerAmount() > 0.5 then
-		Lyon:gripperSolenoid(DoubleSolenoidValue.Reverse)
-	else
-		Lyon:gripperSolenoid(DoubleSolenoidValue.Off)
+		Lyon:closeGripper()
 	end
+
+	nudgeChange = gamepad:getLeftStickY() / 50 * nudgeSpeed
+	nudgePosition = clamp(nudgePosition + nudgeChange, 6, 48)
 
 	if gamepad:getButtonHeld(XboxButton.A) then
 		Lyon:setTargetPosition(34, 13)
 	elseif gamepad:getButtonHeld(XboxButton.X) then
-		Lyon:setTargetPosition(42.75, 46)
+		Lyon:setTargetPosition(43.75, 46)
 	elseif gamepad:getButtonHeld(XboxButton.Y) then
-		Lyon:setTargetPosition(60, 64)
+		Lyon:setTargetPosition(62, 73)
 	elseif gamepad:getButtonHeld(XboxButton.B) then
-		Lyon:setTargetPosition(20, 0)
-	else
-		Lyon:setTargetPosition(0,20)
-	end
+		if gamepad:getButtonPressed(XboxButton.B) then
+			Lyon:openGripper()
+		end
 
+		Lyon:setTargetPosition(nudgePosition, 0)
+	else
+		Lyon:setTargetPosition(6, 20)
+	end
 end
 

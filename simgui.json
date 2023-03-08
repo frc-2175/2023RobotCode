@@ -78,11 +78,17 @@
       "FMSInfo": {
         "open": true
       },
+      "LiveWindow": {
+        "open": true
+      },
       "SmartDashboard": {
         "open": true
       },
       "photonvision": {
         "GigaLaptop": {
+          "open": true
+        },
+        "HD_USB_Camera": {
           "open": true
         },
         "open": true,
@@ -103,6 +109,7 @@
       "Subscribers": {
         "open": true
       }
-    }
+    },
+    "visible": true
   }
 }
