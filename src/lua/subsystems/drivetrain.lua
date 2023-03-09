@@ -38,8 +38,8 @@ end
 function Drivetrain:drive(speed, rotation)
 	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, rotation)
 
-	leftMotor:set(leftSpeed)
-	rightMotor:set(rightSpeed)
+	leftMotor:set(leftSpeed * 0.5)
+	rightMotor:set(rightSpeed * 0.5)
 end
 
 function Drivetrain:stop()
@@ -52,6 +52,10 @@ end
 
 function Drivetrain:rightPosition()
 	return -rightMotor:getSelectedSensorPosition() * TICKS_TO_INCHES
+end
+
+function Drivetrain:combinedPosition() 
+	return (Drivetrain:leftPosition() + Drivetrain:rightPosition()) / 2
 end
 
 if isTesting() then

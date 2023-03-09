@@ -2,6 +2,7 @@ require("utils.teleopcoroutine")
 require("utils.math")
 require("utils.pid")
 require("wpilib.dashboard")
+require("utils.vector")
 
 --[[
 
@@ -77,6 +78,10 @@ Lyon.NODE_ANGLE_HIGH = 1.89
 Lyon.MIN_EXTENSION = 31.5
 Lyon.MAX_EXTENSION = 63
 Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
+Lyon.HIGH_PRESET = Vector:new(62, 73)
+Lyon.MID_PRESET = Vector:new(43.75, 46)
+Lyon.LOW_PRESET = Vector:new(34, 13)
+Lyon.NEUTRAL = Vector:new(6, 20)
 
 local OUTSIDE_ANGLE_FRONT = 0.1
 local OUTSIDE_ANGLE_BACK = -0.6
@@ -254,6 +259,11 @@ function Lyon:setTargetPosition(x, y)
 	SmartDashboard:putNumber("LyonTargetY", y)
 
 	return angle, extension
+end
+
+---@param preset Vector
+function Lyon:setTargetPositionPreset(preset)
+	Lyon:setTargetPosition(preset.x, preset.y)
 end
 
 test("Lyon setTarget", function (t)

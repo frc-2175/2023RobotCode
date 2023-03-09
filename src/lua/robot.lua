@@ -5,6 +5,7 @@ require("utils.DDPE")
 require("utils.path")
 require("utils.purepursuit")
 require("wpilib.dashboard")
+require("auto.coroutines")
 
 leftStick = Joystick:new(0)
 rightStick = Joystick:new(1)
@@ -31,6 +32,10 @@ local speed, turn
 local nudgePosition = 10
 
 local nudgeSpeed = 16 -- inches per second
+
+local autoSeconds = 3000
+
+local autoLoopCount = 0
 
 -----------------------------------
 
@@ -63,16 +68,19 @@ function Robot.robotPeriodic()
 end
 
 function Robot.autonomousInit()
+	getSelectedAuto():reset()
 end
 
 function Robot.autonomousPeriodic()
-	Drivetrain:drive(clamp(-speed, -0.2, 0.2),clamp(-turn, -0.2, 0.2))
+	-- Drivetrain:drive(clamp(-speed, -0.2, 0.2),clamp(-turn, -0.2, 0.2))
+	-- Just call auto periodic
+	getSelectedAuto():run()
 end
 
 function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
-	Drivetrain:drive(signedPow(leftStick:getY()) * 0.5, signedPow(rightStick:getX()) * 0.5)
+	Drivetrain:drive(signedPow(leftStick:getY()), signedPow(rightStick:getX()))
 
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:openGripper()
@@ -84,11 +92,11 @@ function Robot.teleopPeriodic()
 	nudgePosition = clamp(nudgePosition + nudgeChange, 6, 48)
 
 	if gamepad:getButtonHeld(XboxButton.A) then
-		Lyon:setTargetPosition(34, 13)
+		Lyon:setTargetPositionPreset(Lyon.LOW_PRESET)
 	elseif gamepad:getButtonHeld(XboxButton.X) then
-		Lyon:setTargetPosition(43.75, 46)
+		Lyon:setTargetPositionPreset(Lyon.MID_PRESET)
 	elseif gamepad:getButtonHeld(XboxButton.Y) then
-		Lyon:setTargetPosition(62, 73)
+		Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
 	elseif gamepad:getButtonHeld(XboxButton.B) then
 		if gamepad:getButtonPressed(XboxButton.B) then
 			Lyon:openGripper()
@@ -96,7 +104,7 @@ function Robot.teleopPeriodic()
 
 		Lyon:setTargetPosition(nudgePosition, 0)
 	else
-		Lyon:setTargetPosition(6, 20)
+		Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
 	end
 end
 

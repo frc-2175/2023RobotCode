@@ -3,6 +3,7 @@
 ---@field coroutineFunc function
 ---@field coroutine any
 ---@field wasRunning boolean
+---@field done boolean
 FancyCoroutine = {}
 
 ---@param coroutineFunc function
@@ -12,6 +13,7 @@ function FancyCoroutine:new(coroutineFunc)
 		coroutineFunc = coroutineFunc,
 		coroutine = nil,
 		wasRunning = false,
+		done = false,
 		-- runWhile = function(self, running)
 		-- 	if running then
 		-- 		if not self.wasRunning then
@@ -34,9 +36,12 @@ function FancyCoroutine:new(coroutineFunc)
 
 	return t
 end
+
 function FancyCoroutine:reset() 
 	self.wasRunning = false
+	self.done = false
 end
+
 function FancyCoroutine:run()
 	if not self.wasRunning then
 		self.coroutine = coroutine.create(self.coroutineFunc)
@@ -44,6 +49,16 @@ function FancyCoroutine:run()
 	end
 
 	local status, yield = coroutine.resume(self.coroutine)
+	if not status then
+		self.done = true
+	end
 
 	return yield
+end
+
+function FancyCoroutine:runUntilDone()
+	while not self.done do
+		self:run()
+		coroutine.yield()
+	end
 end
