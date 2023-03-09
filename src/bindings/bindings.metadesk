@@ -547,7 +547,7 @@ dashboard: {
 		@static @nolua double* GetNumberArray(const char* keyName, double* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetNumberArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();""";
 		@static @nolua PutStringArray(const char* keyName, const char** value, size_t size) """	std::vector<std::string> strVec(value, value + size);
 	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));""";
-		@static @nolua @alias(PutIntChooser) PutData(@cast("frc::SendableChooser<int>*") void* data);
+		@static @nolua @alias(PutIntChooser) PutData(@cast("std::string_view") const char* key, @cast("frc::SendableChooser<int>*") void* data);
 		@static @nolua @alias(PutField) PutData(@cast("frc::Field2d*") void* field);
 	}
 

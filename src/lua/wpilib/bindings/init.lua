@@ -473,7 +473,7 @@ void PutNumberArray(const char * keyName, double * value, size_t size);
 size_t GetNumberArraySize(const char * keyName);
 double * GetNumberArray(const char * keyName, double * defaultValue, size_t defaultSize);
 void PutStringArray(const char * keyName, const char ** value, size_t size);
-void PutIntChooser(void * data);
+void PutIntChooser(const char * key, void * data);
 void PutField(void * field);
 void* SendableChooser_new();
 void SendableChooser_AddOption(void* _this, const char * name, int object);

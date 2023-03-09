@@ -68,9 +68,9 @@ function getSelectedAuto()
 	return autoChooser:getSelected()
 end
 
-autoChooser:putChooser({
+autoChooser:putChooser("Selected Auto", {
 	{ name = "doNothing", value = doNothingAuto },
 	{ name = "mobilityAuto", value = mobilityAuto},
 	{ name = "highMobility", value = highMobility},
-	{ name = "highAutoEngage", value = highAutoEngage}
+	-- { name = "highAutoEngage", value = highAutoEngage}
 })

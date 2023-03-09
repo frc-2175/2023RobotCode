@@ -56,6 +56,7 @@
       "/LiveWindow/Ungrouped/Talon FX [13]": "Motor Controller",
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Selected Auto": "String Chooser",
       "/SmartDashboard/SendableChooser[0]": "String Chooser"
     },
     "windows": {

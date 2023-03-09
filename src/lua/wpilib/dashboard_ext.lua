@@ -33,14 +33,16 @@ function SmartDashboard:putStringArray(keyName, value)
     ffi.C.PutStringArray(keyName, ffi.new("const char *[?]", #value, value), #value)
 end
 
-function SendableChooser:putChooser(options)
+---@param name string
+---@param options table
+function SendableChooser:putChooser(name, options)
 	self.options = options
 
 	for i, option in ipairs(options) do
 		self:addOption(option.name, i)
 	end
 
-	ffi.C.PutIntChooser(self._this)
+	ffi.C.PutIntChooser(name, self._this)
 end
 
 function SendableChooser:getSelected()

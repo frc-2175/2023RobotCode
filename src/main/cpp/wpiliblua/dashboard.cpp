@@ -81,8 +81,8 @@ LUAFUNC void PutStringArray(const char * keyName, const char ** value, size_t si
 	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));
 }
 
-LUAFUNC void PutIntChooser(void * data) {
-    frc::SmartDashboard::PutData((frc::SendableChooser<int>*)data);
+LUAFUNC void PutIntChooser(const char * key, void * data) {
+    frc::SmartDashboard::PutData((std::string_view)key, (frc::SendableChooser<int>*)data);
 }
 
 LUAFUNC void PutField(void * field) {
