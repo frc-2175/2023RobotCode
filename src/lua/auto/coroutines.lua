@@ -50,6 +50,7 @@ local mobilityAuto = FancyCoroutine:new(function ()
 end)
 
 local scoreHigh = FancyCoroutine:new(function ()
+	Lyon:closeGripper()
 	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
 	sleep(3)
 	Lyon:openGripper()
@@ -59,13 +60,19 @@ local scoreHigh = FancyCoroutine:new(function ()
 end)
 
 local highMobility = FancyCoroutine:new(function ()
+	scoreHigh:reset()
+	mobilityAuto:reset()
 	scoreHigh:runUntilDone()
 	mobilityAuto:runUntilDone()
 end)
 
 ---@return FancyCoroutine
 function getSelectedAuto()
-	return autoChooser:getSelected()
+	if autoChooser:getSelected() then
+		return autoChooser:getSelected()
+	else 
+		return mobilityAuto
+	end
 end
 
 autoChooser:putChooser("Selected Auto", {

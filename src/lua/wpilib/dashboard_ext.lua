@@ -45,10 +45,12 @@ function SendableChooser:putChooser(name, options)
 	ffi.C.PutIntChooser(name, self._this)
 end
 
+---@return any?
 function SendableChooser:getSelected()
 	local selected = ffi.C.SendableChooser_GetSelected(self._this)
-
-	return self.options[selected].value
+	local selectedOption = self.options[selected]
+	
+	return selectedOption and selectedOption.value
 end
 
 ---@param field Field2d

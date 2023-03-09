@@ -80,7 +80,7 @@ end
 function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
-	Drivetrain:drive(signedPow(leftStick:getY()), signedPow(rightStick:getX()))
+	Drivetrain:drive(signedPow(-leftStick:getY()), signedPow(rightStick:getX()))
 
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:openGripper()

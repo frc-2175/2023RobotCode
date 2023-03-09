@@ -8,6 +8,10 @@
 
 require("utils.math")
 
+---@param moveValue number
+---@param turnValue number
+---@param inputThreshold number?
+---@return number, number
 function getBlendedMotorValues(moveValue, turnValue, inputThreshold)
 	-- default value
 	inputThreshold = inputThreshold or 0.1

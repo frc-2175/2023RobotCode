@@ -7,19 +7,18 @@ rightMotor = TalonFX:new(12)
 
 navx = AHRS:new(4)
 
-rightMotor:setInverted(CTREInvertType.InvertMotorOutput)
+leftMotor:setInverted(CTREInvertType.InvertMotorOutput)
 leftFollower = TalonFX:new(11)
 leftFollower:follow(leftMotor)
 leftFollower:setInverted(CTREInvertType.FollowMaster)
 
+rightMotor:setInverted(CTREInvertType.None)
 rightFollower = TalonFX:new(13)
 rightFollower:follow(rightMotor)
 rightFollower:setInverted(CTREInvertType.FollowMaster)
 
 leftMotor:setNeutralMode(NeutralMode.Brake)
 rightMotor:setNeutralMode(NeutralMode.Brake)
-
-rightMotor:setInverted(CTREInvertType.InvertMotorOutput)
 
 local TICKS_TO_INCHES = (6 * math.pi) / (2048 * 11.71)
 
@@ -36,7 +35,7 @@ function Drivetrain:periodic()
 end
 
 function Drivetrain:drive(speed, rotation)
-	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, rotation)
+	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation)
 
 	leftMotor:set(leftSpeed * 0.5)
 	rightMotor:set(rightSpeed * 0.5)
