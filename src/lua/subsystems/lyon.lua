@@ -105,6 +105,8 @@ local telePid = PIDController:new(1 / 2, 0, 0)
 local targetExtension = Lyon.MIN_EXTENSION
 local targetAngle = 0
 
+local overrideSlowdownWhenExtended = false
+
 ---Computes how far the arm should extend in order to reach the ground. Formula: 40" / cos(angle).
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
 ---@return number
@@ -144,6 +146,9 @@ local function angleMotorOutputSpeed(target, angle, extension)
 
 	local relativeExtension = (extension - Lyon.MIN_EXTENSION) / Lyon.MAX_EXTENSION
 	local armMultiplier = (1 - speedWhenExtended) * signedPow(1-relativeExtension, curviness) + speedWhenExtended
+	if overrideSlowdownWhenExtended then
+		armMultiplier = 1 -- be careful!!
+	end
 
 	local armSpeed = anglePid:pid(angle, target, 0.3, math.pi, ANGLE_MOTOR_MAX_SPEED * armMultiplier)
 
@@ -213,6 +218,8 @@ function Lyon:periodic()
 
 	anglePid:updateTime(Timer:getFPGATimestamp())
 	telePid:updateTime(Timer:getFPGATimestamp())
+
+	overrideSlowdownWhenExtended = false
 end
 
 ---Gets the angle of the arm, in radians. Positive angle is toward the front of the robot; negative angle is toward the back.
@@ -267,6 +274,10 @@ end
 ---@param preset Vector
 function Lyon:setTargetPositionPreset(preset)
 	Lyon:setTargetPosition(preset.x, preset.y)
+end
+
+function Lyon:overrideSlowdownWhenExtendedThisTick()
+	overrideSlowdownWhenExtended = true
 end
 
 test("Lyon setTarget", function (t)

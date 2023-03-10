@@ -67,7 +67,7 @@ local highMobility = FancyCoroutine:new(function ()
 end)
 
 local engage = FancyCoroutine:new(function ()
-	driveNInches(((8*12)+(2+(5/8))) - 20, -0.5):runUntilDone()
+	driveNInches(((9*12)+(2+(5/8))) - 20, -0.5):runUntilDone()
 end)
 
 local highAutoEngage = FancyCoroutine:new(function ()

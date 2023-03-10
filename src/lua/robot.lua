@@ -31,13 +31,15 @@ local speed, turn
 
 local nudgePosition = 10
 
-local nudgeSpeed = 16 -- inches per second
+local nudgeSpeed = 32 -- inches per second
 
 local autoSeconds = 3000
 
 local autoLoopCount = 0
 
 local scoreDirection = "front"
+
+navx = AHRS:new(4)
 
 -----------------------------------
 
@@ -65,6 +67,8 @@ function Robot.robotPeriodic()
 	SmartDashboard:putNumber("speed", speed)
 	SmartDashboard:putNumber("turn", turn)
 	SmartDashboard:putString("scoreDirection", scoreDirection)
+	SmartDashboard:putNumber("roll", navx:getRoll())
+	SmartDashboard:putNumber("pitch", navx:getPitch())
 
 	Lyon:periodic()
 	Drivetrain:periodic()
@@ -108,6 +112,7 @@ function Robot.teleopPeriodic()
 				Lyon:openGripper()
 			end
 
+			Lyon:overrideSlowdownWhenExtendedThisTick()
 			Lyon:setTargetPosition(nudgePosition, 0)
 		else
 			Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
@@ -134,4 +139,6 @@ function Robot.teleopPeriodic()
 	if rightStick:getButtonPressed(2) then
 		scoreDirection = "rear"
 	end
+
+	
 end
