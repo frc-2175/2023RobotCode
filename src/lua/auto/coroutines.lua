@@ -89,6 +89,7 @@ end
 autoChooser:putChooser("Selected Auto", {
 	{ name = "doNothing", value = doNothingAuto },
 	{ name = "mobilityAuto", value = mobilityAuto},
+	{ name = "highOnly", value = scoreHigh },
 	{ name = "highMobility", value = highMobility},
 	{ name = "highAutoEngage", value = highAutoEngage}
 })
