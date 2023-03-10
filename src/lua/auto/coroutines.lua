@@ -66,6 +66,17 @@ local highMobility = FancyCoroutine:new(function ()
 	mobilityAuto:runUntilDone()
 end)
 
+local engage = FancyCoroutine:new(function ()
+	driveNInches(((8*12)+(2+(5/8))) - 20, -0.5):runUntilDone()
+end)
+
+local highAutoEngage = FancyCoroutine:new(function ()
+	scoreHigh:reset()
+	engage:reset()
+	scoreHigh:runUntilDone()
+	engage:runUntilDone()
+end)
+
 ---@return FancyCoroutine
 function getSelectedAuto()
 	if autoChooser:getSelected() then
@@ -79,5 +90,5 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "doNothing", value = doNothingAuto },
 	{ name = "mobilityAuto", value = mobilityAuto},
 	{ name = "highMobility", value = highMobility},
-	-- { name = "highAutoEngage", value = highAutoEngage}
+	{ name = "highAutoEngage", value = highAutoEngage}
 })

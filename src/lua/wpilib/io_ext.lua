@@ -3,6 +3,19 @@ require("utils.math")
 
 local deadvalue = 0.01
 
+XboxButton = {
+	A = 1,
+	B = 2,
+	X = 3,
+	Y = 4,
+	LeftBumper = 5,
+	RightBumper = 6,
+	Select = 7,
+	Start = 8,
+	LeftStick = 9,
+	RightStick = 10,
+}
+
 ---@return number
 function Joystick:getX()
 	return deadband(ffi.C.Joystick_GetX(self._this), deadvalue)

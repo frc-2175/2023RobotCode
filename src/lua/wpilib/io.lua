@@ -8,30 +8,6 @@ require("wpilib.bindings.enum")
 ---@field _this Joystick
 Joystick = {}
 
----@class XboxButton
----@field A integer
----@field B integer
----@field X integer
----@field Y integer
----@field LeftBumper integer
----@field RightBumper integer
----@field Select integer
----@field Start integer
----@field LeftStick integer
----@field RightStick integer
-XboxButton = BindingEnum:new('XboxButton', {
-    A = 1,
-    B = 2,
-    X = 3,
-    Y = 4,
-    LeftBumper = 5,
-    RightBumper = 6,
-    Select = 7,
-    Start = 8,
-    LeftStick = 9,
-    RightStick = 10,
-})
-
 -- Construct an instance of a joystick.
 ---@param port integer
 ---@return Joystick
@@ -102,7 +78,6 @@ end
 ---@param button integer
 ---@return boolean
 function Joystick:getButtonHeld(button)
-    button = AssertEnumValue(XboxButton, button)
     button = AssertInt(button)
     return ffi.C.Joystick_GetButtonHeld(self._this, button)
 end
@@ -110,7 +85,6 @@ end
 ---@param button integer
 ---@return boolean
 function Joystick:getButtonPressed(button)
-    button = AssertEnumValue(XboxButton, button)
     button = AssertInt(button)
     return ffi.C.Joystick_GetButtonPressed(self._this, button)
 end
@@ -118,7 +92,6 @@ end
 ---@param button integer
 ---@return boolean
 function Joystick:getButtonReleased(button)
-    button = AssertEnumValue(XboxButton, button)
     button = AssertInt(button)
     return ffi.C.Joystick_GetButtonReleased(self._this, button)
 end

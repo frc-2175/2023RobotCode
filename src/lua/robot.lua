@@ -37,6 +37,8 @@ local autoSeconds = 3000
 
 local autoLoopCount = 0
 
+local scoreDirection = "front"
+
 -----------------------------------
 
 function Robot.robotInit()
@@ -62,6 +64,7 @@ function Robot.robotPeriodic()
 	
 	SmartDashboard:putNumber("speed", speed)
 	SmartDashboard:putNumber("turn", turn)
+	SmartDashboard:putString("scoreDirection", scoreDirection)
 
 	Lyon:periodic()
 	Drivetrain:periodic()
@@ -90,21 +93,45 @@ function Robot.teleopPeriodic()
 
 	nudgeChange = gamepad:getLeftStickY() / 50 * nudgeSpeed
 	nudgePosition = clamp(nudgePosition + nudgeChange, 6, 48)
+	SmartDashboard:putNumber("nudgeChange", nudgeChange)
+	SmartDashboard:putNumber("nudgePosition", nudgePosition)
 
-	if gamepad:getButtonHeld(XboxButton.A) then
-		Lyon:setTargetPositionPreset(Lyon.LOW_PRESET)
-	elseif gamepad:getButtonHeld(XboxButton.X) then
-		Lyon:setTargetPositionPreset(Lyon.MID_PRESET)
-	elseif gamepad:getButtonHeld(XboxButton.Y) then
-		Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
-	elseif gamepad:getButtonHeld(XboxButton.B) then
-		if gamepad:getButtonPressed(XboxButton.B) then
-			Lyon:openGripper()
+	if scoreDirection == "front" then
+		if gamepad:getButtonHeld(XboxButton.A) then
+			Lyon:setTargetPositionPreset(Lyon.LOW_PRESET)
+		elseif gamepad:getButtonHeld(XboxButton.X) then
+			Lyon:setTargetPositionPreset(Lyon.MID_PRESET)
+		elseif gamepad:getButtonHeld(XboxButton.Y) then
+			Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
+		elseif gamepad:getButtonHeld(XboxButton.B) then
+			if gamepad:getButtonPressed(XboxButton.B) then
+				Lyon:openGripper()
+			end
+
+			Lyon:setTargetPosition(nudgePosition, 0)
+		else
+			Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
 		end
+	end
 
-		Lyon:setTargetPosition(nudgePosition, 0)
-	else
-		Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
+	if scoreDirection == "rear" then
+		if gamepad:getButtonHeld(XboxButton.A) then
+			Lyon:setTargetPositionPreset(Lyon.LOW_REAR)
+		elseif gamepad:getButtonHeld(XboxButton.X) then
+			Lyon:setTargetPositionPreset(Lyon.MID_REAR)
+		elseif gamepad:getButtonHeld(XboxButton.Y) then
+			Lyon:setTargetPositionPreset(Lyon.HIGH_REAR)
+		else
+			Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
+		end
+	end
+
+	-- Switch score mode
+	if leftStick:getButtonPressed(2) then
+		scoreDirection = "front"
+	end
+
+	if rightStick:getButtonPressed(2) then
+		scoreDirection = "rear"
 	end
 end
-

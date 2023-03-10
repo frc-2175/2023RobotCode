@@ -1,18 +1,18 @@
 @include("<frc/Joystick.h>")
 io: {
-	@enum
-	XboxButton: {
-		A: 1,
-		B: 2,
-		X: 3,
-		Y: 4,
-		LeftBumper: 5,
-		RightBumper: 6,
-		Select: 7,
-		Start: 8,
-		LeftStick: 9,
-		RightStick: 10,
-	}
+	// @enum
+	// XboxButton: {
+	// 	A: 1,
+	// 	B: 2,
+	// 	X: 3,
+	// 	Y: 4,
+	// 	LeftBumper: 5,
+	// 	RightBumper: 6,
+	// 	Select: 7,
+	// 	Start: 8,
+	// 	LeftStick: 9,
+	// 	RightStick: 10,
+	// }
 
 	@class("frc::Joystick")
 	Joystick: {
@@ -38,9 +38,9 @@ io: {
 		// hey i feel like if you're reading this you should know, WPI officially supports a guitar controller
 
 		// GenericHID
-		@alias(GetButtonHeld) bool GetRawButton(@enum(XboxButton) int button);
-		@alias(GetButtonPressed) bool GetRawButtonPressed(@enum(XboxButton) int button);
-		@alias(GetButtonReleased) bool GetRawButtonReleased(@enum(XboxButton) int button);
+		@alias(GetButtonHeld) bool GetRawButton(int button);
+		@alias(GetButtonPressed) bool GetRawButtonPressed(int button);
+		@alias(GetButtonReleased) bool GetRawButtonReleased(int button);
 		@nolua double GetRawAxis(int axis); // we will write a custom getAxis with deadband
 		int GetPOV(@default(0) int port); // Note that this takes an optional argument in case you somehow have more than one POV. I'm leaving that argument out.
 		int GetAxisCount();
