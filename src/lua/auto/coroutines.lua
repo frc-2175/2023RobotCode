@@ -67,14 +67,27 @@ local highMobility = FancyCoroutine:new(function ()
 end)
 
 local engage = FancyCoroutine:new(function ()
-	driveNInches(((9*12)+(2+(5/8))) - 20, -0.5):runUntilDone()
+	driveNInches((104.625) - 20, -0.5):runUntilDone()
+end)
+
+local smartEngage = FancyCoroutine:new(function ()
+	print("Starting smartEngage")
+	while Drivetrain:pitchDegrees() > -11 do
+		print("Driving while waiting for pitch to drop...")
+		Drivetrain:drive(-0.5, 0)
+		coroutine.yield()
+	end
+	print("Reached target, stopping...")
+	Drivetrain:stop()
+	print("Driving 42 inches...")
+	driveNInches(42, -0.4):runUntilDone()
 end)
 
 local highAutoEngage = FancyCoroutine:new(function ()
 	scoreHigh:reset()
-	engage:reset()
+	smartEngage:reset()
 	scoreHigh:runUntilDone()
-	engage:runUntilDone()
+	smartEngage:runUntilDone()
 end)
 
 ---@return FancyCoroutine
@@ -91,5 +104,6 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "mobilityAuto", value = mobilityAuto},
 	{ name = "highOnly", value = scoreHigh },
 	{ name = "highMobility", value = highMobility},
-	{ name = "highAutoEngage", value = highAutoEngage}
+	{ name = "highAutoEngage", value = highAutoEngage},
+	{ name = "smartEngage", value = smartEngage}
 })

@@ -28,6 +28,10 @@ function Drivetrain:yaw()
 	return -math.rad(navx:getYaw())
 end
 
+function Drivetrain:pitchDegrees()
+	return navx:getPitch()
+end
+
 function Drivetrain:periodic()
 	SmartDashboard:putNumber("leftPosition", Drivetrain:leftPosition())
 	SmartDashboard:putNumber("rightPosition", Drivetrain:rightPosition())

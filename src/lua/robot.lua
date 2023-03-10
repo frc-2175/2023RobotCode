@@ -110,10 +110,11 @@ function Robot.teleopPeriodic()
 		elseif gamepad:getButtonHeld(XboxButton.B) then
 			if gamepad:getButtonPressed(XboxButton.B) then
 				Lyon:openGripper()
+				Lyon:overrideSlowdownWhenExtendedThisTick()
+				Lyon:setTargetPosition(nudgePosition, 0)
 			end
-
-			Lyon:overrideSlowdownWhenExtendedThisTick()
-			Lyon:setTargetPosition(nudgePosition, 0)
+		elseif gamepad:getButtonHeld(XboxButton.LeftBumper) then
+			Lyon:setTargetPositionPreset(Lyon.SUBSTATION_PRESET)
 		else
 			Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
 		end
@@ -126,6 +127,8 @@ function Robot.teleopPeriodic()
 			Lyon:setTargetPositionPreset(Lyon.MID_REAR)
 		elseif gamepad:getButtonHeld(XboxButton.Y) then
 			Lyon:setTargetPositionPreset(Lyon.HIGH_REAR)
+		elseif gamepad:getButtonHeld(XboxButton.LeftBumper) then
+			Lyon:setTargetPositionPreset(Lyon.SUBSTATION_REAR)
 		else
 			Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
 		end

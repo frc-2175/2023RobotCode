@@ -81,10 +81,12 @@ Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
 Lyon.HIGH_PRESET = Vector:new(62, 73)
 Lyon.MID_PRESET = Vector:new(43.75, 46)
 Lyon.LOW_PRESET = Vector:new(34, 13)
+Lyon.SUBSTATION_PRESET = Vector:new(29, ((3*12) + 10))
 Lyon.NEUTRAL = Vector:new(6, 20)
 Lyon.HIGH_REAR = Vector:new(-62, 73)
 Lyon.MID_REAR = Vector:new(-43.75, 46)
 Lyon.LOW_REAR = Vector:new(-34, 13)
+Lyon.SUBSTATION_REAR = Vector:new(-29, ((3*12) + 10))
 
 local OUTSIDE_ANGLE_FRONT = 0.1
 local OUTSIDE_ANGLE_BACK = -0.6
