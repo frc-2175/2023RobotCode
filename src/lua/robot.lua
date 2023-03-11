@@ -37,6 +37,10 @@ local autoSeconds = 3000
 
 local autoLoopCount = 0
 
+local encoderValueAtSubstation = 0
+
+local inSubstation = false
+
 local scoreDirection = "front"
 
 navx = AHRS:new(4)
@@ -48,20 +52,20 @@ end
 
 function Robot.robotPeriodic()
 	local pose, timestamp = poseEst:update()
-
+	
 	if pose ~= nil then
 		pe:AddVisionMeasurement(pose.position.x, pose.position.y, pose.rotation.z, timestamp)
 	end
-
+	
 	local x, y , rot = pe:Update(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition())
-
+	
 	SmartDashboard:putNumber("X", x)
 	SmartDashboard:putNumber("Y", y)
 	SmartDashboard:putNumber("Rot", rot)
-
+	
 	field:setRobotPose(x, y, rot)
 	SmartDashboard:putField(field)
-
+	
 	speed, turn = pp:run(Vector:new(x, y), rot)
 	
 	SmartDashboard:putNumber("speed", speed)
@@ -69,7 +73,7 @@ function Robot.robotPeriodic()
 	SmartDashboard:putString("scoreDirection", scoreDirection)
 	SmartDashboard:putNumber("roll", navx:getRoll())
 	SmartDashboard:putNumber("pitch", navx:getPitch())
-
+	
 	Lyon:periodic()
 	Drivetrain:periodic()
 end
@@ -88,60 +92,71 @@ function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
 	Drivetrain:drive(signedPow(-leftStick:getY()), signedPow(rightStick:getX()))
-
+	
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:openGripper()
 	elseif gamepad:getRightTriggerAmount() > 0.5 then
 		Lyon:closeGripper()
 	end
-
+	
 	nudgeChange = gamepad:getLeftStickY() / 50 * nudgeSpeed
-	nudgePosition = clamp(nudgePosition + nudgeChange, 6, 48)
+	nudgePosition = clamp(nudgePosition + nudgeChange, 7, 20)
 	SmartDashboard:putNumber("nudgeChange", nudgeChange)
 	SmartDashboard:putNumber("nudgePosition", nudgePosition)
 
-	if scoreDirection == "front" then
+	reachedEncoderDisableFront = (encoderValueAtSubstation + 36 < Drivetrain:combinedPosition())
+	-- reachedEncoderDisableRear = (scoreDirection == "rear" and (Drivetrain:combinedPosition() > encoderValueAtSubstation + 36))
+	if reachedEncoderDisableFront then
+		inSubstation = false
+	end
+	
+	if not inSubstation then
 		if gamepad:getButtonHeld(XboxButton.A) then
-			Lyon:setTargetPositionPreset(Lyon.LOW_PRESET)
+			local preset = scoreDirection == "front" and Lyon.LOW_PRESET or Lyon.LOW_REAR
+			Lyon:setTargetPositionPreset(preset)
 		elseif gamepad:getButtonHeld(XboxButton.X) then
-			Lyon:setTargetPositionPreset(Lyon.MID_PRESET)
+			local preset = scoreDirection == "front" and Lyon.MID_PRESET or Lyon.MID_REAR
+			Lyon:setTargetPositionPreset(preset)
 		elseif gamepad:getButtonHeld(XboxButton.Y) then
-			Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
-		elseif gamepad:getButtonHeld(XboxButton.B) then
+			local preset = scoreDirection == "front" and Lyon.HIGH_PRESET or Lyon.HIGH_REAR
+			Lyon:setTargetPositionPreset(preset)
+		elseif gamepad:getButtonHeld(XboxButton.B) and scoreDirection == "front" then
 			if gamepad:getButtonPressed(XboxButton.B) then
 				Lyon:openGripper()
-				Lyon:overrideSlowdownWhenExtendedThisTick()
-				Lyon:setTargetPosition(nudgePosition, 0)
 			end
-		elseif gamepad:getButtonHeld(XboxButton.LeftBumper) then
+			Lyon:overrideSlowdownWhenExtendedThisTick()
+			Lyon:setTargetPosition(nudgePosition, 0)
+		else
+			local neutralX = (Lyon.MIN_EXTENSION*nudgePosition)/Lyon.AXLE_HEIGHT
+			local neutralY = Lyon.AXLE_HEIGHT-Lyon.MIN_EXTENSION
+			Lyon:setTargetPosition(neutralX,neutralY)
+		end
+	end
+	
+	if gamepad:getButtonHeld(XboxButton.LeftBumper) then
+		if scoreDirection == "front" then
 			Lyon:setTargetPositionPreset(Lyon.SUBSTATION_PRESET)
-		else
-			Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
 		end
-	end
+		-- elseif scoreDirection == "rear" then
+		-- 	Lyon:setTargetPositionPreset(Lyon.SUBSTATION_REAR)
+		-- end
 
-	if scoreDirection == "rear" then
-		if gamepad:getButtonHeld(XboxButton.A) then
-			Lyon:setTargetPositionPreset(Lyon.LOW_REAR)
-		elseif gamepad:getButtonHeld(XboxButton.X) then
-			Lyon:setTargetPositionPreset(Lyon.MID_REAR)
-		elseif gamepad:getButtonHeld(XboxButton.Y) then
-			Lyon:setTargetPositionPreset(Lyon.HIGH_REAR)
-		elseif gamepad:getButtonHeld(XboxButton.LeftBumper) then
-			Lyon:setTargetPositionPreset(Lyon.SUBSTATION_REAR)
-		else
-			Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
+		if gamepad:getButtonPressed(XboxButton.LeftBumper) then
+			Lyon:openGripper()
 		end
-	end
 
+		inSubstation = true
+		encoderValueAtSubstation = Drivetrain:combinedPosition()
+	elseif leftStick:getTriggerHeld() then
+		inSubstation = false
+	end
+		
 	-- Switch score mode
 	if leftStick:getButtonPressed(2) then
 		scoreDirection = "front"
 	end
-
 	if rightStick:getButtonPressed(2) then
 		scoreDirection = "rear"
 	end
-
 	
 end

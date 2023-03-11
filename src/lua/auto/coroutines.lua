@@ -59,6 +59,16 @@ local scoreHigh = FancyCoroutine:new(function ()
 	sleep(2)
 end)
 
+local reverseScoreHigh = FancyCoroutine:new(function ()
+	Lyon:closeGripper()
+	Lyon:setTargetPositionPreset(Lyon.HIGH_REAR)
+	sleep(3)
+	Lyon:openGripper()
+	sleep(1)
+	Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
+	sleep(2)
+end)
+
 local highMobility = FancyCoroutine:new(function ()
 	scoreHigh:reset()
 	mobilityAuto:reset()
@@ -105,5 +115,6 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "highOnly", value = scoreHigh },
 	{ name = "highMobility", value = highMobility},
 	{ name = "highAutoEngage", value = highAutoEngage},
-	{ name = "smartEngage", value = smartEngage}
+	{ name = "smartEngage", value = smartEngage},
+	{ name = "reverseScoreHigh", value = reverseScoreHigh}
 })
