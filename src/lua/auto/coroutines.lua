@@ -93,11 +93,30 @@ local smartEngage = FancyCoroutine:new(function ()
 	driveNInches(42, -0.4):runUntilDone()
 end)
 
+local reverseSmartEngage = FancyCoroutine:new(function ()
+	print("Starting reverseSmartEngage")
+	while Drivetrain:pitchDegrees() < 11 do
+		print("Driving while waiting for pitch to drop...")
+		Drivetrain:drive(0.5, 0)
+		coroutine.yield()
+	end
+	print("reached target, stopping...")
+	Drivetrain:stop()
+	print("Driving 42 inches")
+	driveNInches(42, 0.4):runUntilDone()
+end)
+
 local highAutoEngage = FancyCoroutine:new(function ()
 	scoreHigh:reset()
 	smartEngage:reset()
 	scoreHigh:runUntilDone()
 	smartEngage:runUntilDone()
+end)
+local reverseHighAutoEngage = FancyCoroutine:new(function ()
+	reverseScoreHigh:reset()
+	reverseSmartEngage:reset()
+	reverseScoreHigh:runUntilDone()
+	reverseSmartEngage:runUntilDone()	
 end)
 
 ---@return FancyCoroutine
@@ -116,5 +135,6 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "highMobility", value = highMobility},
 	{ name = "highAutoEngage", value = highAutoEngage},
 	{ name = "smartEngage", value = smartEngage},
-	{ name = "reverseScoreHigh", value = reverseScoreHigh}
+	{ name = "highOnlyRear", value = reverseScoreHigh},
+	{ name = "reverseHighAutoEngage", value = reverseHighAutoEngage}
 })
