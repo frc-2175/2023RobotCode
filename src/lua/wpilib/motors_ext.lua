@@ -54,10 +54,10 @@ function DifferentialDrive:curvatureDriveIK(xSpeed, zRotation, allowTurnInPlace)
 	return left[0], right[0]
 end
 
-function DifferentialDrive:blendedDrive(desiredSpeed, rotation, inputThreshold)
-	local left, right = getBlendedMotorValues(desiredSpeed, rotation, inputThreshold);
-	self:tankDrive(left, right)
-end
+-- function DifferentialDrive:blendedDrive(desiredSpeed, rotation, inputThreshold)
+-- 	local left, right = getBlendedMotorValues(desiredSpeed, rotation, inputThreshold);
+-- 	self:tankDrive(left, right)
+-- end
 
 DummyMotor = {}
 

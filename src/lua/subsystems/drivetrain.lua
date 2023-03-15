@@ -39,15 +39,22 @@ function Drivetrain:periodic()
 	SmartDashboard:putNumber("yaw", Drivetrain:yaw())
 end
 
-function Drivetrain:drive(speed, rotation)
+function Drivetrain:autoDrive(speed, rotation)
 	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation)
 
-	leftMotor:set(leftSpeed * 0.5)
-	rightMotor:set(rightSpeed * 0.5)
+	leftMotor:set(leftSpeed)
+	rightMotor:set(rightSpeed)
+end
+
+function Drivetrain:teleopDrive(speed, rotation) 
+	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation, 0.1, 0.6, 0.5)
+
+	leftMotor:set(leftSpeed)
+	rightMotor:set(rightSpeed)
 end
 
 function Drivetrain:stop()
-	Drivetrain:drive(0, 0)
+	Drivetrain:autoDrive(0, 0)
 end
 
 function Drivetrain:leftPosition()

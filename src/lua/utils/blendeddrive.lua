@@ -12,12 +12,17 @@ require("utils.math")
 ---@param turnValue number
 ---@param inputThreshold number?
 ---@return number, number
-function getBlendedMotorValues(moveValue, turnValue, inputThreshold)
+function getBlendedMotorValues(moveValue, turnValue, inputThreshold, speedScale, rotationScale)
 	-- default value
 	inputThreshold = inputThreshold or 0.1
+	speedScale = speedScale or 0.5
+	rotationScale = rotationScale or 0.5
 
-	local arcadeLeft, arcadeRight = DifferentialDrive:curvatureDriveIK(moveValue, turnValue, true)
-	local curvatureLeft, curvatureRight = DifferentialDrive:curvatureDriveIK(moveValue, turnValue, false)
+	local scaledMove = moveValue * speedScale
+	local scaledTurn = turnValue * rotationScale
+
+	local arcadeLeft, arcadeRight = DifferentialDrive:curvatureDriveIK(scaledMove, scaledTurn, true)
+	local curvatureLeft, curvatureRight = DifferentialDrive:curvatureDriveIK(scaledMove, scaledTurn, false)
 
 	lerpT = math.abs(moveValue) / inputThreshold;
 	lerpT = clamp(lerpT, 0, 1)

@@ -89,7 +89,6 @@ function Robot.autonomousInit()
 end
 
 function Robot.autonomousPeriodic()
-	-- Drivetrain:drive(clamp(-speed, -0.2, 0.2),clamp(-turn, -0.2, 0.2))
 	-- Just call auto periodic
 	getSelectedAuto():run()
 end
@@ -97,7 +96,7 @@ end
 function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
-	Drivetrain:drive(driveRamp:ramp(signedPow(-leftStick:getY())), signedPow(rightStick:getX()))
+	Drivetrain:teleopDrive(driveRamp:ramp(signedPow(-leftStick:getY())), signedPow(rightStick:getX()))
 	
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:openGripper()

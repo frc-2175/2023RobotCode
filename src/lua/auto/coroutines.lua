@@ -22,7 +22,7 @@ local function driveNInches(driveDistance, speed)
 		while math.abs(Drivetrain:combinedPosition() - startingPosition) < driveDistance do
 			print("Driving...")
 			print("Combined position:", Drivetrain:combinedPosition())
-			Drivetrain:drive(speed, 0)
+			Drivetrain:autoDrive(speed, 0)
 			coroutine:yield()
 		end
 		
@@ -37,7 +37,7 @@ local function driveSeconds(time, speed)
 		timer:start()
 
 		while timer:get() < time do
-			Drivetrain:drive(speed, 0)
+			Drivetrain:autoDrive(speed, 0)
 			coroutine.yield()
 		end
 
@@ -84,7 +84,7 @@ local smartEngage = FancyCoroutine:new(function ()
 	print("Starting smartEngage")
 	while Drivetrain:pitchDegrees() > -11 do
 		print("Driving while waiting for pitch to drop...")
-		Drivetrain:drive(-0.5, 0)
+		Drivetrain:autoDrive(-0.5, 0)
 		coroutine.yield()
 	end
 	print("Reached target, stopping...")
@@ -97,7 +97,7 @@ local reverseSmartEngage = FancyCoroutine:new(function ()
 	print("Starting reverseSmartEngage")
 	while Drivetrain:pitchDegrees() < 11 do
 		print("Driving while waiting for pitch to drop...")
-		Drivetrain:drive(0.5, 0)
+		Drivetrain:autoDrive(0.5, 0)
 		coroutine.yield()
 	end
 	print("reached target, stopping...")
