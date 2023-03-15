@@ -13,6 +13,12 @@ gamepad = Joystick:new(2)
 
 -----------------------------------
 
+
+
+-- ramp for the drive controls, so drivers can think even less.
+local driveRamp = Ramp:new(0.5, 0.5)
+
+
 local camera = PhotonCamera:new("HD_USB_Camera")
 local poseEst = PhotonPoseEstimator:new(getDeployDirectory() .. "/fakefield.json", PoseStrategy.MULTI_TAG_PNP, camera, Transform3d:new(Translate3d:new(10.75, 7, 21), Rotate3d:new(0, 0, 0)))
 
@@ -91,7 +97,7 @@ end
 function Robot.teleopInit() end
 
 function Robot.teleopPeriodic()
-	Drivetrain:drive(signedPow(-leftStick:getY()), signedPow(rightStick:getX()))
+	Drivetrain:drive(driveRamp:ramp(signedPow(-leftStick:getY())), signedPow(rightStick:getX()))
 	
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:openGripper()

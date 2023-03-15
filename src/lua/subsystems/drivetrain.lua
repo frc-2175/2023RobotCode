@@ -1,4 +1,5 @@
 require("utils.blendeddrive")
+require("utils.ramp")
 require("mocks.navx")
 require("mocks.motors")
 
@@ -57,7 +58,7 @@ function Drivetrain:rightPosition()
 	return -rightMotor:getSelectedSensorPosition() * TICKS_TO_INCHES
 end
 
-function Drivetrain:combinedPosition() 
+function Drivetrain:combinedPosition()
 	return (Drivetrain:leftPosition() + Drivetrain:rightPosition()) / 2
 end
 
