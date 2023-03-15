@@ -16,7 +16,7 @@ gamepad = Joystick:new(2)
 
 
 -- ramp for the drive controls, so drivers can think even less.
-local driveRamp = Ramp:new(0.5, 0.5)
+local driveRamp = Ramp:new(0.25, 0.4)
 
 
 local camera = PhotonCamera:new("HD_USB_Camera")
