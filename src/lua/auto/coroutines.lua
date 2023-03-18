@@ -1,5 +1,6 @@
 require("wpilib.dashboard")
 require("subsystems.drivetrain")
+require("subsystems.brakes")
 
 local autoChooser = SendableChooser:new()
 
@@ -91,6 +92,7 @@ local smartEngage = FancyCoroutine:new(function ()
 	Drivetrain:stop()
 	print("Driving 42 inches...")
 	driveNInches(42, -0.4):runUntilDone()
+	Brakes:toggleBrakes()
 end)
 
 local reverseSmartEngage = FancyCoroutine:new(function ()
@@ -104,6 +106,7 @@ local reverseSmartEngage = FancyCoroutine:new(function ()
 	Drivetrain:stop()
 	print("Driving 42 inches")
 	driveNInches(42, 0.4):runUntilDone()
+	Brakes:toggleBrakes()
 end)
 
 local highAutoEngage = FancyCoroutine:new(function ()

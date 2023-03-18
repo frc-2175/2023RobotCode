@@ -1,5 +1,7 @@
 require("subsystems.drivetrain")
 require("subsystems.lyon")
+require("subsystems.brakes")
+require("subsystems.intake")
 require("utils.vector")
 require("utils.DDPE")
 require("utils.path")
@@ -162,6 +164,10 @@ function Robot.teleopPeriodic()
 	end
 	if rightStick:getButtonPressed(2) then
 		scoreDirection = "rear"
+	end
+	
+	if rightStick:getButtonPressed(10) then
+		Brakes:toggleBrakes()
 	end
 	
 end
