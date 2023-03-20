@@ -134,9 +134,7 @@ function Robot.teleopPeriodic()
 			Lyon:overrideSlowdownWhenExtendedThisTick()
 			Lyon:setTargetPosition(nudgePosition, 0)
 		else
-			local neutralX = (Lyon.MIN_EXTENSION*nudgePosition)/Lyon.AXLE_HEIGHT
-			local neutralY = Lyon.AXLE_HEIGHT-Lyon.MIN_EXTENSION
-			Lyon:setTargetPosition(neutralX,neutralY)
+			Lyon:neutralPosition()
 		end
 	end
 	
@@ -170,4 +168,9 @@ function Robot.teleopPeriodic()
 		Brakes:toggleBrakes()
 	end
 	
+	if gamepad:getPOV() == 0 then
+		RollerBar:deploy()
+	else
+		RollerBar:retract()
+	end
 end

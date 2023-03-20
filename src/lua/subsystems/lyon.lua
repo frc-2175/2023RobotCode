@@ -1,3 +1,4 @@
+require("subsystems.intake")
 require("utils.teleopcoroutine")
 require("utils.math")
 require("utils.pid")
@@ -94,9 +95,9 @@ local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION
 local ANGLE_MOTOR_MAX_SPEED = 1
 local TA_MOTOR_MAX_SPEED = 1
 
-local arm = CANSparkMax:new(23, SparkMaxMotorType.kBrushless)
+local arm = CANSparkMax:new(21, SparkMaxMotorType.kBrushless)
 local armEncoder = arm:getEncoder()
-local telescopingArm = CANSparkMax:new(22, SparkMaxMotorType.kBrushless)
+local telescopingArm = CANSparkMax:new(20, SparkMaxMotorType.kBrushless)
 telescopingArm:setInverted(false)
 local telescopingEncoder = telescopingArm:getEncoder()
 gripperSolenoid = DoubleSolenoid:new(0, 1)
@@ -271,6 +272,11 @@ function Lyon:setTargetPosition(x, y)
 	SmartDashboard:putNumber("LyonTargetY", y)
 
 	return angle, extension
+end
+
+function Lyon:neutralPosition()
+	self:setTargetPosition(0, 20)
+	RollerBar:retract()
 end
 
 ---@param preset Vector
