@@ -37,10 +37,6 @@ local field = Field2d:new()
 
 local speed, turn
 
-local nudgePosition = 10
-
-local nudgeSpeed = 32 -- inches per second
-
 local autoSeconds = 3000
 
 local autoLoopCount = 0
@@ -105,11 +101,6 @@ function Robot.teleopPeriodic()
 	elseif gamepad:getRightTriggerAmount() > 0.5 then
 		Lyon:closeGripper()
 	end
-	
-	nudgeChange = gamepad:getLeftStickY() / 50 * nudgeSpeed
-	nudgePosition = clamp(nudgePosition + nudgeChange, 7, 20)
-	SmartDashboard:putNumber("nudgeChange", nudgeChange)
-	SmartDashboard:putNumber("nudgePosition", nudgePosition)
 
 	reachedEncoderDisableFront = (encoderValueAtSubstation + 36 < Drivetrain:combinedPosition())
 	-- reachedEncoderDisableRear = (scoreDirection == "rear" and (Drivetrain:combinedPosition() > encoderValueAtSubstation + 36))
@@ -131,8 +122,6 @@ function Robot.teleopPeriodic()
 			if gamepad:getButtonPressed(XboxButton.B) then
 				Lyon:openGripper()
 			end
-			Lyon:overrideSlowdownWhenExtendedThisTick()
-			Lyon:setTargetPosition(nudgePosition, 0)
 		else
 			Lyon:neutralPosition()
 		end
@@ -168,7 +157,7 @@ function Robot.teleopPeriodic()
 		Brakes:toggleBrakes()
 	end
 	
-	if gamepad:getPOV() == 0 then
+	if gamepad:getPOV() == 0 or gamepad:getPOV() == 45 or gamepad:getPOV() == 315 then
 		RollerBar:deploy()
 	else
 		RollerBar:retract()
