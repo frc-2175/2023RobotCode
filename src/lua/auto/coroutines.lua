@@ -1,10 +1,16 @@
-require("wpilib.dashboard")
+require("mocks.dashboard")
 require("subsystems.drivetrain")
 require("subsystems.brakes")
+require("utils.teleopcoroutine")
+require("wpilib.dashboard")
 
 local autoChooser = SendableChooser:new()
 
-local doNothingAuto = FancyCoroutine:new(function () 
+if isTesting() then
+	autoChooser = MockSendableChooser
+end
+
+local doNothingAuto = FancyCoroutine:new(function ()
 end)
 
 local function sleep(time) 

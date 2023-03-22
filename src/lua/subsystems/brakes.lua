@@ -1,3 +1,5 @@
+require("wpilib.solenoids")
+
 local brakeSolenoid = DoubleSolenoid:new(6, 7)
 
 Brakes = {}

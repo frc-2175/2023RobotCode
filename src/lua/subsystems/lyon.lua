@@ -74,6 +74,7 @@ Lyon must always respect the following constraints:
 Lyon = {}
 
 Lyon.AXLE_HEIGHT = 40
+Lyon.GROUND_CLEARANCE = 0.5
 Lyon.NODE_ANGLE_MID = 1.57
 Lyon.NODE_ANGLE_HIGH = 1.89
 Lyon.MIN_EXTENSION = 31.5
@@ -122,7 +123,7 @@ local function extensionToGround(angle)
 	local fudge = 16 * (-math.cos(angle) + 1) / 2
 	SmartDashboard:putNumber("LyonExtensionFudge", fudge)
 
-	return clamp((Lyon.AXLE_HEIGHT - 0.5) / math.cos(angle) - fudge, Lyon.MIN_EXTENSION, Lyon.MAX_EXTENSION)
+	return clamp((Lyon.AXLE_HEIGHT - Lyon.GROUND_CLEARANCE) / math.cos(angle) - fudge, Lyon.MIN_EXTENSION, Lyon.MAX_EXTENSION)
 end
 
 ---Computes the maximum length in inches to which the arm may extend.
@@ -318,7 +319,7 @@ test("Lyon safety constraints", function(t)
 	t:assert(angleMotorOutputSpeed(math.pi/2, 0, 0) > 0, "straight down, not extended, swing forward")
 	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(-math.pi/2, 0, 0) < 0, "straight down, not extended, swing backward")
-	t:assertEqual(extensionToGround(0), Lyon.AXLE_HEIGHT - 2)
+	t:assertEqual(extensionToGround(0), Lyon.AXLE_HEIGHT - Lyon.GROUND_CLEARANCE)
 	t:assert(maxSafeExtension(0) < Lyon.MIN_EXTENSION + 3, "safe extension when inside the robot")
 	telePid:clear(Timer:getFPGATimestamp())
 	t:assert(teleMotorOutputSpeed(Lyon.MIN_EXTENSION, Lyon.MIN_EXTENSION + 2, 0, 0) <= 0, "retract when inside the robot")
