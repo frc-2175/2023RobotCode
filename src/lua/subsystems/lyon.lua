@@ -89,6 +89,7 @@ Lyon.HIGH_REAR = Vector:new(-62, 73)
 Lyon.MID_REAR = Vector:new(-43.75, 46)
 Lyon.LOW_REAR = Vector:new(-34, 13)
 Lyon.SUBSTATION_REAR = Vector:new(-29, ((3*12) + 10))
+Lyon.NEUTRAL_ANGLE = 0.25
 
 local OUTSIDE_ANGLE_FRONT = 0.6
 local OUTSIDE_ANGLE_BACK = -0.6
@@ -140,7 +141,7 @@ local function maxSafeExtension(angle)
 	end
 
 	if LEDGE_ANGLE < angle and angle < OUTSIDE_ANGLE_FRONT then
-		MAX_SAVE = extensionToGround(angle, 3)
+		MAX_SAFE = extensionToGround(angle, 3)
 	end
 
 	if ROLLERBAR_BACK < angle and angle < ROLLARBAR_FRONT then
@@ -282,7 +283,8 @@ function Lyon:setTargetPosition(x, y)
 end
 
 function Lyon:neutralPosition()
-	self:setTargetPosition(0, 10)
+	self:setTargetAngle(Lyon.NEUTRAL_ANGLE)
+	self:setTargetExtension(Lyon.MIN_EXTENSION)
 	RollerBar:retract()
 end
 
@@ -383,7 +385,7 @@ test("Lyon: traverse from back to inside", function(t)
 	--------------------------------------------------------
 	-- moving from out back of robot to inside frame - requiring us to go up and over the electronics
 
-	local targetAngle = 0.2
+	local targetAngle = Lyon.NEUTRAL_ANGLE
 	local targetExtension = extensionToGround(0) - 1
 	t:assert(targetExtension > MAX_EXTENSION_WHEN_INSIDE)
 	t:assert(targetExtension < extensionToGround(0))

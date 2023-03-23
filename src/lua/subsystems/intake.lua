@@ -1,21 +1,19 @@
-local leftBarPiston = DoubleSolenoid:new(2, 3)
-local rightBarPiston = DoubleSolenoid:new(4, 5)
+local intakePiston = DoubleSolenoid:new(2, 3)
 local barNeo = CANSparkMax:new(22, SparkMaxMotorType.kBrushless)
+local barSpeed = 1/3 --TODO: finetune value
 
 RollerBar = {}
 
 function RollerBar:down()
-	leftBarPiston:set(DoubleSolenoidValue.Forward)
-	rightBarPiston:set(DoubleSolenoidValue.Forward)
+	intakePiston:set(DoubleSolenoidValue.Forward)
 end
 
 function RollerBar:up()
-	leftBarPiston:set(DoubleSolenoidValue.Reverse)
-	rightBarPiston:set(DoubleSolenoidValue.Reverse)
+	intakePiston:set(DoubleSolenoidValue.Reverse)
 end
 
 function RollerBar:rollOut()
-	barNeo:set(0.2) --TODO: finetune value
+	barNeo:set(-barSpeed)
 end
 
 function RollerBar:rollStop()
@@ -23,7 +21,7 @@ function RollerBar:rollStop()
 end
 
 function RollerBar:rollIn()
-	barNeo:set(-0.2) --TODO: finetune value
+	barNeo:set(barSpeed)
 end
 
 --- Puts the bar down and starts the motor

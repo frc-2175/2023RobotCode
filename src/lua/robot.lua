@@ -80,6 +80,8 @@ function Robot.robotPeriodic()
 	
 	Lyon:periodic()
 	Drivetrain:periodic()
+	
+	SmartDashboard:putNumber("Solenoid", brakeSolenoid:get())
 end
 
 function Robot.autonomousInit()
@@ -122,6 +124,8 @@ function Robot.teleopPeriodic()
 			if gamepad:getButtonPressed(XboxButton.B) then
 				Lyon:openGripper()
 			end
+			Lyon:setTargetAngle(Lyon.NEUTRAL_ANGLE)
+			Lyon:setTargetExtension(Lyon.MAX_EXTENSION)
 		else
 			Lyon:neutralPosition()
 		end
@@ -141,9 +145,14 @@ function Robot.teleopPeriodic()
 
 		inSubstation = true
 		encoderValueAtSubstation = Drivetrain:combinedPosition()
-	elseif leftStick:getTriggerHeld() then
+	elseif leftStick:getTriggerHeld() or gamepad:getButtonHeld(XboxButton.RightBumper) then
 		inSubstation = false
 	end
+
+	-- Nick, I expected better
+	-- if gamepad:getButtonHeld(XboxButton.RightBumper) then
+	-- 	inSubstation = false
+	-- end
 		
 	-- Switch score mode
 	if leftStick:getButtonPressed(2) then
@@ -153,13 +162,24 @@ function Robot.teleopPeriodic()
 		scoreDirection = "rear"
 	end
 	
-	if rightStick:getButtonPressed(10) then
-		Brakes:toggleBrakes()
-	end
-	
 	if gamepad:getPOV() == 0 or gamepad:getPOV() == 45 or gamepad:getPOV() == 315 then
 		RollerBar:deploy()
+		Lyon:openGripper()
 	else
 		RollerBar:retract()
+	end
+
+	if gamepad:getPOV() == 180 or gamepad:getPOV() == 135 or gamepad:getPOV() == 225 then
+		RollerBar:rollIn()
+	else 
+		RollerBar:rollStop()
+	end
+
+	if rightStick:getButtonPressed(10) then
+		Brakes:forward()
+	end
+
+	if leftStick:getButtonPressed(10) then
+		Brakes:reverse()
 	end
 end

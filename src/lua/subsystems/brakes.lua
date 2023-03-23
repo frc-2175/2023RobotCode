@@ -1,8 +1,17 @@
 require("wpilib.solenoids")
 
-local brakeSolenoid = DoubleSolenoid:new(6, 7)
+brakeSolenoid = DoubleSolenoid:new(4, 5)
 
 Brakes = {}
+
+function Brakes:forward()
+	brakeSolenoid:set(DoubleSolenoidValue.Forward)
+	
+end
+
+function Brakes:reverse()
+	brakeSolenoid:set(DoubleSolenoidValue.Reverse)
+end
 
 function Brakes:toggleBrakes()
 	if brakeSolenoid:get() ~= DoubleSolenoidValue.Reverse then
