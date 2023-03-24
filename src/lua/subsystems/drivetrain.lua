@@ -3,19 +3,29 @@ require("utils.ramp")
 require("utils.DDPE")
 require("mocks.navx")
 require("mocks.motors")
+require("wpilib.motors")
+require("wpilib.ahrs")
 
 leftMotor = TalonFX:new(10)
 rightMotor = TalonFX:new(12)
+leftFollower = TalonFX:new(11)
+rightFollower = TalonFX:new(13)
 
 navx = AHRS:new(4)
 
+if isTesting() then
+	navx = MockNavX
+	leftMotor = MockTalonFX
+	rightMotor = MockTalonFX
+	leftFollower = MockTalonFX
+	rightFollower = MockTalonFX
+end
+
 leftMotor:setInverted(CTREInvertType.InvertMotorOutput)
-leftFollower = TalonFX:new(11)
 leftFollower:follow(leftMotor)
 leftFollower:setInverted(CTREInvertType.FollowMaster)
 
 rightMotor:setInverted(CTREInvertType.None)
-rightFollower = TalonFX:new(13)
 rightFollower:follow(rightMotor)
 rightFollower:setInverted(CTREInvertType.FollowMaster)
 
@@ -77,10 +87,4 @@ end
 
 function Drivetrain:stop()
 	Drivetrain:autoDrive(0, 0)
-end
-
-if isTesting() then
-	navx = MockNavX
-	leftMotor = MockTalonFX
-	rightMotor = MockTalonFX
 end

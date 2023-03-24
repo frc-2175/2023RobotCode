@@ -75,8 +75,8 @@ Lyon = {}
 
 Lyon.AXLE_HEIGHT = 40
 Lyon.GROUND_CLEARANCE = 0.5
-Lyon.NODE_ANGLE_MID = 1.57
-Lyon.NODE_ANGLE_HIGH = 1.89
+Lyon.SHELF_CLEARANCE = 3
+Lyon.MAX_ANGLE = 1.89
 Lyon.MIN_EXTENSION = 31.5
 Lyon.MAX_EXTENSION = 63
 Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
@@ -141,7 +141,7 @@ local function maxSafeExtension(angle)
 	end
 
 	if LEDGE_ANGLE < angle and angle < OUTSIDE_ANGLE_FRONT then
-		MAX_SAFE = extensionToGround(angle, 3)
+		MAX_SAFE = extensionToGround(angle, Lyon.SHELF_CLEARANCE)
 	end
 
 	if ROLLERBAR_BACK < angle and angle < ROLLARBAR_FRONT then
@@ -165,17 +165,19 @@ local function angleMotorOutputSpeed(target, angle, extension)
 
 	local armSpeed = anglePid:pid(angle, target, 0.3, math.pi, ANGLE_MOTOR_MAX_SPEED * armMultiplier)
 
-	if angle >= Lyon.NODE_ANGLE_HIGH then
+	if angle >= Lyon.MAX_ANGLE then
 		armSpeed = math.min(armSpeed, 0)
-	elseif angle <= -Lyon.NODE_ANGLE_HIGH then
+	elseif angle <= -Lyon.MAX_ANGLE then
 		armSpeed = math.max(armSpeed, 0)
 	end
 
 	if extension > Lyon.MIN_EXTENSION + 2 then
-		if 0 < angle and  angle <= LEDGE_ANGLE then
-			armSpeed = math.max(armSpeed, 0)
-		elseif OUTSIDE_ANGLE_BACK <= angle and angle < 0 then
+		if OUTSIDE_ANGLE_BACK <= angle and angle < 0 then
+			-- only allow backwards motion if overextended toward the back of the bot
 			armSpeed = math.min(armSpeed, 0)
+		elseif 0 <= angle and angle <= LEDGE_ANGLE then
+			-- only allow forwards motion if overextended toward the front of the bot
+			armSpeed = math.max(armSpeed, 0)
 		end
 	end
 
@@ -219,6 +221,8 @@ function Lyon:periodic()
 	SmartDashboard:putNumber("LyonTelePos", Lyon:getExtension())
 	SmartDashboard:putNumber("LyonRawTelePos", getExtensionMotorRawPosition())
 	SmartDashboard:putNumber("LyonExtensionToGround", extensionToGround(Lyon:getAngle()))
+	SmartDashboard:putBoolean("LyonInsideSafeAngle", -Lyon.MAX_ANGLE <= Lyon:getAngle() and Lyon:getAngle() <= Lyon.MAX_ANGLE)
+	SmartDashboard:putBoolean("LyonInsideSafeExtension", Lyon.MIN_EXTENSION <= Lyon:getExtension() and Lyon:getExtension() <= Lyon.MAX_EXTENSION)
 
 	local armSpeed = angleMotorOutputSpeed(targetAngle, Lyon:getAngle(), Lyon:getExtension())
 
@@ -364,21 +368,39 @@ test("Lyon safety constraints", function(t)
 
 	-- too far
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(0, Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "on the outer limit returning, forward")
+	t:assertEqual(angleMotorOutputSpeed(0, Lyon.MAX_ANGLE, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "on the outer limit returning, forward")
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(0, -Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "on the outer limit returning, backward")
+	t:assertEqual(angleMotorOutputSpeed(0, -Lyon.MAX_ANGLE, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "on the outer limit returning, backward")
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(Lyon.NODE_ANGLE_HIGH + 1, Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), 0, "on the outer limit continuing, forward")
+	t:assertEqual(angleMotorOutputSpeed(Lyon.MAX_ANGLE + 0.1, Lyon.MAX_ANGLE, Lyon.MIN_EXTENSION), 0, "on the outer limit continuing, forward")
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(-Lyon.NODE_ANGLE_HIGH - 1, -Lyon.NODE_ANGLE_HIGH, Lyon.MIN_EXTENSION), 0, "on the outer limit continuing, backward")
+	t:assertEqual(angleMotorOutputSpeed(-Lyon.MAX_ANGLE - 0.1, -Lyon.MAX_ANGLE, Lyon.MIN_EXTENSION), 0, "on the outer limit continuing, backward")
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(0, Lyon.NODE_ANGLE_HIGH + 1, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "past the outer limit returning, forward")
+	t:assertEqual(angleMotorOutputSpeed(0, Lyon.MAX_ANGLE + 0.1, Lyon.MIN_EXTENSION), -ANGLE_MOTOR_MAX_SPEED, "past the outer limit returning, forward")
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(0, -Lyon.NODE_ANGLE_HIGH - 1, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "past the outer limit returning, backward")
+	t:assertEqual(angleMotorOutputSpeed(0, -Lyon.MAX_ANGLE - 0.1, Lyon.MIN_EXTENSION), ANGLE_MOTOR_MAX_SPEED, "past the outer limit returning, backward")
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(Lyon.NODE_ANGLE_HIGH + 2, Lyon.NODE_ANGLE_HIGH + 1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, forward")
+	t:assertEqual(angleMotorOutputSpeed(Lyon.MAX_ANGLE + 0.2, Lyon.MAX_ANGLE + 0.1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, forward")
 	anglePid:clear(Timer:getFPGATimestamp())
-	t:assertEqual(angleMotorOutputSpeed(-Lyon.NODE_ANGLE_HIGH - 2, -Lyon.NODE_ANGLE_HIGH - 1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, backward")
+	t:assertEqual(angleMotorOutputSpeed(-Lyon.MAX_ANGLE - 0.2, -Lyon.MAX_ANGLE - 0.1, Lyon.MIN_EXTENSION), 0, "past the outer limit continuing, backward")
+
+	-- too far, arm extended
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assert(angleMotorOutputSpeed(0, Lyon.MAX_ANGLE, Lyon.MAX_EXTENSION) < 0, "on the outer limit returning, forward, arm extended")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assert(angleMotorOutputSpeed(0, -Lyon.MAX_ANGLE, Lyon.MAX_EXTENSION) > 0, "on the outer limit returning, backward, arm extended")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assertEqual(angleMotorOutputSpeed(Lyon.MAX_ANGLE + 0.1, Lyon.MAX_ANGLE, Lyon.MAX_EXTENSION), 0, "on the outer limit continuing, forward, arm extended")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assertEqual(angleMotorOutputSpeed(-Lyon.MAX_ANGLE - 0.1, -Lyon.MAX_ANGLE, Lyon.MAX_EXTENSION), 0, "on the outer limit continuing, backward, arm extended")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assert(angleMotorOutputSpeed(0, Lyon.MAX_ANGLE + 0.1, Lyon.MAX_EXTENSION) < 0, "past the outer limit returning, forward, arm extended")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assert(angleMotorOutputSpeed(0, -Lyon.MAX_ANGLE - 0.1, Lyon.MAX_EXTENSION) > 0, "past the outer limit returning, backward, arm extended")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assertEqual(angleMotorOutputSpeed(Lyon.MAX_ANGLE + 0.2, Lyon.MAX_ANGLE + 0.1, Lyon.MAX_EXTENSION), 0, "past the outer limit continuing, forward, arm extended")
+	anglePid:clear(Timer:getFPGATimestamp())
+	t:assertEqual(angleMotorOutputSpeed(-Lyon.MAX_ANGLE - 0.2, -Lyon.MAX_ANGLE - 0.1, Lyon.MAX_EXTENSION), 0, "past the outer limit continuing, backward, arm extended")
 end)
 
 test("Lyon: traverse from back to inside", function(t)
@@ -386,7 +408,7 @@ test("Lyon: traverse from back to inside", function(t)
 	-- moving from out back of robot to inside frame - requiring us to go up and over the electronics
 
 	local targetAngle = Lyon.NEUTRAL_ANGLE
-	local targetExtension = extensionToGround(0) - 1
+	local targetExtension = extensionToGround(0, Lyon.SHELF_CLEARANCE)
 	t:assert(targetExtension > MAX_EXTENSION_WHEN_INSIDE)
 	t:assert(targetExtension < extensionToGround(0))
 
