@@ -4,6 +4,7 @@ require("utils.pid")
 require("wpilib.ahrs")
 require("wpilib.motors")
 require("wpilib.time")
+local pprint = require("utils.pprint")
 
 local SEARCH_DISTANCE = 36 -- 36 inches before and after the last closest point
 local LOOKAHEAD_DISTANCE = 42 -- look 24 inches ahead of the closest point
@@ -68,34 +69,42 @@ end
 
 ---@class PurePursuit
 ---@field path Path
----@field triggerFuncs table<string, function>
+---@field events table[]
 ---@field previousClosestPoint number
 ---@field purePursuitPID PIDController
 PurePursuit = {}
+
+function table.copy(t)
+	local u = { }
+	for k, v in pairs(t) do u[k] = v end
+	return setmetatable(u, getmetatable(t))
+  end
 
 ---@param path Path
 ---@param p number
 ---@param i number
 ---@param d number
 ---@return PurePursuit
-function PurePursuit:new(path, p, i, d, triggerFuncs)
-	triggerFuncs = triggerFuncs or {}
-
+function PurePursuit:new(path, p, i, d)
 	local x = {
 		path = path,
-		triggerFuncs = triggerFuncs,
+		events = table.copy(path.events),
 		purePursuitPID = PIDController:new(p, i, d),
 		previousClosestPoint = 1,
 	}
 	setmetatable(x, PurePursuit)
 	self.__index = self
 
+	table.sort(x.events, function (a, b)
+		return a.distance < b.distance
+	end)
+
 	return x
 end
 
 ---@param position Vector
 ---@param rotation number
----@return number turnValue, number speed
+---@return number speed, number turnValue, boolean isDone
 function PurePursuit:run(position, rotation)
 	-- pprint(self.path.triggerPoints)
 	self.purePursuitPID:updateTime(Timer:getFPGATimestamp())
@@ -114,8 +123,7 @@ function PurePursuit:run(position, rotation)
 
 	-- without this the bot will relentlessly target the last point and that's no good
 	if indexOfClosestPoint >= #self.path.points then
-		speed = 0
-		turnValue = 0
+		return 0, 0, true
 	end
 
 	SmartDashboard:putNumber("closest", indexOfClosestPoint)
@@ -127,5 +135,5 @@ function PurePursuit:run(position, rotation)
 	SmartDashboard:putNumber("closesty", self.path.points[indexOfClosestPoint].y)
 	SmartDashboard:putNumber("angletopoint", angleToGoal)
 
-	return speed, turnValue
+	return speed, turnValue, false
 end

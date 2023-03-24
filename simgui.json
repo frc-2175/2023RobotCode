@@ -57,7 +57,8 @@
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Selected Auto": "String Chooser",
-      "/SmartDashboard/SendableChooser[0]": "String Chooser"
+      "/SmartDashboard/SendableChooser[0]": "String Chooser",
+      "/SmartDashboard/Test Chooser": "String Chooser"
     },
     "windows": {
       "/SmartDashboard/Field": {

@@ -20,27 +20,6 @@ gamepad = Joystick:new(2)
 -- ramp for the drive controls, so drivers can think even less.
 local driveRamp = Ramp:new(0.25, 0.4)
 
-
-local camera = PhotonCamera:new("HD_USB_Camera")
-local poseEst = PhotonPoseEstimator:new(getDeployDirectory() .. "/fakefield.json", PoseStrategy.MULTI_TAG_PNP, camera, Transform3d:new(Translate3d:new(10.75, 7, 21), Rotate3d:new(0, 0, 0)))
-
-local pe = DDPE:new(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition(), 0, 0, 0)
-
-local path = Path:new("Test", {
-	testEvent = function()
-		print("TEST PATH TEST PATH TEST PATH")
-	end,
-})
-local pp = PurePursuit:new(path, 0.1, 0, 0)
-
-local field = Field2d:new()
-
-local speed, turn
-
-local autoSeconds = 3000
-
-local autoLoopCount = 0
-
 local encoderValueAtSubstation = 0
 
 local inSubstation = false
@@ -55,33 +34,10 @@ function Robot.robotInit()
 end
 
 function Robot.robotPeriodic()
-	local pose, timestamp = poseEst:update()
-	
-	if pose ~= nil then
-		pe:AddVisionMeasurement(pose.position.x, pose.position.y, pose.rotation.z, timestamp)
-	end
-	
-	local x, y , rot = pe:Update(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition())
-	
-	SmartDashboard:putNumber("X", x)
-	SmartDashboard:putNumber("Y", y)
-	SmartDashboard:putNumber("Rot", rot)
-	
-	field:setRobotPose(x, y, rot)
-	SmartDashboard:putField(field)
-	
-	speed, turn = pp:run(Vector:new(x, y), rot)
-	
-	SmartDashboard:putNumber("speed", speed)
-	SmartDashboard:putNumber("turn", turn)
 	SmartDashboard:putString("scoreDirection", scoreDirection)
-	SmartDashboard:putNumber("roll", navx:getRoll())
-	SmartDashboard:putNumber("pitch", navx:getPitch())
-	
+
 	Lyon:periodic()
 	Drivetrain:periodic()
-	
-	SmartDashboard:putNumber("Solenoid", brakeSolenoid:get())
 end
 
 function Robot.autonomousInit()

@@ -1,3 +1,5 @@
+-- this is a file
+
 require("utils.vector")
 require("utils.math")
 local json = require("utils.json")
@@ -7,6 +9,7 @@ local dir = getDeployDirectory() .. "/pathplanner/"
 ---@field points Vector[] The path points in field coordinates. (Origin bottom left, inches.)
 ---@field distances number[] A table with the distance for each path point. (Cumulative)
 ---@field events table[] The events to run along the path. Each table is {distance from start, function to run}.
+---@field name string
 Path = {}
 
 --[[
@@ -89,6 +92,7 @@ function Path:new(pathName, eventFuncs)
 		points = points,
 		distances = distances,
 		events = events,
+		name = pathName,
 	}
 	setmetatable(p, self)
 	self.__index = self
