@@ -17,7 +17,7 @@ local LOOKAHEAD_DISTANCE = 42 -- look 24 inches ahead of the closest point
     looks through all points on the list, finds & returns the point
     closest to current robot position 
 --]]
-function findClosestPoint(path, fieldPosition, previousClosestPoint)
+local function findClosestPoint(path, fieldPosition, previousClosestPoint)
 	local indexOfClosestPoint = 1
 	local startDistance = path.distances[previousClosestPoint] - SEARCH_DISTANCE
 	local endDistance = path.distances[previousClosestPoint] + SEARCH_DISTANCE
@@ -43,7 +43,7 @@ end
 ---@param path Path
 ---@param closestPoint integer
 ---@return integer goalPoint
-function findGoalPoint(path, closestPoint)
+local function findGoalPoint(path, closestPoint)
 	closestPoint = closestPoint == nil and 1 or closestPoint
 
 	local goalPoint = closestPoint
@@ -59,7 +59,7 @@ end
 
 ---@param point Vector
 ---@return number degAngle
-function getAngleToPoint(point)
+local function getAngleToPoint(point)
 	if point:length() == 0 then
 		return 0
 	end
@@ -78,7 +78,7 @@ function table.copy(t)
 	local u = { }
 	for k, v in pairs(t) do u[k] = v end
 	return setmetatable(u, getmetatable(t))
-  end
+end
 
 ---@param path Path
 ---@param p number
@@ -106,7 +106,6 @@ end
 ---@param rotation number
 ---@return number speed, number turnValue, boolean isDone
 function PurePursuit:run(position, rotation)
-	-- pprint(self.path.triggerPoints)
 	self.purePursuitPID:updateTime(Timer:getFPGATimestamp())
 
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
@@ -126,14 +125,14 @@ function PurePursuit:run(position, rotation)
 		return 0, 0, true
 	end
 
-	SmartDashboard:putNumber("closest", indexOfClosestPoint)
-	SmartDashboard:putNumber("goal", indexOfGoalPoint)
-	SmartDashboard:putNumber("max", #self.path.points)
-	SmartDashboard:putNumber("goalx", goalPoint.x)
-	SmartDashboard:putNumber("goaly", goalPoint.y)
-	SmartDashboard:putNumber("closestx", self.path.points[indexOfClosestPoint].x)
-	SmartDashboard:putNumber("closesty", self.path.points[indexOfClosestPoint].y)
-	SmartDashboard:putNumber("angletopoint", angleToGoal)
+	SmartDashboard:putNumber("PurePursuitIndexClosest", indexOfClosestPoint)
+	SmartDashboard:putNumber("PurePursuitIndexGoal", indexOfGoalPoint)
+	SmartDashboard:putNumber("PurePursuitIndexMax", #self.path.points)
+	SmartDashboard:putNumber("PurePursuitGoalX", goalPoint.x)
+	SmartDashboard:putNumber("PurePursuitGoalY", goalPoint.y)
+	SmartDashboard:putNumber("PurePursuitClosestX", self.path.points[indexOfClosestPoint].x)
+	SmartDashboard:putNumber("PurePursuitClosestY", self.path.points[indexOfClosestPoint].y)
+	SmartDashboard:putNumber("PurePursuitAngleToGoal", angleToGoal)
 
 	return speed, turnValue, false
 end
