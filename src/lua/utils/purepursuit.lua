@@ -6,8 +6,12 @@ require("wpilib.motors")
 require("wpilib.time")
 local pprint = require("utils.pprint")
 
-local SEARCH_DISTANCE = 36 -- 36 inches before and after the last closest point
-local LOOKAHEAD_DISTANCE = 24 -- look 24 inches ahead of the closest point
+-- Search this many inches before and after the previous closest point. This
+-- allows the path to cross over itself.
+local SEARCH_DISTANCE = 36
+
+-- Look this many inches ahead of the closest point to find the goal point.
+local LOOKAHEAD_DISTANCE = 24
 
 ---@param path Path - a pure pursuit path
 ---@param fieldPosition Vector - the robot's current position on the field
@@ -53,16 +57,6 @@ local function findGoalPoint(path, closestPoint)
 	end
 
 	return #path.points
-end
-
----@param point Vector
----@return number angle
-local function getAngleToPoint(point)
-	if point:length() == 0 then
-		return 0
-	end
-	local angle = math.atan2(point.y, point.x)
-	return angle
 end
 
 ---@class PurePursuit
@@ -112,14 +106,18 @@ function PurePursuit:run(position, rotation)
 
 	local maxDistance = self.path.distances[#self.path.distances]
 	if self.path.distances[indexOfClosestPoint] + LOOKAHEAD_DISTANCE > maxDistance then
-		goalPoint = self.path.points[#self.path.points] + Vector:new(self.path.distances[indexOfClosestPoint] + LOOKAHEAD_DISTANCE - maxDistance, 0):rotate(self.path.endAngle)
+		local distancePastFinal = self.path.distances[indexOfClosestPoint] + LOOKAHEAD_DISTANCE - maxDistance
+		goalPoint = self.path.points[#self.path.points] + Vector:new(distancePastFinal, 0):rotate(self.path.endAngle)
 	end
-	
-	goalPoint = (goalPoint - position):rotate(-rotation)
-	
-	local angleToGoal = getAngleToPoint(goalPoint)
-	
+
+	local angleToGoal = 0 -- relative to the robot's current heading
+	local goalPointRobotRelative = (goalPoint - position):rotate(-rotation)
+	if goalPointRobotRelative:length() ~= 0 then
+		angleToGoal = math.atan2(goalPointRobotRelative.y, goalPointRobotRelative.x)
+	end
+
 	local turnValue = -self.purePursuitPID:pid(rotation, angleToGoal)
+	-- TODO: use accurate distances here
 	local speed = getTrapezoidSpeed(
 		0.25, 0.75, 0.5, #self.path.points, 20, 20, indexOfClosestPoint
 	)
