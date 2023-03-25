@@ -10,6 +10,9 @@ local dir = getDeployDirectory() .. "/pathplanner/"
 ---@field distances number[] A table with the distance for each path point. (Cumulative)
 ---@field events table[] The events to run along the path. Each table is {distance from start, function to run}.
 ---@field name string
+---@field firstPoint Vector
+---@field startAngle number
+---@field endAngle number
 Path = {}
 
 --[[
@@ -53,6 +56,14 @@ function Path:new(pathName, eventFuncs)
 	local waypoints = parsedJSON.waypoints
 	local markers = parsedJSON.markers
 
+	local firstPoint = Vector:new(waypoints[1].anchorPoint.x, waypoints[1].anchorPoint.y) * METERS2INCHES
+	local firstControl = Vector:new(waypoints[1].nextControl.x, waypoints[1].nextControl.y) * METERS2INCHES
+	local startAngle = math.atan2((firstControl - firstPoint).y, (firstControl - firstPoint).x)
+
+	local lastControl = Vector:new(waypoints[#waypoints].prevControl.x, waypoints[#waypoints].prevControl.y) * METERS2INCHES
+	local lastPoint = Vector:new(waypoints[#waypoints].anchorPoint.x, waypoints[#waypoints].anchorPoint.y) * METERS2INCHES
+	local endAngle = math.atan2((lastPoint - lastControl).y, (lastPoint - lastControl).x)
+
 	for i = 1, #waypoints - 1 do
 		local p1 = Vector:new(waypoints[i].anchorPoint.x, waypoints[i].anchorPoint.y)
 		local p2 = Vector:new(waypoints[i].nextControl.x, waypoints[i].nextControl.y)
@@ -93,6 +104,9 @@ function Path:new(pathName, eventFuncs)
 		distances = distances,
 		events = events,
 		name = pathName,
+		firstPoint = firstPoint,
+		startAngle = startAngle,
+		endAngle = endAngle,
 	}
 	setmetatable(p, self)
 	self.__index = self

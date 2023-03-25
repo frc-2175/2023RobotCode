@@ -7,7 +7,7 @@ require("wpilib.time")
 local pprint = require("utils.pprint")
 
 local SEARCH_DISTANCE = 36 -- 36 inches before and after the last closest point
-local LOOKAHEAD_DISTANCE = 42 -- look 24 inches ahead of the closest point
+local LOOKAHEAD_DISTANCE = 24 -- look 24 inches ahead of the closest point
 
 ---@param path Path - a pure pursuit path
 ---@param fieldPosition Vector - the robot's current position on the field
@@ -46,25 +46,23 @@ end
 function findGoalPoint(path, closestPoint)
 	closestPoint = closestPoint == nil and 1 or closestPoint
 
-	local goalPoint = closestPoint
-
-	for i = goalPoint, #path.points do
+	for i = closestPoint, #path.points do
 		if path.distances[i] >= path.distances[closestPoint] + LOOKAHEAD_DISTANCE then
 			return i
 		end
 	end
 
-	return goalPoint
+	return #path.points
 end
 
 ---@param point Vector
----@return number degAngle
+---@return number angle
 function getAngleToPoint(point)
 	if point:length() == 0 then
 		return 0
 	end
-	local angle = math.atan(point:normalized().y)
-	return sign(point.x) * angle
+	local angle = math.atan2(point.y, point.x)
+	return angle
 end
 
 ---@class PurePursuit
@@ -108,13 +106,21 @@ end
 function PurePursuit:run(position, rotation)
 	-- pprint(self.path.triggerPoints)
 	self.purePursuitPID:updateTime(Timer:getFPGATimestamp())
-
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
+	
 	local indexOfGoalPoint = findGoalPoint(self.path, indexOfClosestPoint)
-	local goalPoint = self.path.points[indexOfGoalPoint] - position
+	local goalPoint = self.path[indexOfGoalPoint]
+
+	local maxDistance = self.path.distances[#self.path.distances]
+	if self.path.distances[indexOfClosestPoint] + LOOKAHEAD_DISTANCE > maxDistance then
+		goalPoint = self.path.points[#self.path.points] + Vector:new(self.path.distances[indexOfClosestPoint] + LOOKAHEAD_DISTANCE - maxDistance, 0):rotate(self.path.endAngle)
+	end
+	
+	goalPoint = (goalPoint - position):rotate(-rotation)
+	
 	local angleToGoal = getAngleToPoint(goalPoint)
 	
-	local turnValue = self.purePursuitPID:pid(rotation, angleToGoal)
+	local turnValue = -self.purePursuitPID:pid(rotation, angleToGoal)
 	local speed = getTrapezoidSpeed(
 		0.25, 0.75, 0.5, #self.path.points, 20, 20, indexOfClosestPoint
 	)

@@ -240,7 +240,7 @@ end
 ---Gets the angle of the arm, in radians. Positive angle is toward the front of the robot; negative angle is toward the back.
 ---@return number
 function Lyon:getAngle()
-	return armEncoder:getPosition() * (math.pi / 155.4955)
+	return armEncoder:getPosition() * (2 * math.pi / 318)
 end
 
 ---Gets the length of the arm in inches, from the center axle to the tip of the gripper.

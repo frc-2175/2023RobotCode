@@ -135,7 +135,9 @@ local testPathAuto = FancyCoroutine:new(function()
 		end,
 	})
 
-	local pp = PurePursuit:new(path, 0.1, 0, 0)
+	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle)
+
+	local pp = PurePursuit:new(path, 4 / math.pi, 0, 0)
 
 	local speed, turn, done = 0, 0, false
 
@@ -145,6 +147,8 @@ local testPathAuto = FancyCoroutine:new(function()
 		Drivetrain:autoDrive(speed, turn)
 		coroutine.yield()
 	end
+
+	print("Done!")
 
 	Drivetrain:autoDrive(0, 0)
 end)
@@ -167,5 +171,5 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "smartEngage",           value = smartEngage },
 	{ name = "highOnlyRear",          value = reverseScoreHigh },
 	{ name = "reverseHighAutoEngage", value = reverseHighAutoEngage },
-	{ name = "test path auto",		  value = testPathAuto},
+	{ name = "test path auto",        value = testPathAuto },
 })

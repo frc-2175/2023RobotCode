@@ -32,7 +32,7 @@ rightFollower:setInverted(CTREInvertType.FollowMaster)
 leftMotor:setNeutralMode(NeutralMode.Brake)
 rightMotor:setNeutralMode(NeutralMode.Brake)
 
-local TICKS_TO_INCHES = (6 * math.pi) / (2048 * 11.71)
+local TICKS_TO_INCHES = -(6 * math.pi) / (2048 * 11.71)
 
 Drivetrain = {}
 
@@ -63,6 +63,7 @@ function Drivetrain:periodic()
 	SmartDashboard:putNumber("rightPosition", Drivetrain:rightPosition())
 	SmartDashboard:putNumber("yaw", Drivetrain:yaw())
 	
+	
 	pe:Update(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition())
 end
 
@@ -83,6 +84,10 @@ function Drivetrain:teleopDrive(speed, rotation)
 
 	leftMotor:set(leftSpeed)
 	rightMotor:set(rightSpeed)
+end
+
+function Drivetrain:setPos(x, y, rot)
+	pe:ResetPosition(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition(), x, y, rot)
 end
 
 function Drivetrain:stop()

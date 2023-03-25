@@ -16,7 +16,6 @@ gamepad = Joystick:new(2)
 -----------------------------------
 
 
-
 -- ramp for the drive controls, so drivers can think even less.
 local driveRamp = Ramp:new(0.25, 0.4)
 
@@ -26,14 +25,22 @@ local inSubstation = false
 
 local scoreDirection = "front"
 
+local field = Field2d:new()
+
 navx = AHRS:new(4)
 
 -----------------------------------
 
 function Robot.robotInit()
+
 end
 
 function Robot.robotPeriodic()
+	local x, y, rot = Drivetrain:getPosition()
+
+	field:setRobotPose(x, y, rot)
+	SmartDashboard:putField(field)
+
 	SmartDashboard:putString("scoreDirection", scoreDirection)
 
 	Lyon:periodic()
@@ -104,11 +111,6 @@ function Robot.teleopPeriodic()
 	elseif leftStick:getTriggerHeld() or gamepad:getButtonHeld(XboxButton.RightBumper) then
 		inSubstation = false
 	end
-
-	-- Nick, I expected better
-	-- if gamepad:getButtonHeld(XboxButton.RightBumper) then
-	-- 	inSubstation = false
-	-- end
 		
 	-- Switch score mode
 	if leftStick:getButtonPressed(2) then
@@ -137,5 +139,10 @@ function Robot.teleopPeriodic()
 
 	if leftStick:getButtonPressed(10) then
 		Brakes:reverse()
+	end
+
+	
+	if leftStick:getButtonHeld(3) then
+		Drivetrain:setPos(0,0,0)
 	end
 end
