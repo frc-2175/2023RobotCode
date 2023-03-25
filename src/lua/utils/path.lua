@@ -105,6 +105,7 @@ function Path:new(pathName, eventFuncs)
 		events = events,
 		name = pathName,
 		firstPoint = firstPoint,
+		lastPoint = lastPoint,
 		startAngle = startAngle,
 		endAngle = endAngle,
 	}
