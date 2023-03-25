@@ -31,7 +31,7 @@ local function findClosestPoint(path, fieldPosition, previousClosestPoint)
 
 	local minDistance = (path.points[1] - fieldPosition):length()
 	for i = 1, #path.distances do
-		if startDistance < path.distances[i] and path.distances[i] < endDistance then
+		if startDistance <= path.distances[i] and path.distances[i] <= endDistance then
 			local distance = (path.points[i] - fieldPosition):length()
 
 			if distance <= minDistance then
@@ -49,7 +49,7 @@ end
 ---@return integer goalPoint
 local function findGoalPoint(path, closestPoint)
 	closestPoint = closestPoint == nil and 1 or closestPoint
-
+	
 	for i = closestPoint, #path.points do
 		if path.distances[i] >= path.distances[closestPoint] + LOOKAHEAD_DISTANCE then
 			return i
@@ -116,7 +116,11 @@ function PurePursuit:run(position, rotation)
 		angleToGoal = math.atan2(goalPointRobotRelative.y, goalPointRobotRelative.x)
 	end
 
-	local turnValue = -self.purePursuitPID:pid(rotation, angleToGoal)
+	local between = lerp(position, goalPoint, 0.5)
+
+	field:getObject("angle"):setPose(between.x, between.y, angleToGoal + rotation)
+
+	local turnValue = self.purePursuitPID:pid(angleToGoal, 0)
 	-- TODO: use accurate distances here
 	local speed = getTrapezoidSpeed(
 		0.25, 0.75, 0.5, #self.path.points, 20, 20, indexOfClosestPoint
@@ -132,6 +136,7 @@ function PurePursuit:run(position, rotation)
 	SmartDashboard:putNumber("PurePursuitIndexClosest", indexOfClosestPoint)
 	SmartDashboard:putNumber("PurePursuitIndexGoal", indexOfGoalPoint)
 	SmartDashboard:putNumber("PurePursuitIndexMax", #self.path.points)
+	SmartDashboard:putNumber("PurePursuitDistanceMax", #self.path.distances)
 	field:getObject("test"):setPose(goalPoint.x, goalPoint.y, 0)
 	SmartDashboard:putNumber("PurePursuitGoalX", goalPoint.x)
 	SmartDashboard:putNumber("PurePursuitGoalY", goalPoint.y)

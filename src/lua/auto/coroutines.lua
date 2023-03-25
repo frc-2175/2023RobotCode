@@ -149,6 +149,7 @@ local testPathAuto = FancyCoroutine:new(function()
 	end
 
 	print("Done!")
+	print("Final error: " ..  (path.points[#path.points] - Vector:new(Drivetrain:getPosition())):length() .. "in")
 
 	Drivetrain:autoDrive(0, 0)
 end)
