@@ -100,7 +100,7 @@ end
 function PurePursuit:run(position, rotation)
 	self.purePursuitPID:updateTime(Timer:getFPGATimestamp())
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
-	
+
 	local indexOfGoalPoint = findGoalPoint(self.path, indexOfClosestPoint)
 	local goalPoint = self.path.points[indexOfGoalPoint]
 
@@ -141,3 +141,11 @@ function PurePursuit:run(position, rotation)
 
 	return speed, turnValue, false
 end
+
+test("Pure pursuit debug fun time", function(t)
+	local path = Path:new("TestOnlyDoNotEdit", {
+		testEvent = function() print("wow!") end,
+	})
+	local pp = PurePursuit:new(path, 1, 0, 0)
+	pp:run(path.firstPoint, 0)
+end)

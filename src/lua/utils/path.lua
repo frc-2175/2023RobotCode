@@ -122,7 +122,7 @@ function Path:print()
 end
 
 test("Path:new", function(t)
-	local p = Path:new("Test", {
+	local p = Path:new("TestOnlyDoNotEdit", {
 		testEvent = function()
 			print("wow, an event!")
 		end

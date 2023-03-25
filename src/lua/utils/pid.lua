@@ -91,6 +91,7 @@ end
 
 ---@param time number
 function PIDController:updateTime(time)
+	time = time or 0 -- tests like to pass us a nil value
 	self.dt = time - self.previousTime
 	self.previousTime = time
 end
