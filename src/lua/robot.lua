@@ -123,13 +123,11 @@ function Robot.teleopPeriodic()
 	if gamepad:getPOV() == 0 or gamepad:getPOV() == 45 or gamepad:getPOV() == 315 then
 		RollerBar:deploy()
 		Lyon:openGripper()
-	else
+	elseif gamepad:getPOV() == 180 or gamepad:getPOV() == 135 or gamepad:getPOV() == 225 then
 		RollerBar:retract()
-	end
-
-	if gamepad:getPOV() == 180 or gamepad:getPOV() == 135 or gamepad:getPOV() == 225 then
 		RollerBar:rollIn()
 	else 
+		RollerBar:retract()
 		RollerBar:rollStop()
 	end
 
@@ -139,10 +137,5 @@ function Robot.teleopPeriodic()
 
 	if leftStick:getButtonPressed(10) then
 		Brakes:reverse()
-	end
-
-	
-	if leftStick:getButtonHeld(3) then
-		Drivetrain:setPos(0,0,0)
 	end
 end
