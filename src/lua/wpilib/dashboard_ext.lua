@@ -1,5 +1,10 @@
 local ffi = require("ffi")
 
+ffi.cdef[[
+void* Field2d_GetObject(void* _this, const char* name);
+void FieldObject2d_SetPose(void* _this, double x, double y, double rotation);
+]]
+
 function SmartDashboard:getString(keyName)
 	local cstr = ffi.C.SmartDashboard_GetString(keyName, nil)
 	local luastr = ffi.string(cstr)
@@ -56,4 +61,24 @@ end
 ---@param field Field2d
 function SmartDashboard:putField(field)
 	ffi.C.PutField(field._this)
+end
+
+---@class FieldObject2d
+---@field _this FieldObject2d
+FieldObject2d = {}
+
+---@param name string
+---@return FieldObject2d
+function Field2d:getObject(name)
+    local instance = {
+        _this = ffi.C.Field2d_GetObject(self._this, name),
+    }
+    setmetatable(instance, FieldObject2d)
+    FieldObject2d.__index = FieldObject2d
+
+	return instance
+end
+
+function FieldObject2d:setPose(x, y, rot)
+	ffi.C.FieldObject2d_SetPose(self._this, x, y, rot)
 end

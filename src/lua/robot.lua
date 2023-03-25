@@ -25,7 +25,7 @@ local inSubstation = false
 
 local scoreDirection = "front"
 
-local field = Field2d:new()
+field = Field2d:new()
 
 navx = AHRS:new(4)
 

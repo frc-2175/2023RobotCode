@@ -108,7 +108,7 @@ function PurePursuit:run(position, rotation)
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
 	
 	local indexOfGoalPoint = findGoalPoint(self.path, indexOfClosestPoint)
-	local goalPoint = self.path[indexOfGoalPoint]
+	local goalPoint = self.path.points[indexOfGoalPoint]
 
 	local maxDistance = self.path.distances[#self.path.distances]
 	if self.path.distances[indexOfClosestPoint] + LOOKAHEAD_DISTANCE > maxDistance then
@@ -134,6 +134,7 @@ function PurePursuit:run(position, rotation)
 	SmartDashboard:putNumber("PurePursuitIndexClosest", indexOfClosestPoint)
 	SmartDashboard:putNumber("PurePursuitIndexGoal", indexOfGoalPoint)
 	SmartDashboard:putNumber("PurePursuitIndexMax", #self.path.points)
+	field:getObject("test"):setPose(goalPoint.x, goalPoint.y, 0)
 	SmartDashboard:putNumber("PurePursuitGoalX", goalPoint.x)
 	SmartDashboard:putNumber("PurePursuitGoalY", goalPoint.y)
 	SmartDashboard:putNumber("PurePursuitClosestX", self.path.points[indexOfClosestPoint].x)
