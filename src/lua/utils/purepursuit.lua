@@ -124,13 +124,13 @@ function PurePursuit:run(position, rotation)
 	end
 
 	local between = lerp(position, goalPoint, 0.5)
-
+	
 	field:getObject("PurePursuitAngleToGoal"):setPose(between.x, between.y, angleToGoal + rotation)
 
 	local turnValue = self.purePursuitPID:pid(angleToGoal, 0)
 	
 	local speed = getTrapezoidSpeed(
-		0.25, 0.75, 0.5, #self.path.distances[#self.path.distances], 20, 20, self.path.distances[indexOfClosestPoint]
+		0.25, 0.75, 0.5, self.path.distances[#self.path.distances], 20, 20, self.path.distances[indexOfClosestPoint]
 	)
 
 	self.previousClosestPoint = indexOfClosestPoint

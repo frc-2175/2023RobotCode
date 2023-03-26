@@ -140,14 +140,14 @@ local testPathAuto = FancyCoroutine:new(function()
 	for i = 1, 85 do
 		local pathIndex = math.ceil(#path.points * i / 85)
 		local pathPoint = path.points[pathIndex]
-		table.insert(pointPoses, {pathPoint.x, pathPoint.y, 0})
+		table.insert(pointPoses, {x = pathPoint.x, y = pathPoint.y, rot = 0})
 	end
 
 	field:getObject("Path"):setPoses(pointPoses)
 
 	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle)
 
-	local pp = PurePursuit:new(path, 4 / math.pi, 0, 0)
+	local pp = PurePursuit:new(path, 2, 0, 0)
 
 	local speed, turn, done = 0, 0, false
 

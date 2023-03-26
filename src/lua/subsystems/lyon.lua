@@ -76,11 +76,11 @@ Lyon = {}
 Lyon.AXLE_HEIGHT = 40
 Lyon.GROUND_CLEARANCE = 0.5
 Lyon.SHELF_CLEARANCE = 3
-Lyon.MAX_ANGLE = 1.89
+Lyon.MAX_ANGLE = 1.82
 Lyon.MIN_EXTENSION = 31.5
-Lyon.MAX_EXTENSION = 63
+Lyon.MAX_EXTENSION = 66
 Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
-Lyon.HIGH_PRESET = Vector:new(62, 73)
+Lyon.HIGH_PRESET = Vector:new(65, 62)
 Lyon.MID_PRESET = Vector:new(43.75, 46)
 Lyon.LOW_PRESET = Vector:new(34, 13)
 Lyon.SUBSTATION_PRESET = Vector:new(27, ((3*12) + 9))
@@ -240,7 +240,7 @@ end
 ---Gets the angle of the arm, in radians. Positive angle is toward the front of the robot; negative angle is toward the back.
 ---@return number
 function Lyon:getAngle()
-	return armEncoder:getPosition() * (2 * math.pi / 318)
+	return armEncoder:getPosition() * (math.pi / 155.4955) / 1.0318
 end
 
 ---Gets the length of the arm in inches, from the center axle to the tip of the gripper.
@@ -441,6 +441,7 @@ test("Lyon: traverse from back to inside", function(t)
 	anglePid:clear(Timer:getFPGATimestamp())
 	t:assert(angleMotorOutputSpeed(targetAngle, LEDGE_ANGLE + 0.01, 50) > 0)
 	telePid:clear(Timer:getFPGATimestamp())
+	targetExtension = extensionToGround(LEDGE_ANGLE, 3)
 	t:assertEqual(teleMotorOutputSpeed(targetExtension, targetExtension, LEDGE_ANGLE + 0.01, targetAngle), 0)
 end)
 

@@ -67,7 +67,7 @@ function Robot.teleopPeriodic()
 		Lyon:closeGripper()
 	end
 
-	reachedEncoderDisableFront = (encoderValueAtSubstation + 36 < Drivetrain:combinedPosition())
+	reachedEncoderDisableFront = (encoderValueAtSubstation - 36 > Drivetrain:combinedPosition())
 	-- reachedEncoderDisableRear = (scoreDirection == "rear" and (Drivetrain:combinedPosition() > encoderValueAtSubstation + 36))
 	if reachedEncoderDisableFront then
 		inSubstation = false
@@ -108,16 +108,22 @@ function Robot.teleopPeriodic()
 
 		inSubstation = true
 		encoderValueAtSubstation = Drivetrain:combinedPosition()
-	elseif leftStick:getTriggerHeld() or gamepad:getButtonHeld(XboxButton.RightBumper) then
+	elseif leftStick:getTriggerHeld() or gamepad:getButtonHeld(XboxButton.Select) then
 		inSubstation = false
 	end
 		
 	-- Switch score mode
-	if leftStick:getButtonPressed(2) then
-		scoreDirection = "front"
-	end
-	if rightStick:getButtonPressed(2) then
-		scoreDirection = "rear"
+
+	function toggleScoreDirection() 
+		if scoreDirection == "front" then
+			scoreDirection = "rear"
+		elseif scoreDirection == "rear" then
+			scoreDirection = "front"
+		end
+	end		
+
+	if leftStick:getButtonPressed(2) or gamepad:getButtonPressed(XboxButton.Start) then
+		toggleScoreDirection()
 	end
 	
 	if gamepad:getPOV() == 0 or gamepad:getPOV() == 45 or gamepad:getPOV() == 315 then
@@ -132,10 +138,12 @@ function Robot.teleopPeriodic()
 	end
 
 	if rightStick:getButtonPressed(10) then
-		Brakes:forward()
+		Brakes:reverse()
 	end
 
 	if leftStick:getButtonPressed(10) then
-		Brakes:reverse()
+		Brakes:forward()
 	end
+
+	-- 1.62 is the magic value
 end

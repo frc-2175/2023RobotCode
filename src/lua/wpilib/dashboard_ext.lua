@@ -85,7 +85,6 @@ function FieldObject2d:setPose(x, y, rot)
 	ffi.C.FieldObject2d_SetPose(self._this, x, y, rot)
 end
 
----@param poses Pose2d[]
 function FieldObject2d:setPoses(poses)
-	ffi.C.FieldObject2d_SetPose(self._this, ffi.new("ObjectPose[?]", #poses, poses), #poses)
+	ffi.C.FieldObject2d_SetPoses(self._this, ffi.new("ObjectPose[?]", #poses, poses), #poses)
 end
