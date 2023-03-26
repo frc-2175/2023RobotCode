@@ -134,6 +134,16 @@ local testPathAuto = FancyCoroutine:new(function()
 			print("TEST PATH TEST PATH TEST PATH")
 		end,
 	})
+	
+	local pointPoses = {}
+
+	for i = 1, 85 do
+		local pathIndex = math.ceil(#path.points * i / 85)
+		local pathPoint = path.points[pathIndex]
+		table.insert(pointPoses, Pose2d:new(pathPoint.x, pathPoint.y, 0))
+	end
+
+	field:getObject("Path"):setPoses(pointPoses)
 
 	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle)
 
@@ -149,7 +159,8 @@ local testPathAuto = FancyCoroutine:new(function()
 	end
 
 	print("Done!")
-	print("Final error: " ..  (path.points[#path.points] - Vector:new(Drivetrain:getPosition())):length() .. "in")
+	print("Average error: " .. (pp.pathError / pp.iterations) .. "in")
+	print("End error: " ..  (path.points[#path.points] - Vector:new(Drivetrain:getPosition())):length() .. "in")
 
 	Drivetrain:autoDrive(0, 0)
 end)

@@ -68,3 +68,25 @@ function Transform3d:new(position, rotation)
 	return instance
 end
 
+---@class Pose2d
+---@field x number
+---@field y number
+---@field rot number
+Pose2d = {}
+
+---@param x number
+---@param y number
+---@param rot number
+---@return Pose2d
+function Pose2d:new(x, y, rot)
+	local instance = {
+		x = x,
+		y = y,
+		rot = rot,
+	}
+	setmetatable(instance, self)
+	self.__index = self
+
+	return instance
+end
+

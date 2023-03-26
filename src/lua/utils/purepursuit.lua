@@ -62,8 +62,10 @@ end
 ---@class PurePursuit
 ---@field path Path
 ---@field events table[]
----@field previousClosestPoint number
 ---@field purePursuitPID PIDController
+---@field previousClosestPoint number
+---@field pathError number
+---@field iterations integer
 PurePursuit = {}
 
 function table.copy(t)
@@ -83,6 +85,8 @@ function PurePursuit:new(path, p, i, d)
 		events = table.copy(path.events),
 		purePursuitPID = PIDController:new(p, i, d),
 		previousClosestPoint = 1,
+		pathError = 0,
+		iterations = 0,
 	}
 	setmetatable(x, PurePursuit)
 	self.__index = self
@@ -98,8 +102,11 @@ end
 ---@param rotation number
 ---@return number speed, number turnValue, boolean isDone
 function PurePursuit:run(position, rotation)
+	self.iterations = self.iterations + 1
 	self.purePursuitPID:updateTime(Timer:getFPGATimestamp())
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
+
+	self.pathError = self.pathError + (self.path.points[indexOfClosestPoint] - position):length()
 
 	local indexOfGoalPoint = findGoalPoint(self.path, indexOfClosestPoint)
 	local goalPoint = self.path.points[indexOfGoalPoint]
@@ -118,12 +125,12 @@ function PurePursuit:run(position, rotation)
 
 	local between = lerp(position, goalPoint, 0.5)
 
-	field:getObject("angle"):setPose(between.x, between.y, angleToGoal + rotation)
+	field:getObject("PurePursuitAngleToGoal"):setPose(between.x, between.y, angleToGoal + rotation)
 
 	local turnValue = self.purePursuitPID:pid(angleToGoal, 0)
-	-- TODO: use accurate distances here
+	
 	local speed = getTrapezoidSpeed(
-		0.25, 0.75, 0.5, #self.path.points, 20, 20, indexOfClosestPoint
+		0.25, 0.75, 0.5, #self.path.distances[#self.path.distances], 20, 20, self.path.distances[indexOfClosestPoint]
 	)
 
 	self.previousClosestPoint = indexOfClosestPoint
@@ -137,11 +144,8 @@ function PurePursuit:run(position, rotation)
 	SmartDashboard:putNumber("PurePursuitIndexGoal", indexOfGoalPoint)
 	SmartDashboard:putNumber("PurePursuitIndexMax", #self.path.points)
 	SmartDashboard:putNumber("PurePursuitDistanceMax", #self.path.distances)
-	field:getObject("test"):setPose(goalPoint.x, goalPoint.y, 0)
-	SmartDashboard:putNumber("PurePursuitGoalX", goalPoint.x)
-	SmartDashboard:putNumber("PurePursuitGoalY", goalPoint.y)
-	SmartDashboard:putNumber("PurePursuitClosestX", self.path.points[indexOfClosestPoint].x)
-	SmartDashboard:putNumber("PurePursuitClosestY", self.path.points[indexOfClosestPoint].y)
+	field:getObject("PurePursuitGoalPoint"):setPose(goalPoint.x, goalPoint.y, 0)
+	field:getObject("PurePursuitClosestPoint"):setPose(self.path.points[indexOfClosestPoint].x, self.path.points[indexOfClosestPoint].y, 0)
 	SmartDashboard:putNumber("PurePursuitAngleToGoal", angleToGoal)
 
 	return speed, turnValue, false

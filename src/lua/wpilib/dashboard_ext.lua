@@ -1,8 +1,10 @@
 local ffi = require("ffi")
 
 ffi.cdef[[
+typedef struct { double x, y, rot; } ObjectPose;
 void* Field2d_GetObject(void* _this, const char* name);
 void FieldObject2d_SetPose(void* _this, double x, double y, double rotation);
+void FieldObject2d_SetPoses(void* _this, ObjectPose* poses, size_t count);
 ]]
 
 function SmartDashboard:getString(keyName)
@@ -81,4 +83,9 @@ end
 
 function FieldObject2d:setPose(x, y, rot)
 	ffi.C.FieldObject2d_SetPose(self._this, x, y, rot)
+end
+
+---@param poses Pose2d[]
+function FieldObject2d:setPoses(poses)
+	ffi.C.FieldObject2d_SetPose(self._this, ffi.new("ObjectPose[?]", #poses, poses), #poses)
 end
