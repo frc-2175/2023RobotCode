@@ -43,6 +43,10 @@ function Robot.robotPeriodic()
 
 	SmartDashboard:putString("scoreDirection", scoreDirection)
 
+	if gamepad:getButtonPressed(XboxButton.Select) then
+		Drivetrain:setPos(0, 0, 0)
+	end
+
 	Lyon:periodic()
 	Drivetrain:periodic()
 end
@@ -56,11 +60,12 @@ function Robot.autonomousPeriodic()
 	getSelectedAuto():run()
 end
 
-function Robot.teleopInit() end
+function Robot.teleopInit()
+end
 
 function Robot.teleopPeriodic()
 	Drivetrain:teleopDrive(driveRamp:ramp(signedPow(-leftStick:getY())), signedPow(rightStick:getX()))
-	
+
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:openGripper()
 	elseif gamepad:getRightTriggerAmount() > 0.5 then
@@ -72,7 +77,7 @@ function Robot.teleopPeriodic()
 	if reachedEncoderDisableFront then
 		inSubstation = false
 	end
-	
+
 	if not inSubstation then
 		if gamepad:getButtonHeld(XboxButton.A) then
 			local preset = scoreDirection == "front" and Lyon.LOW_PRESET or Lyon.LOW_REAR
@@ -93,7 +98,7 @@ function Robot.teleopPeriodic()
 			Lyon:neutralPosition()
 		end
 	end
-	
+
 	if gamepad:getButtonHeld(XboxButton.LeftBumper) then
 		if scoreDirection == "front" then
 			Lyon:setTargetPositionPreset(Lyon.SUBSTATION_PRESET)
@@ -111,28 +116,28 @@ function Robot.teleopPeriodic()
 	elseif leftStick:getTriggerHeld() or gamepad:getButtonHeld(XboxButton.Select) then
 		inSubstation = false
 	end
-		
+
 	-- Switch score mode
 
-	function toggleScoreDirection() 
+	function toggleScoreDirection()
 		if scoreDirection == "front" then
 			scoreDirection = "rear"
 		elseif scoreDirection == "rear" then
 			scoreDirection = "front"
 		end
-	end		
+	end
 
 	if leftStick:getButtonPressed(2) or gamepad:getButtonPressed(XboxButton.Start) then
 		toggleScoreDirection()
 	end
-	
+
 	if gamepad:getPOV() == 0 or gamepad:getPOV() == 45 or gamepad:getPOV() == 315 then
 		RollerBar:deploy()
 		Lyon:openGripper()
 	elseif gamepad:getPOV() == 180 or gamepad:getPOV() == 135 or gamepad:getPOV() == 225 then
 		RollerBar:retract()
 		RollerBar:rollIn()
-	else 
+	else
 		RollerBar:retract()
 		RollerBar:rollStop()
 	end

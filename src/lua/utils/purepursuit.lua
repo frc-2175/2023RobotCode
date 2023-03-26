@@ -22,14 +22,14 @@ local LOOKAHEAD_DISTANCE = 24
     closest to current robot position 
 --]]
 local function findClosestPoint(path, fieldPosition, previousClosestPoint)
-	local indexOfClosestPoint = 1
+	local indexOfClosestPoint = previousClosestPoint
 	local startDistance = path.distances[previousClosestPoint] - SEARCH_DISTANCE
 	local endDistance = path.distances[previousClosestPoint] + SEARCH_DISTANCE
 
 	startDistance = math.max(startDistance, 0)
 	endDistance = math.min(endDistance, path.distances[#path.distances])
 
-	local minDistance = (path.points[1] - fieldPosition):length()
+	local minDistance = (path.points[previousClosestPoint] - fieldPosition):length()
 	for i = 1, #path.distances do
 		if startDistance <= path.distances[i] and path.distances[i] <= endDistance then
 			local distance = (path.points[i] - fieldPosition):length()
@@ -66,6 +66,7 @@ end
 ---@field previousClosestPoint number
 ---@field pathError number
 ---@field iterations integer
+---@field isReversed boolean
 PurePursuit = {}
 
 function table.copy(t)
@@ -78,8 +79,9 @@ end
 ---@param p number
 ---@param i number
 ---@param d number
+---@param isReversed boolean
 ---@return PurePursuit
-function PurePursuit:new(path, p, i, d)
+function PurePursuit:new(path, p, i, d, isReversed)
 	local x = {
 		path = path,
 		events = table.copy(path.events),
@@ -87,6 +89,7 @@ function PurePursuit:new(path, p, i, d)
 		previousClosestPoint = 1,
 		pathError = 0,
 		iterations = 0,
+		isReversed = isReversed,
 	}
 	setmetatable(x, PurePursuit)
 	self.__index = self
@@ -103,6 +106,11 @@ end
 ---@return number speed, number turnValue, boolean isDone
 function PurePursuit:run(position, rotation)
 	self.iterations = self.iterations + 1
+
+	if self.isReversed then
+		rotation = rotation + math.pi
+	end
+
 	self.purePursuitPID:updateTime(Timer:getFPGATimestamp())
 	local indexOfClosestPoint = findClosestPoint(self.path, position, self.previousClosestPoint)
 
@@ -147,6 +155,11 @@ function PurePursuit:run(position, rotation)
 	field:getObject("PurePursuitGoalPoint"):setPose(goalPoint.x, goalPoint.y, 0)
 	field:getObject("PurePursuitClosestPoint"):setPose(self.path.points[indexOfClosestPoint].x, self.path.points[indexOfClosestPoint].y, 0)
 	SmartDashboard:putNumber("PurePursuitAngleToGoal", angleToGoal)
+
+
+	if self.isReversed then
+		speed = -speed
+	end
 
 	return speed, turnValue, false
 end

@@ -145,9 +145,42 @@ local testPathAuto = FancyCoroutine:new(function()
 
 	field:getObject("Path"):setPoses(pointPoses)
 
-	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle)
+	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle + math.pi)
 
-	local pp = PurePursuit:new(path, 2, 0, 0)
+	local pp = PurePursuit:new(path, 3, 0, 0.15, true)
+
+	local speed, turn, done = 0, 0, false
+
+	while not done do
+		local x, y, rot = Drivetrain:getPosition()
+		speed, turn, done = pp:run(Vector:new(x, y), rot)
+		Drivetrain:autoDrive(speed, turn)
+		coroutine.yield()
+	end
+
+	print("Done!")
+	print("Average error: " .. (pp.pathError / pp.iterations) .. "in")
+	print("End error: " ..  (path.points[#path.points] - Vector:new(Drivetrain:getPosition())):length() .. "in")
+
+	Drivetrain:autoDrive(0, 0)
+end)
+
+local twoConePt1 = FancyCoroutine:new(function ()
+	local path = Path:new("TwoConePt1", {})
+	
+	local pointPoses = {}
+
+	for i = 1, 85 do
+		local pathIndex = math.ceil(#path.points * i / 85)
+		local pathPoint = path.points[pathIndex]
+		table.insert(pointPoses, {x = pathPoint.x, y = pathPoint.y, rot = 0})
+	end
+
+	field:getObject("Path"):setPoses(pointPoses)
+
+	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle + math.pi)
+
+	local pp = PurePursuit:new(path, 3, 0, 0.15, true)
 
 	local speed, turn, done = 0, 0, false
 
@@ -184,4 +217,5 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "highOnlyRear",          value = reverseScoreHigh },
 	{ name = "reverseHighAutoEngage", value = reverseHighAutoEngage },
 	{ name = "test path auto",        value = testPathAuto },
+	{ name = "Two Cone part 1",        value = twoConePt1 },
 })

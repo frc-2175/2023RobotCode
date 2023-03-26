@@ -32,7 +32,7 @@ rightFollower:setInverted(CTREInvertType.FollowMaster)
 leftMotor:setNeutralMode(NeutralMode.Brake)
 rightMotor:setNeutralMode(NeutralMode.Brake)
 
-local TICKS_TO_INCHES = -(6 * math.pi) / (2048 * 11.71)
+local TICKS_TO_INCHES = (6 * math.pi) / (2048 * 11.71)
 
 Drivetrain = {}
 
@@ -45,11 +45,11 @@ function Drivetrain:pitchDegrees()
 end
 
 function Drivetrain:leftPosition()
-	return -leftMotor:getSelectedSensorPosition() * TICKS_TO_INCHES
+	return leftMotor:getSelectedSensorPosition() * TICKS_TO_INCHES
 end
 
 function Drivetrain:rightPosition()
-	return -rightMotor:getSelectedSensorPosition() * TICKS_TO_INCHES
+	return rightMotor:getSelectedSensorPosition() * TICKS_TO_INCHES
 end
 
 function Drivetrain:combinedPosition()
