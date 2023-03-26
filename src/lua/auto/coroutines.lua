@@ -13,11 +13,11 @@ end
 local doNothingAuto = FancyCoroutine:new(function()
 end)
 
-local function sleep(time)
+local function sleep(timeSeconds)
 	local timer = Timer:new()
 	timer:start()
 
-	while timer:get() < time do
+	while timer:get() < timeSeconds do
 		coroutine.yield()
 	end
 end
@@ -128,6 +128,47 @@ local reverseHighAutoEngage = FancyCoroutine:new(function()
 	reverseSmartEngage:runUntilDone()
 end)
 
+---@param path Path
+---@param isReversed boolean
+---@return FancyCoroutine
+local function pathCoroutine(path, isReversed)
+	return FancyCoroutine:new(function ()
+		local pointPoses = {}
+	
+		for i = 1, 85 do
+			local pathIndex = math.ceil(#path.points * i / 85)
+			local pathPoint = path.points[pathIndex]
+			table.insert(pointPoses, {x = pathPoint.x, y = pathPoint.y, rot = 0})
+		end
+	
+		field:getObject("Path"):setPoses(pointPoses)
+	
+		if isReversed then
+			Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle + math.pi)
+		else
+			Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle)
+		end
+	
+		local pp = PurePursuit:new(path, 3, 0, 0.15, isReversed)
+	
+		local speed, turn, done = 0, 0, false
+	
+		while not done do
+			local x, y, rot = Drivetrain:getPosition()
+			speed, turn, done = pp:run(Vector:new(x, y), rot)
+			Drivetrain:autoDrive(speed, turn)
+			coroutine.yield()
+		end
+	
+		print("Done with " .. path.name .. "!")
+		print("Average error: " .. (pp.pathError / pp.iterations) .. "in")
+		print("End error: " ..  (path.points[#path.points] - Vector:new(Drivetrain:getPosition())):length() .. "in")
+	
+		Drivetrain:autoDrive(0, 0)
+
+	end)
+end
+
 local testPathAuto = FancyCoroutine:new(function()
 	local path = Path:new("Test", {
 		testEvent = function()
@@ -135,67 +176,24 @@ local testPathAuto = FancyCoroutine:new(function()
 		end,
 	})
 	
-	local pointPoses = {}
-
-	for i = 1, 85 do
-		local pathIndex = math.ceil(#path.points * i / 85)
-		local pathPoint = path.points[pathIndex]
-		table.insert(pointPoses, {x = pathPoint.x, y = pathPoint.y, rot = 0})
-	end
-
-	field:getObject("Path"):setPoses(pointPoses)
-
-	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle + math.pi)
-
-	local pp = PurePursuit:new(path, 3, 0, 0.15, true)
-
-	local speed, turn, done = 0, 0, false
-
-	while not done do
-		local x, y, rot = Drivetrain:getPosition()
-		speed, turn, done = pp:run(Vector:new(x, y), rot)
-		Drivetrain:autoDrive(speed, turn)
-		coroutine.yield()
-	end
-
-	print("Done!")
-	print("Average error: " .. (pp.pathError / pp.iterations) .. "in")
-	print("End error: " ..  (path.points[#path.points] - Vector:new(Drivetrain:getPosition())):length() .. "in")
-
-	Drivetrain:autoDrive(0, 0)
+	pathCoroutine(path, true):runUntilDone()
 end)
 
 local twoConePt1 = FancyCoroutine:new(function ()
+	Lyon:openGripper()	
+	Lyon:setTargetPosition(-30, 0)
+
 	local path = Path:new("TwoConePt1", {})
 	
-	local pointPoses = {}
+	pathCoroutine(path, true):runUntilDone()
 
-	for i = 1, 85 do
-		local pathIndex = math.ceil(#path.points * i / 85)
-		local pathPoint = path.points[pathIndex]
-		table.insert(pointPoses, {x = pathPoint.x, y = pathPoint.y, rot = 0})
-	end
+	sleep(0.1)
 
-	field:getObject("Path"):setPoses(pointPoses)
-
-	Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle + math.pi)
-
-	local pp = PurePursuit:new(path, 3, 0, 0.15, true)
-
-	local speed, turn, done = 0, 0, false
-
-	while not done do
-		local x, y, rot = Drivetrain:getPosition()
-		speed, turn, done = pp:run(Vector:new(x, y), rot)
-		Drivetrain:autoDrive(speed, turn)
-		coroutine.yield()
-	end
-
-	print("Done!")
-	print("Average error: " .. (pp.pathError / pp.iterations) .. "in")
-	print("End error: " ..  (path.points[#path.points] - Vector:new(Drivetrain:getPosition())):length() .. "in")
-
-	Drivetrain:autoDrive(0, 0)
+	Lyon:closeGripper()
+	sleep(0.1)
+	Lyon:setTargetPosition(-30,20)
+	sleep(0.5)
+	Lyon:neutralPosition()
 end)
 
 ---@return FancyCoroutine
