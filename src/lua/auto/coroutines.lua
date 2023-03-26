@@ -140,7 +140,7 @@ local testPathAuto = FancyCoroutine:new(function()
 	for i = 1, 85 do
 		local pathIndex = math.ceil(#path.points * i / 85)
 		local pathPoint = path.points[pathIndex]
-		table.insert(pointPoses, Pose2d:new(pathPoint.x, pathPoint.y, 0))
+		table.insert(pointPoses, {pathPoint.x, pathPoint.y, 0})
 	end
 
 	field:getObject("Path"):setPoses(pointPoses)

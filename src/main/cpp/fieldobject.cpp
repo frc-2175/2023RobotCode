@@ -18,7 +18,7 @@ LUAFUNC void FieldObject2d_SetPoses(void* _this, ObjectPose* poses, size_t count
 	std::vector<frc::Pose2d> vec(count);
 	
 	for (size_t i = 0; i < count; i++) {
-		vec[i] = frc::Pose2d((units::inch_t)x, (units::inch_t)y, (units::inch_t)rot);
+		vec[i] = frc::Pose2d{(units::inch_t)poses[i].x, (units::inch_t)poses[i].y, frc::Rotation2d((units::radian_t)poses[i].rot)};
 	}
 
     ((frc::FieldObject2d*)_this)->SetPoses(vec);
