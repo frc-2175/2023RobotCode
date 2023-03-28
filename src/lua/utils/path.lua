@@ -10,7 +10,6 @@ local dir = getDeployDirectory() .. "/pathplanner/"
 ---@field distances number[] A table with the distance for each path point. (Cumulative)
 ---@field events table[] The events to run along the path. Each table is {distance from start, function to run}.
 ---@field name string
----@field firstPoint Vector
 ---@field startAngle number
 ---@field endAngle number
 Path = {}
@@ -104,8 +103,6 @@ function Path:new(pathName, eventFuncs)
 		distances = distances,
 		events = events,
 		name = pathName,
-		firstPoint = firstPoint,
-		lastPoint = lastPoint,
 		startAngle = startAngle,
 		endAngle = endAngle,
 	}
@@ -115,9 +112,21 @@ function Path:new(pathName, eventFuncs)
 	return p
 end
 
+---mirrors a path, does not make a copy
+function Path:mirror()
+	for _, point in ipairs(self.points) do
+		point.x = 651.25 - point.x
+	end
+
+	self.startAngle = math.pi - self.startAngle
+	self.startAngle = math.pi - self.startAngle
+
+	return self
+end
+
 function Path:print()
-	for index, value in ipairs(self.points) do
-		print(value)
+	for _, point in ipairs(self.points) do
+		print(point)
 	end
 end
 

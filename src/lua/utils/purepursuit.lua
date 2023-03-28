@@ -80,8 +80,12 @@ end
 ---@param i number
 ---@param d number
 ---@param isReversed boolean
+---@param isMirrored boolean
 ---@return PurePursuit
-function PurePursuit:new(path, p, i, d, isReversed)
+function PurePursuit:new(path, p, i, d, isReversed, isMirrored)
+	if isMirrored then
+		path:mirror()
+	end
 	local x = {
 		path = path,
 		events = table.copy(path.events),
@@ -169,5 +173,5 @@ test("Pure pursuit debug fun time", function(t)
 		testEvent = function() print("wow!") end,
 	})
 	local pp = PurePursuit:new(path, 1, 0, 0)
-	pp:run(path.firstPoint, 0)
+	pp:run(path.points[0], 0)
 end)

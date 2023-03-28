@@ -144,9 +144,9 @@ local function pathCoroutine(path, isReversed)
 		field:getObject("Path"):setPoses(pointPoses)
 	
 		if isReversed then
-			Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle + math.pi)
+			Drivetrain:setPos(path.points[1].x, path.points[1].y, path.startAngle + math.pi)
 		else
-			Drivetrain:setPos(path.firstPoint.x, path.firstPoint.y, path.startAngle)
+			Drivetrain:setPos(path.points[1].x, path.points[1].y, path.startAngle)
 		end
 	
 		local pp = PurePursuit:new(path, 3, 0, 0.15, isReversed)
