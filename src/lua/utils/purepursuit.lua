@@ -82,10 +82,7 @@ end
 ---@param isReversed boolean
 ---@param isMirrored boolean
 ---@return PurePursuit
-function PurePursuit:new(path, p, i, d, isReversed, isMirrored)
-	if isMirrored then
-		path:mirror()
-	end
+function PurePursuit:new(path, p, i, d, isReversed)
 	local x = {
 		path = path,
 		events = table.copy(path.events),

@@ -119,9 +119,7 @@ function Path:mirror()
 	end
 
 	self.startAngle = math.pi - self.startAngle
-	self.startAngle = math.pi - self.startAngle
-
-	return self
+	self.endAngle = math.pi - self.endAngle
 end
 
 function Path:print()
