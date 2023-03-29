@@ -41,7 +41,7 @@ function Drivetrain:yaw()
 end
 
 function Drivetrain:pitchDegrees()
-	return navx:getPitch()
+	return navx:getPitch() + 0.349999994039536
 end
 
 function Drivetrain:leftPosition()
@@ -62,6 +62,7 @@ function Drivetrain:periodic()
 	SmartDashboard:putNumber("leftPosition", Drivetrain:leftPosition())
 	SmartDashboard:putNumber("rightPosition", Drivetrain:rightPosition())
 	SmartDashboard:putNumber("yaw", Drivetrain:yaw())
+	SmartDashboard:putNumber("pitch", Drivetrain:pitchDegrees())
 	
 	
 	pe:Update(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition())
@@ -80,7 +81,7 @@ function Drivetrain:autoDrive(speed, rotation)
 end
 
 function Drivetrain:teleopDrive(speed, rotation)
-	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation, 0.1, 0.8, 0.6)
+	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation, 0.1, 0.8, 0.8)
 
 	leftMotor:set(leftSpeed)
 	rightMotor:set(rightSpeed)

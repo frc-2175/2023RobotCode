@@ -80,7 +80,7 @@ Lyon.MAX_ANGLE = 1.82
 Lyon.MIN_EXTENSION = 31.5
 Lyon.MAX_EXTENSION = 66
 Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
-Lyon.HIGH_PRESET = Vector:new(65, 62)
+Lyon.HIGH_PRESET = Vector:new(62, 62)
 Lyon.MID_PRESET = Vector:new(43.75, 46)
 Lyon.LOW_PRESET = Vector:new(34, 13)
 Lyon.SUBSTATION_PRESET = Vector:new(27, ((3*12) + 9))
@@ -112,6 +112,8 @@ local telePid = PIDController:new(1 / 2, 0, 0)
 
 local targetExtension = Lyon.MIN_EXTENSION
 local targetAngle = 0
+
+local slowdownWhenExtended = true
 
 ---Computes how far the arm should extend in order to reach the ground. Formula: 40" / cos(angle).
 ---@param angle number The angle of the arm, in radians. You should probably call `Lyon:getAngle()` to get this value.
@@ -162,6 +164,10 @@ local function angleMotorOutputSpeed(target, angle, extension)
 
 	local relativeExtension = (extension - Lyon.MIN_EXTENSION) / Lyon.MAX_EXTENSION
 	local armMultiplier = (1 - speedWhenExtended) * signedPow(1-relativeExtension, curviness) + speedWhenExtended
+	
+	if not slowdownWhenExtended then
+		armMultiplier = 1 -- be careful!!
+	end
 
 	local armSpeed = anglePid:pid(angle, target, 0.3, math.pi, ANGLE_MOTOR_MAX_SPEED * armMultiplier)
 
@@ -295,6 +301,10 @@ end
 ---@param preset Vector
 function Lyon:setTargetPositionPreset(preset)
 	Lyon:setTargetPosition(preset.x, preset.y)
+end
+
+function Lyon:slowdownWhenExtended(shouldSlow)
+	slowdownWhenExtended = shouldSlow
 end
 
 test("Lyon setTarget", function (t)

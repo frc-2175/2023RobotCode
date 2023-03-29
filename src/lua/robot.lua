@@ -52,6 +52,7 @@ function Robot.robotPeriodic()
 end
 
 function Robot.autonomousInit()
+	Lyon:slowdownWhenExtended(true)
 	getSelectedAuto():reset()
 end
 
@@ -61,9 +62,12 @@ function Robot.autonomousPeriodic()
 end
 
 function Robot.teleopInit()
+	Brakes:forward()
+	Lyon:slowdownWhenExtended(true)
 end
 
 function Robot.teleopPeriodic()
+	Lyon:slowdownWhenExtended(true)
 	Drivetrain:teleopDrive(driveRamp:ramp(signedPow(-leftStick:getY())), signedPow(rightStick:getX()))
 
 	if gamepad:getLeftTriggerAmount() > 0.5 then

@@ -2,7 +2,7 @@
 
 #include <frc/estimator/DifferentialDrivePoseEstimator.h>
 
-const units::meter_t trackWidth = 22_in; // Distance from left wheels to right wheels. VALUE MAY CHANGE PLEASE UPDATE IF YOU NEED TO!!!
+const units::meter_t trackWidth = 21.5_in; // Distance from left wheels to right wheels. VALUE MAY CHANGE PLEASE UPDATE IF YOU NEED TO!!!
 
 frc::DifferentialDriveKinematics kinematics(trackWidth);
 

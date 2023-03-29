@@ -38,13 +38,14 @@ local function driveNInches(driveDistance, speed)
 	end)
 end
 
-local function driveSeconds(time, speed)
+local function driveSeconds(time, speed, turn)
+	turn = turn or 0
 	return FancyCoroutine:new(function()
 		local timer = Timer:new()
 		timer:start()
 
 		while timer:get() < time do
-			Drivetrain:autoDrive(speed, 0)
+			Drivetrain:autoDrive(speed, turn)
 			coroutine.yield()
 		end
 
@@ -83,11 +84,38 @@ local highMobility = FancyCoroutine:new(function()
 	mobilityAuto:runUntilDone()
 end)
 
+local armBalance = FancyCoroutine:new(function()
+	Brakes:reverse()
+	local xPID = PIDController:new(-0.5, 0, 0)
+	local x = 0
+	
+	while true do
+		Lyon:slowdownWhenExtended(true)
+		local pitch = Drivetrain:pitchDegrees()
+		if pitch > 5 or pitch < -5 then
+			x = 0
+			if pitch > 0 then
+				Lyon:setTargetPosition(62, Lyon.AXLE_HEIGHT - 1)
+			end 
+			if pitch < 0 then
+				Lyon:setTargetPosition(-62, Lyon.AXLE_HEIGHT - 1)
+			end
+		else 
+			Lyon:slowdownWhenExtended(true)
+			x = x + xPID:pid(pitch/5, 1/5)
+			x = clamp(x, -40, 40)
+			Lyon:setTargetPosition(x, 15)
+			SmartDashboard:putNumber("BalanceTargetX", x)
+		end
+		coroutine:yield()
+	end
+end)
+
 local engage = FancyCoroutine:new(function()
 	driveNInches((104.625) - 20, -0.5):runUntilDone()
 end)
 
-local smartEngage = FancyCoroutine:new(function()
+local driveBackwardSmartEngage = FancyCoroutine:new(function()
 	print("Starting smartEngage")
 	while Drivetrain:pitchDegrees() > -11 do
 		print("Driving while waiting for pitch to drop...")
@@ -96,12 +124,14 @@ local smartEngage = FancyCoroutine:new(function()
 	end
 	print("Reached target, stopping...")
 	Drivetrain:stop()
-	print("Driving 42 inches...")
-	driveNInches(42, -0.4):runUntilDone()
+	print("Driving 32 inches...")
+	driveNInches(28, -0.4):runUntilDone()
 	Brakes:toggleBrakes()
+	armBalance:reset()
+	armBalance:runUntilDone()
 end)
 
-local reverseSmartEngage = FancyCoroutine:new(function()
+local driveForwardSmartEngage = FancyCoroutine:new(function()
 	print("Starting reverseSmartEngage")
 	while Drivetrain:pitchDegrees() < 11 do
 		print("Driving while waiting for pitch to drop...")
@@ -110,22 +140,24 @@ local reverseSmartEngage = FancyCoroutine:new(function()
 	end
 	print("reached target, stopping...")
 	Drivetrain:stop()
-	print("Driving 42 inches")
-	driveNInches(42, 0.4):runUntilDone()
+	print("Driving 34 inches")
+	driveNInches(34, 0.4):runUntilDone()
 	Brakes:toggleBrakes()
+	armBalance:reset()
+	armBalance:runUntilDone()
 end)
 
 local highAutoEngage = FancyCoroutine:new(function()
 	scoreHigh:reset()
-	smartEngage:reset()
+	driveBackwardSmartEngage:reset()
 	scoreHigh:runUntilDone()
-	smartEngage:runUntilDone()
+	driveBackwardSmartEngage:runUntilDone()
 end)
 local reverseHighAutoEngage = FancyCoroutine:new(function()
 	reverseScoreHigh:reset()
-	reverseSmartEngage:reset()
+	driveForwardSmartEngage:reset()
 	reverseScoreHigh:runUntilDone()
-	reverseSmartEngage:runUntilDone()
+	driveForwardSmartEngage:runUntilDone()
 end)
 
 ---@param path Path
@@ -179,23 +211,69 @@ local testPathAuto = FancyCoroutine:new(function()
 	pathCoroutine(path, true):runUntilDone()
 end)
 
-local twoConePt1 = FancyCoroutine:new(function ()
-	Lyon:openGripper()	
+local twoCone = FancyCoroutine:new(function ()
+	Lyon:closeGripper()
+	sleep(0.1)
+	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
+	sleep(2.7)
+	Lyon:openGripper()
+	sleep(0.3)
 	Lyon:setTargetPosition(-30, 0)
 
 	local path = Path:new("TwoConePt1", {})
+	local path2 = Path:new("TwoConePt2", {})
 	
 	pathCoroutine(path, true):runUntilDone()
-
 	sleep(0.1)
-
 	Lyon:closeGripper()
-	sleep(0.1)
-	Lyon:setTargetPosition(-30,20)
+	sleep(0.2)
+	Lyon:slowdownWhenExtended(false)
+	Lyon:setTargetPosition(-30,25)
 	sleep(0.5)
+	Lyon:slowdownWhenExtended(true)
+	Lyon:neutralPosition()
+	pathCoroutine(path2, false):runUntilDone()
+	driveSeconds(0.5, 0.2, 0.1):runUntilDone()
+	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
+	sleep(2.7)
+	Lyon:openGripper()
+	sleep(0.1)
 	Lyon:neutralPosition()
 end)
 
+local twoConeEngage = FancyCoroutine:new(function ()
+	Lyon:closeGripper()
+	sleep(0.1)
+	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
+	sleep(2.7)
+	Lyon:openGripper()
+	sleep(0.3)
+	Lyon:setTargetPosition(-30, 0)
+
+	local path = Path:new("TwoConePt1", {})
+	local path2 = Path:new("TwoConePt2", {})
+	local path3 = Path:new("TwoConePt3", {})
+	
+	pathCoroutine(path, true):runUntilDone()
+	sleep(0.1)
+	Lyon:closeGripper()
+	sleep(0.2)
+	Lyon:slowdownWhenExtended(false)
+	Lyon:setTargetPosition(-30,25)
+	sleep(0.5)
+	Lyon:slowdownWhenExtended(true)
+	Lyon:neutralPosition()
+	pathCoroutine(path2, false):runUntilDone()
+	driveSeconds(0.5, 0.2, 0.1):runUntilDone()
+	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
+	sleep(2.7)
+	Lyon:openGripper()
+	sleep(0.1)
+	Lyon:neutralPosition()
+	pathCoroutine(path3, true):runUntilDone()
+	driveBackwardSmartEngage:reset()
+	driveBackwardSmartEngage:runUntilDone()
+end)
 ---@return FancyCoroutine
 function getSelectedAuto()
 	if autoChooser:getSelected() then
@@ -211,9 +289,12 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "highOnly",              value = scoreHigh },
 	{ name = "highMobility",          value = highMobility },
 	{ name = "highAutoEngage",        value = highAutoEngage },
-	{ name = "smartEngage",           value = smartEngage },
+	{ name = "driveBackwardSmartEngage",           value = driveBackwardSmartEngage },
+	{ name = "driveForwardSmartEngage",    value = driveForwardSmartEngage },
 	{ name = "highOnlyRear",          value = reverseScoreHigh },
 	{ name = "reverseHighAutoEngage", value = reverseHighAutoEngage },
 	{ name = "test path auto",        value = testPathAuto },
-	{ name = "Two Cone part 1",        value = twoConePt1 },
+	{ name = "famcy Two Cone",        value = twoCone },
+	{ name = "ultimate auto",		  value = twoConeEngage},
+	{ name = "armBalance",            value = armBalance}
 })
