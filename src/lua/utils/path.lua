@@ -5,10 +5,14 @@ require("utils.math")
 local json = require("utils.json")
 local dir = getDeployDirectory() .. "/pathplanner/"
 
+---@class Event
+---@field distance number
+---@field func function
+
 ---@class Path
 ---@field points Vector[] The path points in field coordinates. (Origin bottom left, inches.)
 ---@field distances number[] A table with the distance for each path point. (Cumulative)
----@field events table[] The events to run along the path. Each table is {distance from start, function to run}.
+---@field events Event[] The events to run along the path. Each table is {distance from start, function to run}.
 ---@field name string
 ---@field startAngle number
 ---@field endAngle number
@@ -32,9 +36,6 @@ local myPath = Path:new("MyPath", {
 	end,
 })
 --]]
-
-
-
 ---@param pathName string The name of the path in PathPlanner, e.g. "MyPath" for a file named MyPath.path
 ---@param eventFuncs table<string, function>? A table of functions for path events.
 ---@return Path
@@ -46,12 +47,12 @@ function Path:new(pathName, eventFuncs)
 	local events = {}
 	-- TODO: Read file, calculate stuff, and save it all on the Path object below
 
-	local rawFile, err = io.open(dir..pathName..".path")
+	local rawFile, err = io.open(dir .. pathName .. ".path")
 	if rawFile == nil then
 		error(err)
 	end
 	local parsedJSON = json.decode(rawFile:read("*a"))
-	
+
 	local waypoints = parsedJSON.waypoints
 	local markers = parsedJSON.markers
 
@@ -59,8 +60,10 @@ function Path:new(pathName, eventFuncs)
 	local firstControl = Vector:new(waypoints[1].nextControl.x, waypoints[1].nextControl.y) * METERS2INCHES
 	local startAngle = math.atan2((firstControl - firstPoint).y, (firstControl - firstPoint).x)
 
-	local lastControl = Vector:new(waypoints[#waypoints].prevControl.x, waypoints[#waypoints].prevControl.y) * METERS2INCHES
-	local lastPoint = Vector:new(waypoints[#waypoints].anchorPoint.x, waypoints[#waypoints].anchorPoint.y) * METERS2INCHES
+	local lastControl = Vector:new(waypoints[#waypoints].prevControl.x, waypoints[#waypoints].prevControl.y) *
+	METERS2INCHES
+	local lastPoint = Vector:new(waypoints[#waypoints].anchorPoint.x, waypoints[#waypoints].anchorPoint.y) *
+	METERS2INCHES
 	local endAngle = math.atan2((lastPoint - lastControl).y, (lastPoint - lastControl).x)
 
 	for i = 1, #waypoints - 1 do
@@ -72,17 +75,17 @@ function Path:new(pathName, eventFuncs)
 		local increment = 0.01
 		for t = 0, 1, increment do
 			for _, marker in ipairs(markers) do
-				if math.floor(marker.position) == i - 1 then -- the marker is on the current segment
+				if math.floor(marker.position) == i - 1 then          -- the marker is on the current segment
 					if t - increment < marker.position and marker.position <= t then -- we just crossed the marker
 						for _, name in ipairs(marker.names) do
 							if eventFuncs[name] == nil then
-								error('Function "'.. name ..'" not defined')
-							else
-								table.insert(events, {
-									distance = distances[#distances],
-									func = eventFuncs[name],
-								})
+								error('Function "' .. name .. '" not defined')
 							end
+
+							table.insert(events, {
+								distance = distances[#distances],
+								func = eventFuncs[name],
+							})
 						end
 					end
 				end

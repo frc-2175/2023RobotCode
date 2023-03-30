@@ -160,18 +160,22 @@ local reverseHighAutoEngage = FancyCoroutine:new(function()
 	driveForwardSmartEngage:runUntilDone()
 end)
 
+
+---@enum FieldSide
+local FieldSide = { Blue = 0, Red = 1 }
+
 ---@param path Path
 ---@param isReversed boolean?
----@param isMirrored boolean?
+---@param side FieldSide?
 ---@return FancyCoroutine
-local function pathCoroutine(path, isReversed, isMirrored)
+local function pathCoroutine(path, isReversed, side)
 	isReversed = isReversed or false
-	isMirrored = isMirrored or false
+	side = side or FieldSide.Blue
 
-	if isMirrored then
+	if side == FieldSide.Red then
 		path:mirror()
 	end
-	
+
 	return FancyCoroutine:new(function()
 		local pointPoses = {}
 
@@ -218,76 +222,8 @@ local testPathAuto = FancyCoroutine:new(function()
 	pathCoroutine(path, true):runUntilDone()
 end)
 
-local twoCone = FancyCoroutine:new(function()
-	Lyon:closeGripper()
-	sleep(0.1)
-	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
-	sleep(2.7)
-	Lyon:openGripper()
-	sleep(0.3)
-	Lyon:setTargetPosition(-30, 0)
-
-	local path = Path:new("TwoConePt1", {})
-	local path2 = Path:new("TwoConePt2", {})
-
-	pathCoroutine(path, true):runUntilDone()
-	sleep(0.1)
-	Lyon:closeGripper()
-	sleep(0.2)
-	Lyon:slowdownWhenExtended(false)
-	Lyon:setTargetPosition(-30, 25)
-	sleep(0.5)
-	Lyon:slowdownWhenExtended(true)
-	Lyon:neutralPosition()
-	pathCoroutine(path2, false):runUntilDone()
-	driveSeconds(0.5, 0.2, 0.1):runUntilDone()
-	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
-	sleep(2.7)
-	Lyon:openGripper()
-	sleep(0.1)
-	Lyon:neutralPosition()
-end)
-
-local twoConeEngage = FancyCoroutine:new(function()
-	Lyon:closeGripper()
-	sleep(0.1)
-	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
-	sleep(2.7)
-	Lyon:openGripper()
-	sleep(0.3)
-	Lyon:setTargetPosition(-30, 0)
-
-	local path = Path:new("TwoConePt1", {})
-	local path2 = Path:new("TwoConePt2", {})
-	local path3 = Path:new("TwoConePt3", {})
-
-	pathCoroutine(path, true):runUntilDone()
-	sleep(0.1)
-	Lyon:closeGripper()
-	sleep(0.2)
-	Lyon:slowdownWhenExtended(false)
-	Lyon:setTargetPosition(-30, 25)
-	sleep(0.5)
-	Lyon:slowdownWhenExtended(true)
-	Lyon:neutralPosition()
-	pathCoroutine(path2, false):runUntilDone()
-	driveSeconds(0.5, 0.2, 0.1):runUntilDone()
-	Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
-	sleep(2.7)
-	Lyon:openGripper()
-	sleep(0.1)
-	Lyon:neutralPosition()
-	pathCoroutine(path3, true):runUntilDone()
-	driveBackwardSmartEngage:reset()
-	driveBackwardSmartEngage:runUntilDone()
-end)
-
----@enum FieldSide
-local FieldSide = { Blue = 0, Red = 1 }
-
 ---@param side FieldSide
 ---@return FancyCoroutine
----@diagnostic disable-next-line: cast-local-type
 function twoCone(side)
 	return FancyCoroutine:new(function()
 		Lyon:closeGripper()
@@ -299,29 +235,46 @@ function twoCone(side)
 		Lyon:setTargetPosition(-30, 0)
 
 		local path = Path:new("TwoConePt1", {})
-		local path2 = Path:new("TwoConePt2", {})
-
-		pathCoroutine(path, true, side == FieldSide.Red):runUntilDone()
-		sleep(0.1)
+		pathCoroutine(path, true, side):runUntilDone()
 
 		Lyon:closeGripper()
 		sleep(0.2)
 		Lyon:slowdownWhenExtended(false)
 		Lyon:setTargetPosition(-30, 25)
-		sleep(0.5)
-		Lyon:slowdownWhenExtended(true)
-		Lyon:neutralPosition()
-		pathCoroutine(path2, false, side == FieldSide.Red):runUntilDone()
+
+		local path2 = Path:new("TwoConePt2", {
+			RaiseArm = function()
+				Lyon:slowdownWhenExtended(true)
+				Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
+			end,
+		})
+
+		pathCoroutine(path2, false, side):runUntilDone()
+		Lyon:slowdownWhenExtended(true) -- paranoid
+
 		local endTurn = 0.1
 		if side == FieldSide.Red then
 			endTurn = -endTurn
 		end
 		driveSeconds(0.5, 0.2, endTurn):runUntilDone()
-		Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
-		sleep(2.7)
+
 		Lyon:openGripper()
 		sleep(0.2)
 		Lyon:neutralPosition()
+	end)
+end
+
+---@param side FieldSide
+---@return FancyCoroutine
+function twoConeEngage(side)
+	return FancyCoroutine:new(function()
+		twoCone(side):runUntilDone()
+
+		local path = Path:new("TwoConePt3", {})
+
+		pathCoroutine(path, true, side):runUntilDone()
+		driveBackwardSmartEngage:reset()
+		driveBackwardSmartEngage:runUntilDone()
 	end)
 end
 
@@ -345,8 +298,10 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "highOnlyRear",             value = reverseScoreHigh },
 	{ name = "reverseHighAutoEngage",    value = reverseHighAutoEngage },
 	{ name = "test path auto",           value = testPathAuto },
-	{ name = "famcy Two Cone Blue",      value = twoCone(FieldSide.Blue) },
-	{ name = "famcy Two Cone Red",       value = twoCone(FieldSide.Red) },
-	{ name = "ultimate auto",            value = twoConeEngage },
+	{ name = "Two Cone Blue",            value = twoCone(FieldSide.Blue) },
+	{ name = "Two Cone Red",             value = twoCone(FieldSide.Red) },
+	{ name = "Two Cone Engage Blue",     value = twoConeEngage(FieldSide.Blue) },
+	{ name = "Two Cone Engage Red",      value = twoConeEngage(FieldSide.Red) },
+	{ name = "TEST_two cone",            value = twoCone(FieldSide.Blue) },
 	{ name = "armBalance",               value = armBalance }
 })

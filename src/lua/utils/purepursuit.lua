@@ -80,7 +80,6 @@ end
 ---@param i number
 ---@param d number
 ---@param isReversed boolean
----@param isMirrored boolean
 ---@return PurePursuit
 function PurePursuit:new(path, p, i, d, isReversed)
 	local x = {
@@ -117,6 +116,13 @@ function PurePursuit:run(position, rotation)
 
 	self.pathError = self.pathError + (self.path.points[indexOfClosestPoint] - position):length()
 
+	for i, event in ipairs(self.path.events) do
+		if self.path.distances[indexOfClosestPoint] >= event.distance then
+			event.func()
+			table.remove(self.path.events, i)
+		end
+	end
+
 	local indexOfGoalPoint = findGoalPoint(self.path, indexOfClosestPoint)
 	local goalPoint = self.path.points[indexOfGoalPoint]
 
@@ -131,10 +137,6 @@ function PurePursuit:run(position, rotation)
 	if goalPointRobotRelative:length() ~= 0 then
 		angleToGoal = math.atan2(goalPointRobotRelative.y, goalPointRobotRelative.x)
 	end
-
-	local between = lerp(position, goalPoint, 0.5)
-	
-	field:getObject("PurePursuitAngleToGoal"):setPose(between.x, between.y, angleToGoal + rotation)
 
 	local turnValue = self.purePursuitPID:pid(angleToGoal, 0)
 	
@@ -153,10 +155,12 @@ function PurePursuit:run(position, rotation)
 	SmartDashboard:putNumber("PurePursuitIndexGoal", indexOfGoalPoint)
 	SmartDashboard:putNumber("PurePursuitIndexMax", #self.path.points)
 	SmartDashboard:putNumber("PurePursuitDistanceMax", #self.path.distances)
-	field:getObject("PurePursuitGoalPoint"):setPose(goalPoint.x, goalPoint.y, 0)
-	field:getObject("PurePursuitClosestPoint"):setPose(self.path.points[indexOfClosestPoint].x, self.path.points[indexOfClosestPoint].y, 0)
 	SmartDashboard:putNumber("PurePursuitAngleToGoal", angleToGoal)
 
+	field:getObject("PurePursuitGoalPoint"):setPose(goalPoint.x, goalPoint.y, 0)
+	field:getObject("PurePursuitClosestPoint"):setPose(self.path.points[indexOfClosestPoint].x, self.path.points[indexOfClosestPoint].y, 0)
+	local between = lerp(position, goalPoint, 0.5)
+	field:getObject("PurePursuitAngleToGoal"):setPose(between.x, between.y, angleToGoal + rotation)
 
 	if self.isReversed then
 		speed = -speed
@@ -169,6 +173,6 @@ test("Pure pursuit debug fun time", function(t)
 	local path = Path:new("TestOnlyDoNotEdit", {
 		testEvent = function() print("wow!") end,
 	})
-	local pp = PurePursuit:new(path, 1, 0, 0)
-	pp:run(path.points[0], 0)
+	local pp = PurePursuit:new(path, 1, 0, 0, false)
+	pp:run(path.points[1], 0)
 end)
