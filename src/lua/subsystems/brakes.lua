@@ -4,19 +4,11 @@ brakeSolenoid = DoubleSolenoid:new(4, 5)
 
 Brakes = {}
 
-function Brakes:forward()
+function Brakes:up()
 	brakeSolenoid:set(DoubleSolenoidValue.Forward)
 	
 end
 
-function Brakes:reverse()
+function Brakes:down()
 	brakeSolenoid:set(DoubleSolenoidValue.Reverse)
-end
-
-function Brakes:toggleBrakes()
-	if brakeSolenoid:get() ~= DoubleSolenoidValue.Reverse then
-		brakeSolenoid:set(DoubleSolenoidValue.Reverse)
-	else
-		brakeSolenoid:set(DoubleSolenoidValue.Forward)
-	end
 end

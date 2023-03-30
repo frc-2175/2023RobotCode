@@ -58,11 +58,13 @@ end
 
 function Robot.autonomousPeriodic()
 	-- Just call auto periodic
-	getSelectedAuto():run()
+	if not getSelectedAuto().done then
+		getSelectedAuto():run()
+	end
 end
 
 function Robot.teleopInit()
-	Brakes:forward()
+	Brakes:up()
 	Lyon:slowdownWhenExtended(true)
 end
 
@@ -147,11 +149,11 @@ function Robot.teleopPeriodic()
 	end
 
 	if rightStick:getButtonPressed(10) then
-		Brakes:reverse()
+		Brakes:down()
 	end
 
 	if leftStick:getButtonPressed(10) then
-		Brakes:forward()
+		Brakes:up()
 	end
 
 	-- 1.62 is the magic value

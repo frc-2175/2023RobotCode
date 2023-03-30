@@ -48,8 +48,13 @@ function FancyCoroutine:run()
 		self.wasRunning = true
 	end
 
-	local status, yield = coroutine.resume(self.coroutine)
-	if not status then
+	local ok, yield = coroutine.resume(self.coroutine)
+	if not ok then
+		self.done = true
+		error(yield)
+	end
+
+	if coroutine.status(self.coroutine) == "dead" then
 		self.done = true
 	end
 

@@ -22,19 +22,19 @@ local function sleep(timeSeconds)
 	end
 end
 
+---@param driveDistance number
+---@param speed number
 local function driveNInches(driveDistance, speed)
 	return FancyCoroutine:new(function()
 		local startingPosition = Drivetrain:combinedPosition()
 
 		while math.abs(Drivetrain:combinedPosition() - startingPosition) < driveDistance do
-			print("Driving...")
-			print("Combined position:", Drivetrain:combinedPosition())
 			Drivetrain:autoDrive(speed, 0)
-			coroutine:yield()
+			coroutine.yield(math.abs(Drivetrain:combinedPosition() - startingPosition))
 		end
-
-		print("Done")
 		Drivetrain:stop()
+
+		return math.abs(Drivetrain:combinedPosition() - startingPosition)
 	end)
 end
 
@@ -85,7 +85,7 @@ local highMobility = FancyCoroutine:new(function()
 end)
 
 local armBalance = FancyCoroutine:new(function()
-	Brakes:reverse()
+	Brakes:down()
 	local xPID = PIDController:new(-0.5, 0, 0)
 	local x = 0
 
@@ -116,6 +116,7 @@ local engage = FancyCoroutine:new(function()
 end)
 
 local driveBackwardSmartEngage = FancyCoroutine:new(function()
+	::restart::
 	print("Starting smartEngage")
 	while Drivetrain:pitchDegrees() > -11 do
 		print("Driving while waiting for pitch to drop...")
@@ -123,26 +124,39 @@ local driveBackwardSmartEngage = FancyCoroutine:new(function()
 		coroutine.yield()
 	end
 	print("Reached target, stopping...")
-	Drivetrain:stop()
-	print("Driving 32 inches...")
-	driveNInches(28, -0.4):runUntilDone()
-	Brakes:toggleBrakes()
+	print("Driving 28 inches...")
+	local driveUp = driveNInches(28, -0.4)
+	while not driveUp.done do
+		local totalDistance = driveUp:run()
+		if Drivetrain:pitchDegrees() > -11 and totalDistance < 20 then
+			goto restart
+		end
+		coroutine.yield()
+	end
+	Brakes:down()
 	armBalance:reset()
 	armBalance:runUntilDone()
 end)
 
 local driveForwardSmartEngage = FancyCoroutine:new(function()
+	::restart::
 	print("Starting reverseSmartEngage")
 	while Drivetrain:pitchDegrees() < 11 do
 		print("Driving while waiting for pitch to drop...")
 		Drivetrain:autoDrive(0.5, 0)
 		coroutine.yield()
 	end
-	print("reached target, stopping...")
-	Drivetrain:stop()
+	print("reached target")
 	print("Driving 34 inches")
-	driveNInches(34, 0.4):runUntilDone()
-	Brakes:toggleBrakes()
+	local driveUp = driveNInches(34, 0.4)
+	while not driveUp.done do
+		local totalDistance = driveUp:run()
+		if Drivetrain:pitchDegrees() < 11 and totalDistance < 20 then
+			goto restart
+		end
+		coroutine.yield()
+	end
+	Brakes:down()
 	armBalance:reset()
 	armBalance:runUntilDone()
 end)
