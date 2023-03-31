@@ -29,9 +29,13 @@ field = Field2d:new()
 
 navx = AHRS:new(4)
 
+local shouldArmBalance = false
+
 -----------------------------------
 
 function Robot.robotInit()
+
+	SmartDashboard:putBoolean("Brakes", true)
 
 end
 
@@ -100,6 +104,8 @@ function Robot.teleopPeriodic()
 			end
 			Lyon:setTargetAngle(Lyon.NEUTRAL_ANGLE)
 			Lyon:setTargetExtension(Lyon.MAX_EXTENSION)
+		elseif shouldArmBalance then
+			ArmBalance:run()
 		else
 			Lyon:neutralPosition()
 		end
@@ -154,7 +160,11 @@ function Robot.teleopPeriodic()
 
 	if leftStick:getButtonPressed(10) then
 		Brakes:up()
+		shouldArmBalance = false
 	end
 
-	-- 1.62 is the magic value
+	if rightStick:getButtonPressed(7) then
+		ArmBalance:reset()
+		shouldArmBalance = not shouldArmBalance
+	end
 end

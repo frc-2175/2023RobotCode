@@ -81,7 +81,7 @@ function Drivetrain:autoDrive(speed, rotation)
 end
 
 function Drivetrain:teleopDrive(speed, rotation)
-	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation, 0.1, 0.8, 0.8)
+	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation, 0.1, 0.8, 0.7)
 
 	leftMotor:set(leftSpeed)
 	rightMotor:set(rightSpeed)

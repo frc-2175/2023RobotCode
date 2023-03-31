@@ -84,7 +84,7 @@ local highMobility = FancyCoroutine:new(function()
 	mobilityAuto:runUntilDone()
 end)
 
-local armBalance = FancyCoroutine:new(function()
+ArmBalance = FancyCoroutine:new(function()
 	Brakes:down()
 	local xPID = PIDController:new(-0.5, 0, 0)
 	local x = 0
@@ -134,8 +134,8 @@ local driveBackwardSmartEngage = FancyCoroutine:new(function()
 		coroutine.yield()
 	end
 	Brakes:down()
-	armBalance:reset()
-	armBalance:runUntilDone()
+	ArmBalance:reset()
+	ArmBalance:runUntilDone()
 end)
 
 local driveForwardSmartEngage = FancyCoroutine:new(function()
@@ -157,8 +157,8 @@ local driveForwardSmartEngage = FancyCoroutine:new(function()
 		coroutine.yield()
 	end
 	Brakes:down()
-	armBalance:reset()
-	armBalance:runUntilDone()
+	ArmBalance:reset()
+	ArmBalance:runUntilDone()
 end)
 
 local TESTarmEngage = FancyCoroutine:new(function ()
@@ -182,8 +182,8 @@ local TESTarmEngage = FancyCoroutine:new(function ()
 		coroutine.yield()
 	end
 	Brakes:down()
-	armBalance:reset()
-	armBalance:runUntilDone()
+	ArmBalance:reset()
+	ArmBalance:runUntilDone()
 end)
 local highAutoEngage = FancyCoroutine:new(function()
 	scoreHigh:reset()
@@ -269,8 +269,8 @@ function twoCone(side)
 		Lyon:setTargetPositionPreset(Lyon.HIGH_PRESET)
 		sleep(2.7)
 		Lyon:openGripper()
-		sleep(0.2)
-		Lyon:setTargetPosition(-30, 0)
+		sleep(0.3)
+		Lyon:setTargetPositionPreset(Lyon.REAR_GRAB)
 
 		local path = Path:new("TwoConePt1", {})
 		pathCoroutine(path, true, side):runUntilDone()
@@ -297,7 +297,7 @@ function twoCone(side)
 		driveSeconds(0.5, 0.2, endTurn):runUntilDone()
 
 		Lyon:openGripper()
-		sleep(0.2)
+		sleep(0.3)
 		Lyon:neutralPosition()
 	end)
 end
@@ -341,6 +341,6 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "Two Cone Engage Blue",     value = twoConeEngage(FieldSide.Blue) },
 	{ name = "Two Cone Engage Red",      value = twoConeEngage(FieldSide.Red) },
 	{ name = "TEST_two cone",            value = twoCone(FieldSide.Blue) },
-	{ name = "armBalance",               value = armBalance },
+	{ name = "armBalance",               value = ArmBalance },
 	{ name = "TESTarmEngage",		     value = TESTarmEngage }
 })

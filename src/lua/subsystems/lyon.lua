@@ -76,19 +76,20 @@ Lyon = {}
 Lyon.AXLE_HEIGHT = 40
 Lyon.GROUND_CLEARANCE = 0.5
 Lyon.SHELF_CLEARANCE = 3
-Lyon.MAX_ANGLE = 1.82
+Lyon.MAX_ANGLE = 1.828
 Lyon.MIN_EXTENSION = 31.5
 Lyon.MAX_EXTENSION = 66
 Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
 Lyon.HIGH_PRESET = Vector:new(62, 62)
 Lyon.MID_PRESET = Vector:new(43.75, 46)
 Lyon.LOW_PRESET = Vector:new(34, 13)
-Lyon.SUBSTATION_PRESET = Vector:new(27, ((3*12) + 8))
+Lyon.SUBSTATION_PRESET = Vector:new(27, ((3*12) + 5))
 Lyon.NEUTRAL = Vector:new(6, 20)
 Lyon.HIGH_REAR = Vector:new(-62, 62)
 Lyon.MID_REAR = Vector:new(-43.75, 46)
 Lyon.LOW_REAR = Vector:new(-34, 13)
-Lyon.SUBSTATION_REAR = Vector:new(-29, ((3*12) + 10))
+Lyon.SUBSTATION_REAR = Vector:new(-29, ((3*12) + 5))
+Lyon.REAR_GRAB = Vector:new(-36, 0)
 Lyon.NEUTRAL_ANGLE = 0.25
 
 local OUTSIDE_ANGLE_FRONT = 0.6
@@ -169,7 +170,11 @@ local function angleMotorOutputSpeed(target, angle, extension)
 		armMultiplier = 1 -- be careful!!
 	end
 
-	local armSpeed = anglePid:pid(angle, target, 0.3, math.pi, ANGLE_MOTOR_MAX_SPEED * armMultiplier)
+	local feedforward = math.sin(angle) * 0.1
+
+	local armSpeed = anglePid:pid(angle, target, 0.3, math.pi, ANGLE_MOTOR_MAX_SPEED * armMultiplier) + feedforward
+
+	SmartDashboard:putNumber("LyonError", math.abs(target - angle))
 
 	if angle >= Lyon.MAX_ANGLE then
 		armSpeed = math.min(armSpeed, 0)

@@ -7,7 +7,6 @@
 ---@field previousOutput number
 ---@field previousTime number
 ---@field dt number
----@field shouldRunIntegral boolean
 PIDController = {}
 
 ---@param p number
@@ -24,7 +23,6 @@ function PIDController:new(p, i, d)
 		previousOutput = nil,
 		previousTime = 0,
 		dt = 0,
-		shouldRunIntegral = false,
 	}
 	setmetatable(pid, self)
 	self.__index = self
@@ -39,7 +37,6 @@ function PIDController:clear(time)
 	self.integral = 0
 	self.previousError = nil
 	self.previousOutput = nil
-	self.shouldRunIntegral = false
 end
 
 ---@param input number
@@ -53,16 +50,14 @@ function PIDController:pid(input, setpoint, thresh, maxChange, maxOutput)
 	local error = setpoint - input
 	local p = error * self.kp
 	local i = 0
-	
-	if self.shouldRunIntegral then
-		if threshold == 0 or (input < (threshold + setpoint) and input > (setpoint - threshold)) then
-			self.integral = self.integral + self.dt * error
-		else
-			self.integral = 0
-		end
+
+	if threshold == 0 or ((setpoint - threshold) < input and input < (setpoint + threshold)) then
+		self.integral = self.integral + self.dt * error
 	else
-		self.shouldRunIntegral = true
+		self.integral = 0
 	end
+
+	i = self.ki * self.integral
 
 	local d
 
