@@ -76,11 +76,11 @@ Lyon = {}
 Lyon.AXLE_HEIGHT = 40
 Lyon.GROUND_CLEARANCE = 0.5
 Lyon.SHELF_CLEARANCE = 3
-Lyon.MAX_ANGLE = 1.828
+Lyon.MAX_ANGLE = 1.88
 Lyon.MIN_EXTENSION = 31.5
 Lyon.MAX_EXTENSION = 66
 Lyon.EXTENSION_ANGLE_THRESHOLD_RADIANS = 0.2
-Lyon.HIGH_PRESET = Vector:new(62, 62)
+Lyon.HIGH_PRESET = Vector:new(62, 64)
 Lyon.MID_PRESET = Vector:new(43.75, 46)
 Lyon.LOW_PRESET = Vector:new(34, 13)
 Lyon.SUBSTATION_PRESET = Vector:new(27, ((3*12) + 5))
@@ -100,6 +100,7 @@ local LEDGE_ANGLE = 0.1
 local MAX_EXTENSION_WHEN_INSIDE = Lyon.MIN_EXTENSION
 local ANGLE_MOTOR_MAX_SPEED = 1
 local TA_MOTOR_MAX_SPEED = 1
+local ANGLE_FEEDFORWARD = 0.1
 
 local arm = CANSparkMax:new(21, SparkMaxMotorType.kBrushless)
 local armEncoder = arm:getEncoder()
@@ -170,7 +171,7 @@ local function angleMotorOutputSpeed(target, angle, extension)
 		armMultiplier = 1 -- be careful!!
 	end
 
-	local feedforward = math.sin(angle) * 0.1
+	local feedforward = math.sin(angle) * ANGLE_FEEDFORWARD
 
 	local armSpeed = anglePid:pid(angle, target, 0.3, math.pi, ANGLE_MOTOR_MAX_SPEED * armMultiplier) + feedforward
 

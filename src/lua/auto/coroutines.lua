@@ -299,6 +299,7 @@ function twoCone(side)
 		Lyon:openGripper()
 		sleep(0.3)
 		Lyon:neutralPosition()
+		
 	end)
 end
 
