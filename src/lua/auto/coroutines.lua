@@ -125,7 +125,7 @@ local driveBackwardSmartEngage = FancyCoroutine:new(function()
 	end
 	print("Reached target, stopping...")
 	print("Driving 28 inches...")
-	local driveUp = driveNInches(28, -0.4)
+	local driveUp = driveNInches(28.5, -0.4)
 	while not driveUp.done do
 		local totalDistance = driveUp:run()
 		if Drivetrain:pitchDegrees() > -11 and totalDistance < 20 then
@@ -161,6 +161,30 @@ local driveForwardSmartEngage = FancyCoroutine:new(function()
 	armBalance:runUntilDone()
 end)
 
+local TESTarmEngage = FancyCoroutine:new(function ()
+	Lyon:setTargetPositionPreset(Lyon.MID_PRESET)
+	::restart::
+	print("Starting reverseSmartEngage")
+	while Drivetrain:pitchDegrees() < 11 do
+		print("Driving while waiting for pitch to drop...")
+		Drivetrain:autoDrive(0.5, 0)
+		coroutine.yield()
+	end
+	print("reached target")
+	print("Driving 34 inches")
+	Lyon:neutralPosition()
+	local driveUp = driveNInches(34, 0.4)
+	while not driveUp.done do
+		local totalDistance = driveUp:run()
+		if Drivetrain:pitchDegrees() < 11 and totalDistance < 20 then
+			goto restart
+		end
+		coroutine.yield()
+	end
+	Brakes:down()
+	armBalance:reset()
+	armBalance:runUntilDone()
+end)
 local highAutoEngage = FancyCoroutine:new(function()
 	scoreHigh:reset()
 	driveBackwardSmartEngage:reset()
@@ -317,5 +341,6 @@ autoChooser:putChooser("Selected Auto", {
 	{ name = "Two Cone Engage Blue",     value = twoConeEngage(FieldSide.Blue) },
 	{ name = "Two Cone Engage Red",      value = twoConeEngage(FieldSide.Red) },
 	{ name = "TEST_two cone",            value = twoCone(FieldSide.Blue) },
-	{ name = "armBalance",               value = armBalance }
+	{ name = "armBalance",               value = armBalance },
+	{ name = "TESTarmEngage",		     value = TESTarmEngage }
 })

@@ -141,7 +141,7 @@ function PurePursuit:run(position, rotation)
 	local turnValue = self.purePursuitPID:pid(angleToGoal, 0)
 	
 	local speed = getTrapezoidSpeed(
-		0.25, 0.75, 0.25, self.path.distances[#self.path.distances], 20, 36, self.path.distances[indexOfClosestPoint]
+		0.25, 0.75, 0.25, self.path.distances[#self.path.distances], 10, 36, self.path.distances[indexOfClosestPoint]
 	)
 
 	self.previousClosestPoint = indexOfClosestPoint
