@@ -22,15 +22,16 @@ if isTesting() then
 end
 
 leftMotor:setInverted(CTREInvertType.InvertMotorOutput)
-leftFollower:follow(leftMotor)
-leftFollower:setInverted(CTREInvertType.FollowMaster)
+leftFollower:setInverted(CTREInvertType.InvertMotorOutput)
 
 rightMotor:setInverted(CTREInvertType.None)
-rightFollower:follow(rightMotor)
-rightFollower:setInverted(CTREInvertType.FollowMaster)
+rightFollower:setInverted(CTREInvertType.None)
 
 leftMotor:setNeutralMode(NeutralMode.Brake)
+leftFollower:setNeutralMode(NeutralMode.Brake)
+
 rightMotor:setNeutralMode(NeutralMode.Brake)
+rightFollower:setNeutralMode(NeutralMode.Brake)
 
 local TICKS_TO_INCHES = (6 * math.pi) / (2048 * 11.71)
 
@@ -63,8 +64,8 @@ function Drivetrain:periodic()
 	SmartDashboard:putNumber("rightPosition", Drivetrain:rightPosition())
 	SmartDashboard:putNumber("yaw", Drivetrain:yaw())
 	SmartDashboard:putNumber("pitch", Drivetrain:pitchDegrees())
-	
-	
+
+
 	pe:Update(Drivetrain:yaw(), Drivetrain:leftPosition(), Drivetrain:rightPosition())
 end
 
@@ -77,14 +78,18 @@ function Drivetrain:autoDrive(speed, rotation)
 	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation)
 
 	leftMotor:set(leftSpeed)
+	leftFollower:set(leftSpeed)
 	rightMotor:set(rightSpeed)
+	rightFollower:set(rightSpeed)
 end
 
 function Drivetrain:teleopDrive(speed, rotation)
-	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation, 0.1, 0.8, 0.7)
+	local leftSpeed, rightSpeed = getBlendedMotorValues(speed, -rotation, 0.1, 0.8, 0.3)
 
 	leftMotor:set(leftSpeed)
+	leftFollower:set(leftSpeed)
 	rightMotor:set(rightSpeed)
+	rightFollower:set(rightSpeed)
 end
 
 function Drivetrain:setPos(x, y, rot)
