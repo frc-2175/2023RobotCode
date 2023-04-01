@@ -54,7 +54,7 @@ local function driveSeconds(time, speed, turn)
 end
 
 local mobilityAuto = FancyCoroutine:new(function()
-	driveNInches(12 * 12, -0.5):runUntilDone()
+	driveNInches(12 * 15, -0.5):runUntilDone()
 end)
 
 local scoreHigh = FancyCoroutine:new(function()
@@ -160,6 +160,8 @@ local driveForwardSmartEngage = FancyCoroutine:new(function()
 	ArmBalance:reset()
 	ArmBalance:runUntilDone()
 end)
+
+
 
 local TESTarmEngage = FancyCoroutine:new(function ()
 	Lyon:setTargetPositionPreset(Lyon.MID_PRESET)
