@@ -76,7 +76,7 @@ local reverseScoreHigh = FancyCoroutine:new(function()
 	Lyon:setTargetPositionPreset(Lyon.NEUTRAL)
 	sleep(2)
 end)
-
+	
 local highMobility = FancyCoroutine:new(function()
 	scoreHigh:reset()
 	mobilityAuto:reset()

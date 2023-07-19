@@ -74,7 +74,17 @@ end
 
 function Robot.teleopPeriodic()
 	Lyon:slowdownWhenExtended(true)
-	Drivetrain:teleopDrive(driveRamp:ramp(signedPow(-leftStick:getY())), signedPow(rightStick:getX()))
+	local speedMultipler = leftStick:getThrottle()
+	
+	if speedMultipler < 0.4 then 
+		speedMultipler = 0.4
+	end
+	print(speedMultipler)
+	if Lyon:getAngle() < 0.3 then 
+		Drivetrain:teleopDrive(driveRamp:ramp(signedPow(-leftStick:getY() * speedMultipler)), signedPow(rightStick:getX()))
+	else
+		Drivetrain:stop()
+	end
 
 	if gamepad:getLeftTriggerAmount() > 0.5 then
 		Lyon:openGripper()
@@ -137,10 +147,6 @@ function Robot.teleopPeriodic()
 		elseif scoreDirection == "rear" then
 			scoreDirection = "front"
 		end
-	end
-
-	if leftStick:getButtonPressed(2) or gamepad:getButtonPressed(XboxButton.Start) then
-		toggleScoreDirection()
 	end
 
 	if gamepad:getPOV() == 0 or gamepad:getPOV() == 45 or gamepad:getPOV() == 315 then
