@@ -649,7 +649,7 @@ function genFunc(func, class)
 		)
 	elseif func.convertsTo then -- handle @converter
 		cppReturnType = "void*"
-		cppBody = cppBody or string.format(
+		cppBody = string.format(
 			"    %s* _converted = (%s*)_this;\n"..
 			"    return _converted;",
 			func.convertsTo, class.cppClass

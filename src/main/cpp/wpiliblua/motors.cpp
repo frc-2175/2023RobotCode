@@ -13,9 +13,8 @@
 #include "luadef.h"
 
 LUAFUNC void* VictorSPX_ToSpeedController(void* _this) {
-    auto _result = ((ctre::phoenix::motorcontrol::can::WPI_VictorSPX*)_this)
-        ->ToSpeedController();
-    return (void)_result;
+    frc::MotorController* _converted = (ctre::phoenix::motorcontrol::can::WPI_VictorSPX*)_this;
+    return _converted;
 }
 
 LUAFUNC void VictorSPX_Set(void* _this, double value) {
@@ -56,9 +55,8 @@ LUAFUNC void VictorSPX_StopMotor(void* _this) {
 }
 
 LUAFUNC void* VictorSPX_ToIMotorController(void* _this) {
-    auto _result = ((ctre::phoenix::motorcontrol::can::WPI_VictorSPX*)_this)
-        ->ToIMotorController();
-    return (void)_result;
+    ctre::phoenix::motorcontrol::IMotorController* _converted = (ctre::phoenix::motorcontrol::can::WPI_VictorSPX*)_this;
+    return _converted;
 }
 
 LUAFUNC void VictorSPX_SetWithControlMode(void* _this, int mode, double value) {
@@ -577,9 +575,8 @@ auto _result = ((ctre::phoenix::motorcontrol::can::WPI_VictorSPX*)_this)
 }
 
 LUAFUNC void* TalonSRX_ToSpeedController(void* _this) {
-    auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonSRX*)_this)
-        ->ToSpeedController();
-    return (void)_result;
+    frc::MotorController* _converted = (ctre::phoenix::motorcontrol::can::WPI_TalonSRX*)_this;
+    return _converted;
 }
 
 LUAFUNC void TalonSRX_Set(void* _this, double value) {
@@ -620,9 +617,8 @@ LUAFUNC void TalonSRX_StopMotor(void* _this) {
 }
 
 LUAFUNC void* TalonSRX_ToIMotorController(void* _this) {
-    auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonSRX*)_this)
-        ->ToIMotorController();
-    return (void)_result;
+    ctre::phoenix::motorcontrol::IMotorController* _converted = (ctre::phoenix::motorcontrol::can::WPI_TalonSRX*)_this;
+    return _converted;
 }
 
 LUAFUNC void TalonSRX_SetWithControlMode(void* _this, int mode, double value) {
@@ -1224,9 +1220,8 @@ auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonSRX*)_this)
 }
 
 LUAFUNC void* TalonFX_ToSpeedController(void* _this) {
-    auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this)
-        ->ToSpeedController();
-    return (void)_result;
+    frc::MotorController* _converted = (ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this;
+    return _converted;
 }
 
 LUAFUNC void TalonFX_Set(void* _this, double value) {
@@ -1267,9 +1262,8 @@ LUAFUNC void TalonFX_StopMotor(void* _this) {
 }
 
 LUAFUNC void* TalonFX_ToIMotorController(void* _this) {
-    auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this)
-        ->ToIMotorController();
-    return (void)_result;
+    ctre::phoenix::motorcontrol::IMotorController* _converted = (ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this;
+    return _converted;
 }
 
 LUAFUNC void TalonFX_SetWithControlMode(void* _this, int mode, double value) {
