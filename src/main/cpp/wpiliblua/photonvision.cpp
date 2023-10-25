@@ -115,11 +115,11 @@ typedef struct {
 } PoseEstimate;
 
 LUAFUNC void* PhotonPoseEstimator_newFromEnum(int field, int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) {
-    return new photonlib::PhotonPoseEstimator(field, poseStrategy, camera, x, y, z, rotx, roty, rotz);
+return new photonlib::PhotonPoseEstimator(frc::LoadAprilTagLayoutField((frc::AprilTagField)field), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));
 }
 
 LUAFUNC void* PhotonPoseEstimator_newFromPath(const char* fieldPath, int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) {
-    return new photonlib::PhotonPoseEstimator(fieldPath, poseStrategy, camera, x, y, z, rotx, roty, rotz);
+return new photonlib::PhotonPoseEstimator(frc::AprilTagFieldLayout((std::string_view)fieldPath), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));
 }
 
 LUAFUNC int PhotonPoseEstimator_GetPoseStrategy(void* _this) {

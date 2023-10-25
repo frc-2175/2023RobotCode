@@ -569,26 +569,22 @@ function genFunc(func, class)
 
 	local cppBody, luaBody
 
-	if func.body then
-		cppBody = func.body
-	end
-
 	local isVoid = cppReturnType == "void" and not func.convertsTo
 	if isMethod and isVoid then
-		cppBody = cppBody or string.format(
+		cppBody = string.format(
 			"    ((%s*)_this)\n"..
 			"        ->%s(%s);",
 			class.cppClass,
 			wpilibName, table.concat(cppCallArgs, ", ")
 		)
-		luaBody = luaBody or string.format(
+		luaBody = string.format(
 			"%s"..
 			"    ffi.C.%s(%s)",
 			luaModsStr,
 			cppWrapperName, table.concat(luaCallArgs, ", ")
 		)
 	elseif isMethod and not isVoid then
-		cppBody = cppBody or string.format(
+		cppBody = string.format(
 			"    auto _result = ((%s*)_this)\n"..
 			"        ->%s(%s);\n"..
 			"    return (%s)_result;",
@@ -596,31 +592,31 @@ function genFunc(func, class)
 			wpilibName, table.concat(cppCallArgs, ", "),
 			cppReturnType
 		)
-		luaBody = luaBody or string.format(
+		luaBody = string.format(
 			"%s"..
 			"    return ffi.C.%s(%s)",
 			luaModsStr,
 			cppWrapperName, table.concat(luaCallArgs, ", ")
 		)
 	elseif not isMethod and isVoid then
-		cppBody = cppBody or string.format(
+		cppBody = class and string.format(
 			"    %s::%s(%s);",
 			class.cppClass, wpilibName, table.concat(cppCallArgs, ", ")
 		)
-		luaBody = luaBody or string.format(
+		luaBody = string.format(
 			"%s"..
 			"    ffi.C.%s(%s)",
 			luaModsStr,
 			cppWrapperName, table.concat(luaCallArgs, ", ")
 		)
 	elseif not isMethod and not isVoid then
-		cppBody = cppBody or string.format(
+		cppBody = class and string.format(
 			"    auto _result = %s::%s(%s);\n"..
 			"    return (%s)_result;",
 			class.cppClass, wpilibName, table.concat(cppCallArgs, ", "),
 			cppReturnType
 		)
-		luaBody = luaBody or string.format(
+		luaBody = string.format(
 			"%s"..
 			"    return ffi.C.%s(%s)",
 			luaModsStr,
@@ -636,11 +632,11 @@ function genFunc(func, class)
 
 	if func.isConstructor then -- handle @constructor
 		cppReturnType = "void*"
-		cppBody = cppBody or string.format(
+		cppBody = class and string.format(
 			"    return new %s(%s);",
 			class.cppClass, table.concat(cppCallArgs, ", ")
 		)
-		luaBody = luaBody or string.format(
+		luaBody = string.format(
 			"%s"..
 			"    local instance = {\n"..
 			"        _this = ffi.C.%s(%s),\n"..
@@ -658,6 +654,10 @@ function genFunc(func, class)
 			"    return _converted;",
 			func.convertsTo, class.cppClass
 		)
+	end
+
+	if func.body then
+		cppBody = func.body
 	end
 
 	------------------
