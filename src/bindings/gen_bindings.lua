@@ -636,11 +636,11 @@ function genFunc(func, class)
 
 	if func.isConstructor then -- handle @constructor
 		cppReturnType = "void*"
-		cppBody = string.format(
+		cppBody = cppBody or string.format(
 			"    return new %s(%s);",
 			class.cppClass, table.concat(cppCallArgs, ", ")
 		)
-		luaBody = string.format(
+		luaBody = luaBody or string.format(
 			"%s"..
 			"    local instance = {\n"..
 			"        _this = ffi.C.%s(%s),\n"..
@@ -653,7 +653,7 @@ function genFunc(func, class)
 		)
 	elseif func.convertsTo then -- handle @converter
 		cppReturnType = "void*"
-		cppBody = string.format(
+		cppBody = cppBody or string.format(
 			"    %s* _converted = (%s*)_this;\n"..
 			"    return _converted;",
 			func.convertsTo, class.cppClass
