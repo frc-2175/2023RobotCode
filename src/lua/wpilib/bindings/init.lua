@@ -518,4 +518,6 @@ void PhotonPoseEstimator_SetReferencePose(void* _this, double x, double y, doubl
 void PhotonPoseEstimator_SetLastPose(void* _this, double x, double y, double z, double rotx, double roty, double rotz);
 PoseEstimate* PhotonPoseEstimator_Update(void* _this);
 void liberate(void* ptr);
+void* SwerveDriveKinematics_new(double flx, double fly, double frx, double fry, double blx, double bly, double brx, double bry);
+void* SwerveDriveKinematics_ToSwerveModuleStates(void* _this, double vx, double vy, double vr);
 ]]

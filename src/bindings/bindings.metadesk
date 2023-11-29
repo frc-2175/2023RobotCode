@@ -688,3 +688,28 @@ file stdlib {
 		free(ptr);
 	}
 }
+
+@include("<frc/kinematics/SwerveDriveKinematics.h>")
+file swerve
+{
+	@cpp("frc::SwerveDriveKinematics<4>")
+	class SwerveDriveKinematics
+	{
+		@constructor new(double flx, double fly, double frx, double fry, double blx, double bly, double brx, double bry) 
+		{
+			frc::Translation2d fl(units::inch_t(flx), units::inch_t(fly));
+			frc::Translation2d fr(units::inch_t(frx), units::inch_t(fry));
+			frc::Translation2d bl(units::inch_t(blx), units::inch_t(bly));
+			frc::Translation2d br(units::inch_t(frx), units::inch_t(bry));
+
+			return new frc::SwerveDriveKinematics<4>(fl, fr, bl, br);
+		}
+
+		void* ToSwerveModuleStates(double vx, double vy, double vr)
+		{
+    		auto _result = ((frc::SwerveDriveKinematics<4>*)_this)
+        	->ToSwerveModuleStates(frc::ChassisSpeeds(vx, vy, vr));
+    		return (void*)_result;
+		}
+	}
+}
