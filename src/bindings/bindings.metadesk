@@ -1,7 +1,6 @@
 @include("<frc/Joystick.h>")
-io: {
-	// @enum
-	// XboxButton: {
+file io {
+	// enum XboxButton {
 	// 	A: 1,
 	// 	B: 2,
 	// 	X: 3,
@@ -14,8 +13,8 @@ io: {
 	// 	RightStick: 10,
 	// }
 
-	@class("frc::Joystick")
-	Joystick: {
+	@cpp("frc::Joystick")
+	class Joystick {
 		@doc("""Construct an instance of a joystick.""")
 		@constructor new(int port);
 
@@ -25,10 +24,10 @@ io: {
 		@nolua double GetZ();
 		double GetTwist();
 		@nolua double GetThrottle(); // we do our own implementation of this that remaps the values the way we like
-		@alias(GetTriggerHeld) bool GetTrigger();
+		@renameTo(GetTriggerHeld) bool GetTrigger();
 		bool GetTriggerPressed();
 		bool GetTriggerReleased();
-		@alias(GetTopHeld) bool GetTop();
+		@renameTo(GetTopHeld) bool GetTop();
 		bool GetTopPressed();
 		bool GetTopReleased();
 		double GetMagnitude();
@@ -38,9 +37,9 @@ io: {
 		// hey i feel like if you're reading this you should know, WPI officially supports a guitar controller
 
 		// GenericHID
-		@alias(GetButtonHeld) bool GetRawButton(int button);
-		@alias(GetButtonPressed) bool GetRawButtonPressed(int button);
-		@alias(GetButtonReleased) bool GetRawButtonReleased(int button);
+		@renameTo(GetButtonHeld) bool GetRawButton(int button);
+		@renameTo(GetButtonPressed) bool GetRawButtonPressed(int button);
+		@renameTo(GetButtonReleased) bool GetRawButtonReleased(int button);
 		@nolua double GetRawAxis(int axis); // we will write a custom getAxis with deadband
 		int GetPOV(@default(0) int port); // Note that this takes an optional argument in case you somehow have more than one POV. I'm leaving that argument out.
 		int GetAxisCount();
@@ -63,50 +62,45 @@ io: {
 @include("<frc/motorcontrol/MotorController.h>")
 @include("<units/time.h>")
 @include('"rev/CANSparkMax.h"')
-motors: {
-	@enum
-	CTREInvertType: {
+file motors {
+	enum CTREInvertType {
 		None: 0,
 		InvertMotorOutput: 1,
 		FollowMaster: 2,
 		OpposeMaster: 3,
 	}
 
-	@enum
-	CTRETalonFXInvertType: {
+	enum CTRETalonFXInvertType {
 		CounterClockwise: 0,
 		Clockwise: 1,
 		FollowMaster: 2,
 		OpposeMaster: 3,
 	}
 
-	@enum
-	SparkMaxMotorType: {
+	enum SparkMaxMotorType {
 		kBrushed: 0,
 		kBrushless: 1,
 	}
 
-	@enum
-	IdleMode: {
+	enum IdleMode {
 		kCoast: 0,
 		kBrake: 1,
 	}
 
-	@enum NeutralMode: {
+	enum NeutralMode {
 		EEPROMSetting: 0,
 		Coast: 1,
-		Brake: 2
+		Brake: 2,
 	}
 
-	@enum
-	SparkMaxEncoderType: {
+	enum SparkMaxEncoderType {
 		kNoSensor: 0,
 		kHallSensor: 1,
 		kQuadrature: 2,
 	}
-	
+
 	@baseclass
-	"frc::PWM": {
+	class "frc::PWM" {
 		@constructor new(int channel, @default(true) bool registerSendable);
 		SetRaw(int value);
 		int GetRaw();
@@ -115,7 +109,7 @@ motors: {
 		SetSpeed(double speed);
 		double GetSpeed();
 		SetDisabled();
-		SetZeroLatch()
+		SetZeroLatch();
 		EnableDeadbandElimination(bool eliminateDeadband);
 		SetBounds(double max, double deadbandMax, double center, double deadbandMin, double min);
 		SetRawBounds(int max, int deadbandMax, int center, int deadbandMin, int min);
@@ -123,7 +117,7 @@ motors: {
 	}
 
 	@baseclass
-	"frc::Servo": {
+	class "frc::Servo" {
 		@constructor new(int channel);
 		double Get();
 		double GetAngle();
@@ -136,7 +130,7 @@ motors: {
 		SetSpeed(double speed);
 		double GetSpeed();
 		SetDisabled();
-		SetZeroLatch()
+		SetZeroLatch();
 		EnableDeadbandElimination(bool eliminateDeadband);
 		SetBounds(double max, double deadbandMax, double center, double deadbandMin, double min);
 		SetRawBounds(int max, int deadbandMax, int center, int deadbandMin, int min);
@@ -144,27 +138,27 @@ motors: {
 	}
 
 	@baseclass
-	"frc::MotorController": {
+	class "frc::MotorController" {
 		@converter("frc::MotorController") ToSpeedController();
 		Set(double value);
 		SetVoltage(@cast("units::volt_t") double output); // TODO: Is it legal to simply cast a double to units::volt_t?
 		double Get();
-		@alias("SetInvertedBool") SetInverted(bool isInverted);
-		@alias("GetInvertedBool") bool GetInverted();
+		@renameTo(SetInvertedBool) SetInverted(bool isInverted);
+		@renameTo(GetInvertedBool) bool GetInverted();
 		Disable();
 		StopMotor();
 	}
 
 	@baseclass
-	"frc::PIDOutput": {
+	class "frc::PIDOutput" {
 		PIDWrite(double output);
 	}
 
 	@baseclass
-	"ctre::phoenix::motorcontrol::can::BaseMotorController": {
+	class "ctre::phoenix::motorcontrol::can::BaseMotorController" {
 		@converter("ctre::phoenix::motorcontrol::IMotorController") ToIMotorController();
-		@alias("SetWithControlMode") Set(@cast("ctre::phoenix::motorcontrol::ControlMode") int mode, double value);
-		@alias("SetWithControlModeAndDemands") Set(@cast("ctre::phoenix::motorcontrol::ControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
+		@renameTo(SetWithControlMode) Set(@cast("ctre::phoenix::motorcontrol::ControlMode") int mode, double value);
+		@renameTo(SetWithControlModeAndDemands) Set(@cast("ctre::phoenix::motorcontrol::ControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
 		NeutralOutput();
 		SetNeutralMode(@enum(NeutralMode) @cast("ctre::phoenix::motorcontrol::NeutralMode") int neutralMode);
 		SetSensorPhase(bool PhaseSensor);
@@ -249,7 +243,7 @@ motors: {
 	}
 
 	@baseclass
-	"ctre::phoenix::motorcontrol::can::BaseTalon": {
+	class "ctre::phoenix::motorcontrol::can::BaseTalon" {
 		double GetOutputCurrent();
 		double GetStatorCurrent();
 		double GetSupplyCurrent();
@@ -262,7 +256,7 @@ motors: {
 	}
 
 	@baseclass
-	"ctre::phoenix::motorcontrol::can::WPI_BaseMotorController": {
+	class "ctre::phoenix::motorcontrol::can::WPI_BaseMotorController" {
 		// GetDescription
 		Feed();
 		SetExpiration(@cast("units::time::second_t") double expirationTime);
@@ -272,70 +266,76 @@ motors: {
 		// GetMotorSafety
 	}
 
-	@class("ctre::phoenix::motorcontrol::can::WPI_VictorSPX")
+	@cpp("ctre::phoenix::motorcontrol::can::WPI_VictorSPX")
 	//@extends("frc::PIDOutput")
 	@extends("frc::MotorController")
 	@extends("ctre::phoenix::motorcontrol::can::BaseMotorController")
 	@extends("ctre::phoenix::motorcontrol::can::WPI_BaseMotorController")
-	VictorSPX: {
+	class VictorSPX {
 		@constructor new(int deviceNumber);
-		@alias("SetWithVictorSPXControlMode") Set(@cast("ctre::phoenix::motorcontrol::VictorSPXControlMode") int mode, double value);
-		@alias("SetWithVictorSPXControlModeAndDemands") Set(@cast("ctre::phoenix::motorcontrol::VictorSPXControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
-		double GetExpiration() """auto _result = ((ctre::phoenix::motorcontrol::can::WPI_VictorSPX*)_this)
-			->GetExpiration();
-			return (double)_result;""";
+		@renameTo(SetWithVictorSPXControlMode) Set(@cast("ctre::phoenix::motorcontrol::VictorSPXControlMode") int mode, double value);
+		@renameTo(SetWithVictorSPXControlModeAndDemands) Set(@cast("ctre::phoenix::motorcontrol::VictorSPXControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
+		double GetExpiration() {
+			auto _result = ((ctre::phoenix::motorcontrol::can::WPI_VictorSPX*)_this)
+				->GetExpiration();
+			return (double)_result;
+		}
 	}
 
-	@class("ctre::phoenix::motorcontrol::can::WPI_TalonSRX")
+	@cpp("ctre::phoenix::motorcontrol::can::WPI_TalonSRX")
 	//@extends("frc::PIDOutput")
 	@extends("frc::MotorController")
 	@extends("ctre::phoenix::motorcontrol::can::BaseMotorController")
 	@extends("ctre::phoenix::motorcontrol::can::WPI_BaseMotorController")
 	@extends("ctre::phoenix::motorcontrol::can::BaseTalon")
-	TalonSRX: {
+	class TalonSRX {
 		@constructor new(int deviceNumber);
-		@alias("SetWithTalonSRXControlMode") Set(@cast("ctre::phoenix::motorcontrol::TalonSRXControlMode") int mode, double value);
-		@alias("SetWithTalonSRXControlModeAndDemands") Set(@cast("ctre::phoenix::motorcontrol::TalonSRXControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
+		@renameTo(SetWithTalonSRXControlMode) Set(@cast("ctre::phoenix::motorcontrol::TalonSRXControlMode") int mode, double value);
+		@renameTo(SetWithTalonSRXControlModeAndDemands) Set(@cast("ctre::phoenix::motorcontrol::TalonSRXControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
 		int ConfigSelectedFeedbackSensor(@cast("ctre::phoenix::motorcontrol::FeedbackDevice") int feedbackDevice, @default(0) int pidIdx, @default(0) int timeoutMs);
 		// ConfigSupplyCurrentLimit
 		int ConfigPeakCurrentLimit(int amps, @default(0) int timeoutMs);
 		int ConfigPeakCurrentDuration(int milliseconds, @default(0) int timeoutMs);
 		int ConfigContinuousCurrentLimit(int amps, @default(0) int timeoutMs);
 		EnableCurrentLimit(bool enable);
-		double GetExpiration() """auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonSRX*)_this)
-			->GetExpiration();
-			return (double)_result;""";
+		double GetExpiration() {
+			auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonSRX*)_this)
+				->GetExpiration();
+			return (double)_result;
+		}
 	}
 
-	@class("ctre::phoenix::motorcontrol::can::WPI_TalonFX")
+	@cpp("ctre::phoenix::motorcontrol::can::WPI_TalonFX")
 	//@extends("frc::PIDOutput")
 	@extends("frc::MotorController")
 	@extends("ctre::phoenix::motorcontrol::can::BaseMotorController")
 	@extends("ctre::phoenix::motorcontrol::can::WPI_BaseMotorController")
 	@extends("ctre::phoenix::motorcontrol::can::BaseTalon")
-	TalonFX: {
+	class TalonFX {
 		@constructor new(int deviceNumber);
-		@alias("SetWithTalonFXControlMode") Set(@cast("ctre::phoenix::motorcontrol::TalonFXControlMode") int mode, double value);
-		@alias("SetWithTalonFXControlModeAndDemands") Set(@cast("ctre::phoenix::motorcontrol::TalonFXControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
+		@renameTo(SetWithTalonFXControlMode) Set(@cast("ctre::phoenix::motorcontrol::TalonFXControlMode") int mode, double value);
+		@renameTo(SetWithTalonFXControlModeAndDemands) Set(@cast("ctre::phoenix::motorcontrol::TalonFXControlMode") int mode, double demand0, @cast("ctre::phoenix::motorcontrol::DemandType") int demand1Type, double demand1);
 		// TODO: The generation for this is strange and unpleasant.
-		@alias("SetInvertedTalonFX") SetInverted(@enum(CTRETalonFXInvertType) @cast("ctre::phoenix::motorcontrol::TalonFXInvertType") int invertType);
-		ConfigStatorCurrentLimit(bool enable, double currentLimit) """
-		((ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this)
-			->ConfigStatorCurrentLimit(ctre::phoenix::motorcontrol::StatorCurrentLimitConfiguration(enable, currentLimit, 0, 0));
-		""";
+		@renameTo(SetInvertedTalonFX) SetInverted(@enum(CTRETalonFXInvertType) @cast("ctre::phoenix::motorcontrol::TalonFXInvertType") int invertType);
+		ConfigStatorCurrentLimit(bool enable, double currentLimit) {
+			((ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this)
+				->ConfigStatorCurrentLimit(ctre::phoenix::motorcontrol::StatorCurrentLimitConfiguration(enable, currentLimit, 0, 0));
+		}
 		ConfigIntegratedSensorOffset(double offsetDegrees, @default(0) int timeoutMs);
 		int ConfigSelectedFeedbackSensor(@cast("ctre::phoenix::motorcontrol::FeedbackDevice") int feedbackDevice, @default(0) int pidIdx, @default(0) int timeoutMs);
-		// @alias("ConfigSelectedFeedbackSensor") int ConfigSelectedFeedbackSensorTalonFX(@cast("ctre::phoenix::motorcontrol::TalonFXFeedbackDevice") int feedbackDevice, @default(0) int pidIdx, int timeoutMs);
-		double GetExpiration() """auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this)
-			->GetExpiration();
-			return (double)_result;""";
+		// @renameTo("ConfigSelectedFeedbackSensor") int ConfigSelectedFeedbackSensorTalonFX(@cast("ctre::phoenix::motorcontrol::TalonFXFeedbackDevice") int feedbackDevice, @default(0) int pidIdx, int timeoutMs);
+		double GetExpiration() {
+			auto _result = ((ctre::phoenix::motorcontrol::can::WPI_TalonFX*)_this)
+				->GetExpiration();
+			return (double)_result;
+		}
 	}
 	
-	@class("rev::CANSparkMax")
-	CANSparkMax: {
-		@constructor new(int deviceID, @enum("SparkMaxMotorType") @cast("rev::CANSparkMax::MotorType") int type);
+	@cpp("rev::CANSparkMax")
+	class CANSparkMax {
+		@constructor new(int deviceID, @enum(SparkMaxMotorType) @cast("rev::CANSparkMax::MotorType") int type);
 
-		SetIdleMode(@enum("IdleMode") @cast("rev::CANSparkMax::IdleMode") int type);
+		SetIdleMode(@enum(IdleMode) @cast("rev::CANSparkMax::IdleMode") int type);
 		RestoreFactoryDefaults();
 		Set(double speed);
 		SetVoltage(@cast("units::volt_t") double output);
@@ -345,33 +345,34 @@ motors: {
 		Disable();
 		StopMotor();
 		@nolua Follow(@deref @cast("rev::CANSparkMax*") void* leader, @default(false) bool invert);
-		@nolua void* GetEncoder(@default(42) int countsPerRev) """	return new rev::SparkMaxRelativeEncoder( ((rev::CANSparkMax *)_this)->GetEncoder());""";
+		@nolua void* GetEncoder(@default(42) int countsPerRev) {
+			return new rev::SparkMaxRelativeEncoder(((rev::CANSparkMax *)_this)->GetEncoder());
+		}
 	}
 
-	@class("rev::SparkMaxRelativeEncoder")
-	SparkMaxRelativeEncoder: {
+	@cpp("rev::SparkMaxRelativeEncoder")
+	class SparkMaxRelativeEncoder {
 		double GetPosition();
 		double GetVelocity();
 		SetPositionConversionFactor(double factor);
 	}
 	
-	@class("frc::DifferentialDrive")
-	DifferentialDrive: {
-		@nolua @constructor new(void* leftMotor, void* rightMotor) """
+	@cpp("frc::DifferentialDrive")
+	class DifferentialDrive {
+		@nolua @constructor new(void* leftMotor, void* rightMotor) {
 			assert(leftMotor);
 			assert(rightMotor);
 			auto l = (frc::MotorController*)leftMotor;
 			auto r = (frc::MotorController*)rightMotor;
 			return new frc::DifferentialDrive(*l, *r);
-		""";
+		}
 		ArcadeDrive(double xSpeed, double zRotation, @default(true) bool squareInputs);
 		TankDrive(double leftSpeed, double rightSpeed, @default(true) bool squareInputs);
-		@nolua @static CurvatureDriveIK(double xSpeed, double zRotation, bool allowTurnInPlace, double* leftSpeed, double* rightSpeed) """
+		@nolua @static CurvatureDriveIK(double xSpeed, double zRotation, bool allowTurnInPlace, double* leftSpeed, double* rightSpeed) {
 			auto speeds = frc::DifferentialDrive::CurvatureDriveIK(xSpeed, zRotation, allowTurnInPlace);
 			*leftSpeed = speeds.left;
 			*rightSpeed = speeds.right;
-		""";
-
+		}
 	}
 }
 
@@ -379,16 +380,15 @@ motors: {
 @include("<frc/DoubleSolenoid.h>")
 @include('"frc/PneumaticsModuleType.h"')
 @include("<units/time.h>")
-solenoids: {
-	@enum
-	DoubleSolenoidValue: {
+file solenoids {
+	enum DoubleSolenoidValue {
 		Off: 0,
 		Forward: 1,
 		Reverse: 2,
 	}
 
-	@class("frc::Solenoid")
-	Solenoid: {
+	@cpp("frc::Solenoid")
+	class Solenoid {
 		@constructor new(@value(0) @cast("frc::PneumaticsModuleType") int moduleType, int channel);
 		Set(bool on);
 		bool Get();
@@ -397,8 +397,8 @@ solenoids: {
 		bool IsDisabled();
 	}
 
-	@class("frc::DoubleSolenoid")
-	DoubleSolenoid: {
+	@cpp("frc::DoubleSolenoid")
+	class DoubleSolenoid {
 		@constructor new(@value(0) @cast("frc::PneumaticsModuleType") int moduleType, int forwardChannel, int reverseChannel);
 		Set(@enum(DoubleSolenoidValue) @cast("frc::DoubleSolenoid::Value") int value);
 		int Get();
@@ -411,18 +411,18 @@ solenoids: {
 }
 
 @include("<cameraserver/CameraServer.h>")
-cameraserver: {
-	@class("frc::CameraServer")
-	CameraServer: {
+file cameraserver {
+	@cpp("frc::CameraServer")
+	class CameraServer {
 		@static StartAutomaticCapture();
 	}
 }
 
 @include("<units/time.h>")
 @include("<frc/Timer.h>")
-time: {
-	@class("frc::Timer")
-	Timer: {
+file time {
+	@cpp("frc::Timer")
+	class Timer {
 		@constructor new();
 		double Get();
 		Reset();
@@ -438,9 +438,9 @@ time: {
 
 @include("<frc/SPI.h>")
 @include('"AHRS.h"')
-ahrs: {
-	@class("AHRS")
-	AHRS: {
+file ahrs {
+	@cpp("AHRS")
+	class AHRS {
 		//stands for ast LOW ridge school
 		// if i'm getting this right, ports just go to an enum
 		// the port we will be using(kMXP) is set to 1. I'll add this enum as a table in lua somewhere
@@ -504,9 +504,9 @@ ahrs: {
 
 
 @include("<frc/RobotBase.h>")
-robotbase: {
-	@class("frc::RobotBase")
-	RobotBase: {
+file robotbase {
+	@cpp("frc::RobotBase")
+	class RobotBase {
 		bool IsEnabled();
 		bool IsDisabled();
 		bool IsAutonomous();
@@ -525,9 +525,9 @@ robotbase: {
 @include("<frc/smartdashboard/SmartDashboard.h>")
 @include("<frc/smartdashboard/SendableChooser.h>")
 @include("<frc/smartdashboard/Field2d.h>")
-dashboard: {
-	@class("frc::SmartDashboard")
-	SmartDashboard: {
+file dashboard {
+	@cpp("frc::SmartDashboard")
+	class SmartDashboard {
 		@static bool ContainsKey(@cast("std::string_view") const char* key);
 		// @static void* GetKeys(int types);
 		@static SetPersistent(@cast("std::string_view") const char* key);
@@ -538,46 +538,67 @@ dashboard: {
 		@static PutNumber(@cast("std::string_view") const char* keyName, double value);
 		@static double GetNumber(@cast("std::string_view") const char* keyName, @default(nil) double defaultValue);
 		@static PutString(@cast("std::string_view") const char* keyName, @cast("std::string_view") const char* value);
-		@static @nolua const char * GetString(const char* keyName, const char* defaultValue) """	return stdStringForLua(frc::SmartDashboard::GetString((std::string_view)keyName, (std::string_view)defaultValue));""";
-		@static @nolua PutBooleanArray(const char* keyName, int* value, size_t size) """	frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));""";
-		@static @nolua size_t GetBooleanArraySize(const char* keyName) """	return frc::SmartDashboard::GetBooleanArray(keyName, {}).size();""";
-		@static @nolua int* GetBooleanArray(const char* keyName, int* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();""";
-		@static @nolua PutNumberArray(const char* keyName, double* value, size_t size) """	frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));""";
-		@static @nolua size_t GetNumberArraySize(const char* keyName) """	return frc::SmartDashboard::GetNumberArray(keyName, {}).size();""";
-		@static @nolua double* GetNumberArray(const char* keyName, double* defaultValue, size_t defaultSize) """	return frc::SmartDashboard::GetNumberArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();""";
-		@static @nolua PutStringArray(const char* keyName, const char** value, size_t size) """	std::vector<std::string> strVec(value, value + size);
-	frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));""";
-		@static @nolua @alias(PutIntChooser) PutData(@cast("std::string_view") const char* key, @cast("frc::SendableChooser<int>*") void* data);
-		@static @nolua @alias(PutField) PutData(@cast("frc::Field2d*") void* field);
+		@static @nolua const char* GetString(const char* keyName, const char* defaultValue) {
+			return stdStringForLua(frc::SmartDashboard::GetString((std::string_view)keyName, (std::string_view)defaultValue));
+		}
+		@static @nolua PutBooleanArray(const char* keyName, int* value, size_t size) {
+			frc::SmartDashboard::PutBooleanArray((std::string_view)keyName, std::span(value, size));
+		}
+		@static @nolua size_t GetBooleanArraySize(const char* keyName) {
+			return frc::SmartDashboard::GetBooleanArray(keyName, {}).size();
+		}
+		@static @nolua int* GetBooleanArray(const char* keyName, int* defaultValue, size_t defaultSize) {
+			return frc::SmartDashboard::GetBooleanArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();
+		}
+		@static @nolua PutNumberArray(const char* keyName, double* value, size_t size) {
+			frc::SmartDashboard::PutNumberArray((std::string_view)keyName, std::span(value, size));
+		}
+		@static @nolua size_t GetNumberArraySize(const char* keyName) {
+			return frc::SmartDashboard::GetNumberArray(keyName, {}).size();
+		}
+		@static @nolua double* GetNumberArray(const char* keyName, double* defaultValue, size_t defaultSize) {
+			return frc::SmartDashboard::GetNumberArray((std::string_view)keyName, std::span(defaultValue, defaultSize)).data();
+		}
+		@static @nolua PutStringArray(const char* keyName, const char** value, size_t size) {
+			std::vector<std::string> strVec(value, value + size);
+			frc::SmartDashboard::PutStringArray((std::string_view)keyName, std::span<std::string>(strVec));
+		}
+		@static @nolua @renameTo(PutIntChooser) PutData(@cast("std::string_view") const char* key, @cast("frc::SendableChooser<int>*") void* data);
+		@static @nolua @renameTo(PutField) PutData(@cast("frc::Field2d*") void* field);
 	}
 
-	@class("frc::SendableChooser<int>")
-	SendableChooser: {
+	@cpp("frc::SendableChooser<int>")
+	class SendableChooser {
 		@constructor new();
 		AddOption(@cast("std::string_view") const char * name, int object);
 		@nolua int GetSelected();
 	}
 
-	@class("frc::Field2d")
-	Field2d: {
+	@cpp("frc::Field2d")
+	class Field2d {
 		@constructor new();
 		SetRobotPose(@construct("units::inch_t") double x, @construct("units::inch_t") double y, @construct("units::radian_t") double rotation);
 	}
 }
 
 @include("<frc/Filesystem.h>")
-filesystem: {
-	@nolua "const char*" GetDeployDirectory() """  return stdStringForLua(frc::filesystem::GetDeployDirectory());""";
+file filesystem {
+	@nolua
+	function const char* GetDeployDirectory() {
+		return stdStringForLua(frc::filesystem::GetDeployDirectory());
+	}
 }
 
 @include("<photonlib/PhotonCamera.h>")
 @include("<photonlib/PhotonPoseEstimator.h>")
 @include("<frc/apriltag/AprilTagFields.h>")
-photonvision: {
-	@class("photonlib::PhotonCamera")
-	PhotonCamera: {
+file photonvision {
+	@cpp("photonlib::PhotonCamera")
+	class PhotonCamera {
 		@constructor new(@cast("std::string_view") const char* cameraName);
-		@nolua void* GetLatestResult() """	return new photonlib::PhotonPipelineResult(((photonlib::PhotonCamera*)_this)->GetLatestResult());""";
+		@nolua void* GetLatestResult() {
+			return new photonlib::PhotonPipelineResult(((photonlib::PhotonCamera*)_this)->GetLatestResult());
+		}
 		SetDriverMode(bool driverMode);
 		bool GetDriverMode();
 		TakeInputSnapshot();
@@ -586,68 +607,109 @@ photonvision: {
 		int GetPipelineIndex();
 	}
 
-	@class("photonlib::PhotonPipelineResult")
-	PhotonPipelineResult: {
-		@nolua void* GetBestTarget() """	return new photonlib::PhotonTrackedTarget(((photonlib::PhotonPipelineResult*)_this)->GetBestTarget());""";
+	@cpp("photonlib::PhotonPipelineResult")
+	class PhotonPipelineResult {
+		@nolua void* GetBestTarget() {
+			return new photonlib::PhotonTrackedTarget(((photonlib::PhotonPipelineResult*)_this)->GetBestTarget());
+		}
 		bool HasTargets();
 	}
 
-	@struct Pose: {
+	struct Pose {
 		double x, y, z;
 		double rotx, roty, rotz;
 	}
 
-	@class("photonlib::PhotonTrackedTarget")
-	PhotonTrackedTarget: {
+	@cpp("photonlib::PhotonTrackedTarget")
+	class PhotonTrackedTarget {
 		double GetYaw();
 		double GetPitch();
 		double GetArea();
 		double GetSkew();
 		int GetFiducialId();
 		double GetPoseAmbiguity();
-		@nolua Pose* GetBestCameraToTarget() """	auto result = ((photonlib::PhotonTrackedTarget*)_this)->GetBestCameraToTarget();
-	return new Pose{
-		result.X().convert<units::inch>().value(), result.Y().convert<units::inch>().value(), result.Z().convert<units::inch>().value(),
-		result.Rotation().X().value(), result.Rotation().Y().value(), result.Rotation().Z().value(),
-	};""";
+		@nolua Pose* GetBestCameraToTarget() {
+			auto result = ((photonlib::PhotonTrackedTarget*)_this)->GetBestCameraToTarget();
+			return new Pose{
+				result.X().convert<units::inch>().value(), result.Y().convert<units::inch>().value(), result.Z().convert<units::inch>().value(),
+				result.Rotation().X().value(), result.Rotation().Y().value(), result.Rotation().Z().value(),
+			};
+		}
 	}
 
-	@enum PoseStrategy: {
+	enum PoseStrategy {
   		LOWEST_AMBIGUITY: 0,
 		CLOSEST_TO_CAMERA_HEIGHT: 1,
 		CLOSEST_TO_REFERENCE_POSE: 2,
 		CLOSEST_TO_LAST_POSE: 3,
 		AVERAGE_BEST_TARGETS: 4,
-		MULTI_TAG_PNP: 5
+		MULTI_TAG_PNP: 5,
 	}
 
-	@enum AprilTagField: {
+	enum AprilTagField {
 		k2022RapidReact: 0,
-		k2023ChargedUp: 1
+		k2023ChargedUp: 1,
 	}
 
-	@struct PoseEstimate: {
+	struct PoseEstimate {
 		Pose pose;
 		double timestamp;
 	}
 
-	@class("photonlib::PhotonPoseEstimator")
-	PhotonPoseEstimator: {
-		@nolua @constructor newFromEnum(@enum(AprilTagField) int field, @enum(PoseStrategy) int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) """	return new photonlib::PhotonPoseEstimator(frc::LoadAprilTagLayoutField((frc::AprilTagField)field), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
-		@nolua @constructor newFromPath(const char* fieldPath, @enum(PoseStrategy) int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) """	return new photonlib::PhotonPoseEstimator(frc::AprilTagFieldLayout((std::string_view)fieldPath), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
+	@cpp("photonlib::PhotonPoseEstimator")
+	class PhotonPoseEstimator {
+		@nolua @constructor newFromEnum(@enum(AprilTagField) int field, @enum(PoseStrategy) int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) {
+			return new photonlib::PhotonPoseEstimator(frc::LoadAprilTagLayoutField((frc::AprilTagField)field), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));
+		}
+		@nolua @constructor newFromPath(const char* fieldPath, @enum(PoseStrategy) int poseStrategy, void* camera, double x, double y, double z, double rotx, double roty, double rotz) {
+			return new photonlib::PhotonPoseEstimator(frc::AprilTagFieldLayout((std::string_view)fieldPath), (photonlib::PoseStrategy)poseStrategy, std::move(*(photonlib::PhotonCamera*)camera), frc::Transform3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));
+		}
 
 		int GetPoseStrategy();
 		void SetPoseStrategy(@enum(PoseStrategy) @cast("photonlib::PoseStrategy") int poseStrategy);
 
-		@nolua void SetReferencePose(double x, double y, double z, double rotx, double roty, double rotz) """	return ((photonlib::PhotonPoseEstimator*)_this)->SetReferencePose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
-		@nolua void SetLastPose(double x, double y, double z, double rotx, double roty, double rotz) """	return ((photonlib::PhotonPoseEstimator*)_this)->SetLastPose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));""";
+		@nolua void SetReferencePose(double x, double y, double z, double rotx, double roty, double rotz) {
+			return ((photonlib::PhotonPoseEstimator*)_this)->SetReferencePose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));
+		}
+		@nolua void SetLastPose(double x, double y, double z, double rotx, double roty, double rotz) {
+			return ((photonlib::PhotonPoseEstimator*)_this)->SetLastPose(frc::Pose3d(frc::Translation3d(units::inch_t(x), units::inch_t(y), units::inch_t(z)), frc::Rotation3d(units::angle::radian_t(rotx), units::angle::radian_t(roty), units::angle::radian_t(rotz))));
+		}
 		
-		@nolua PoseEstimate* Update() """	auto [pose, timestamp, _] = ((photonlib::PhotonPoseEstimator*)_this)->Update().value_or(photonlib::EstimatedRobotPose(frc::Pose3d(), -1_s, {}));
-	return new PoseEstimate{{pose.X().convert<units::inch>().value(), pose.Y().convert<units::inch>().value(), pose.Z().convert<units::inch>().value(), pose.Rotation().X().value(), pose.Rotation().Y().value(), pose.Rotation().Z().value()}, timestamp.value()};""";
+		@nolua PoseEstimate* Update() {
+			auto [pose, timestamp, _] = ((photonlib::PhotonPoseEstimator*)_this)->Update().value_or(photonlib::EstimatedRobotPose(frc::Pose3d(), -1_s, {}));
+			return new PoseEstimate{{pose.X().convert<units::inch>().value(), pose.Y().convert<units::inch>().value(), pose.Z().convert<units::inch>().value(), pose.Rotation().X().value(), pose.Rotation().Y().value(), pose.Rotation().Z().value()}, timestamp.value()};
+		}
 	}
 }
 
 @include("<stdlib.h>")
-stdlib: {
-	@static liberate("void*" ptr) """ free(ptr);""";
+file stdlib {
+	function liberate(void* ptr) {
+		free(ptr);
+	}
+}
+
+@include("<frc/kinematics/SwerveDriveKinematics.h>")
+file swerve
+{
+	@cpp("frc::SwerveDriveKinematics<4>")
+	class SwerveDriveKinematics
+	{
+		@constructor new(double flx, double fly, double frx, double fry, double blx, double bly, double brx, double bry) 
+		{
+			frc::Translation2d fl(units::inch_t(flx), units::inch_t(fly));
+			frc::Translation2d fr(units::inch_t(frx), units::inch_t(fry));
+			frc::Translation2d bl(units::inch_t(blx), units::inch_t(bly));
+			frc::Translation2d br(units::inch_t(frx), units::inch_t(bry));
+
+			return new frc::SwerveDriveKinematics<4>(fl, fr, bl, br);
+		}
+
+		void* ToSwerveModuleStates(double vx, double vy, double vr)
+		{
+    		auto _result = ((frc::SwerveDriveKinematics<4>*)_this)
+        	->ToSwerveModuleStates(frc::ChassisSpeeds(vx, vy, vr));
+    		return (void*)_result;
+		}
+	}
 }
